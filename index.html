@@ -215,7 +215,7 @@
         ];
 
         // Variable para rastrear el canal activo
-        let activeIndex = localStorage.getItem('lastPlayedIndex') || 0;
+        let activeIndex = parseInt(localStorage.getItem('lastPlayedIndex')) || 0;
 
         // Función para renderizar la lista de reproducción
         function renderPlaylist(list = defaultPlaylist) {
@@ -223,8 +223,8 @@
             list.forEach((item, index) => {
                 const li = document.createElement('li');
                 li.innerHTML = `<span>${item.title}</span>`;
-                li.addEventListener('click', () => playVideo(item.url, defaultPlaylist.indexOf(item)));
-                if (defaultPlaylist.indexOf(item) === parseInt(activeIndex)) {
+                li.addEventListener('click', () => playVideo(item.url, index));
+                if (index === activeIndex) {
                     li.classList.add('active'); // Resaltar el canal activo
                 }
                 playlistElement.appendChild(li);
