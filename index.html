@@ -234,10 +234,16 @@
         // Función para reproducir un video
         function playVideo(url, index) {
             player.src({ src: url, type: 'application/x-mpegURL' });
-            player.play();
-            activeIndex = index; // Actualizar el índice activo
-            localStorage.setItem('lastPlayedIndex', index); // Guardar el índice
-            renderPlaylist(); // Volver a renderizar la lista para resaltar el canal activo
+            player.play()
+                .then(() => {
+                    activeIndex = index; // Actualizar el índice activo
+                    localStorage.setItem('lastPlayedIndex', index); // Guardar el índice
+                    renderPlaylist(); // Volver a renderizar la lista para resaltar el canal activo
+                })
+                .catch((error) => {
+                    console.error('Error al cargar el video:', error);
+                    alert('No se pudo cargar el video. Intenta con otro canal.');
+                });
         }
 
         // Función para filtrar la lista de reproducción
