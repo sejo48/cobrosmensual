@@ -3,334 +3,274 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administrar Cobro de Mensualidades</title>
+    <title>Reproductor de video M3U8 Moderno</title>
+    <link href="https://vjs.zencdn.net/7.15.4/video-js.css" rel="stylesheet" />
     <style>
         /* Estilos generales */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f9f9f9;
-            color: #333;
+            padding: 0;
+            background-color: #1a1a1a; /* Fondo oscuro */
+            color: #fff; /* Texto blanco */
         }
-        h2 {
+
+        h1 {
             text-align: center;
-            color: #007BFF;
+            margin: 20px 0;
+            font-size: 2.5em;
+            color: #fff;
         }
-        /* Estilos de la tabla */
-        table {
-            width: 100%;
-            max-width: 1000px;
-            border-collapse: collapse;
-            margin: 20px auto;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            background-color: #fff;
+
+        h2 {
+            font-size: 1.5em;
+            color: #ccc; /* Texto gris claro */
+            margin-bottom: 10px;
         }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #007BFF;
-            color: white;
-            text-transform: uppercase;
-        }
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-        /* Estilos de los botones */
-        button {
-            cursor: pointer;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 5px;
-            font-size: 14px;
-            transition: background-color 0.3s;
-        }
-        button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-        .btn-primary {
-            background-color: #007BFF;
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-        .btn-danger {
-            background-color: #DC3545;
-            color: white;
-        }
-        .btn-danger:hover {
-            background-color: #a71d2a;
-        }
-        .btn-success {
-            background-color: #28A745;
-            color: white;
-        }
-        .btn-success:hover {
-            background-color: #1e7e34;
-        }
-        .btn-warning {
-            background-color: #FFC107;
-            color: black;
-        }
-        .btn-warning:hover {
-            background-color: #e0a800;
-        }
-        /* Estilos para filas de totales */
-        #total-row, #paid-row, #pending-row {
-            font-weight: bold;
-            text-align: right;
-        }
-        #total-row {
-            background-color: #007BFF;
-            color: white;
-        }
-        #paid-row {
-            background-color: #28A745;
-            color: white;
-        }
-        #pending-row {
-            background-color: #DC3545;
-            color: white;
-        }
-        /* Estilos para el formulario de agregar miembros */
-        .add-member {
-            max-width: 1000px;
-            margin: 20px auto;
+
+        /* Contenedor principal */
+        .container {
+            display: flex;
+            flex-direction: column;
+            max-width: 1400px;
+            margin: 0 auto;
             padding: 20px;
-            background-color: #fff;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
+            background-color: #2a2a2a; /* Fondo del contenedor */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            height: 90vh; /* Altura del contenedor principal */
         }
-        .add-member input {
+
+        /* Reproductor de video */
+        #player-container {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            padding-top: 56.25%; /* Relación de aspecto 16:9 */
+            margin-bottom: 20px; /* Espacio entre el reproductor y la lista */
         }
-        .add-member input:focus {
-            border-color: #007BFF;
-            outline: none;
-        }
-        /* Estilos para el modal */
-        .modal {
-            display: none;
-            position: fixed;
+
+        #my-video {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
         }
-        .modal-content {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-        }
-        .modal-buttons {
-            margin-top: 20px;
+
+        /* Lista de reproducción */
+        #playlist-container {
+            background-color: #333; /* Fondo de la lista */
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            flex: 1; /* Ocupar el espacio restante */
             display: flex;
-            justify-content: space-around;
+            flex-direction: column;
         }
-        /* Estilos para móviles */
-        @media (max-width: 600px) {
-            table, .add-member {
+
+        #search {
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: #444;
+            color: #fff;
+            font-size: 1em;
+        }
+
+        #playlist {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            flex: 1; /* Ocupar el espacio restante */
+            overflow-y: auto; /* Scroll vertical si es necesario */
+        }
+
+        #playlist li {
+            padding: 10px;
+            border: 1px solid #444;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #444;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        #playlist li:hover {
+            background-color: #555;
+            transform: translateY(-2px);
+        }
+
+        #playlist li.active {
+            background-color: #4CAF50; /* Color para el canal activo */
+        }
+
+        #playlist li span {
+            font-size: 1em;
+            color: #fff;
+        }
+
+        /* Pantalla completa */
+        .vjs-fullscreen {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: 9999 !important;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+                height: auto; /* Altura automática en móviles */
+            }
+
+            #player-container {
+                padding-top: 56.25%; /* Mantener relación de aspecto 16:9 */
+            }
+
+            #playlist-container {
                 width: 100%;
-                margin: 10px 0;
             }
-            th, td {
-                padding: 8px;
-                font-size: 14px;
+        }
+
+        @media (orientation: landscape) {
+            .container {
+                flex-direction: row;
             }
-            .add-member input, .add-member button {
-                font-size: 14px;
+
+            #player-container {
+                flex: 3;
+                margin-right: 20px;
+                margin-bottom: 0; /* Eliminar margen inferior en modo horizontal */
+            }
+
+            #playlist-container {
+                flex: 1;
+                margin-top: 0;
             }
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <!-- Reproductor de video -->
+        <div id="player-container">
+            <video id="my-video" class="video-js vjs-default-skin" controls preload="auto" width="100%" height="100%" aria-label="Reproductor de video">
+                <source src="" type="application/x-mpegURL">
+            </video>
+        </div>
 
-<h2>Lista de Cobro de Mensualidades</h2>
-
-<table id="membersTable">
-    <thead>
-        <tr>
-            <th>Nombre</th>
-            <th>Monto</th>
-            <th>Estado</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- Filas generadas dinámicamente -->
-    </tbody>
-    <tfoot>
-        <tr id="total-row">
-            <td colspan="2">Total Mensual:</td>
-            <td id="totalAmount">₡0.00</td>
-        </tr>
-        <tr id="paid-row">
-            <td colspan="2">Total Pagado:</td>
-            <td id="paidAmount">₡0.00</td>
-        </tr>
-        <tr id="pending-row">
-            <td colspan="2">Total Pendiente:</td>
-            <td id="pendingAmount">₡0.00</td>
-        </tr>
-    </tfoot>
-</table>
-
-<div class="add-member">
-    <h3>Agregar Miembro</h3>
-    <input type="text" id="name" placeholder="Nombre" required>
-    <input type="number" id="amount" placeholder="Monto" required>
-    <button class="btn-primary" onclick="addMember()">Agregar Miembro</button>
-    <button class="btn-warning" onclick="resetPayments()">Iniciar Nuevamente</button>
-</div>
-
-<!-- Modal para acciones (Pagar/Eliminar) -->
-<div id="actionModal" class="modal">
-    <div class="modal-content">
-        <h3>¿Qué deseas hacer?</h3>
-        <div class="modal-buttons">
-            <button class="btn-success" id="markAsPaid">Marcar como Pagado</button>
-            <button class="btn-danger" id="deleteMember">Eliminar Miembro</button>
-            <button class="btn-primary" onclick="closeActionModal()">Cancelar</button>
+        <!-- Lista de reproducción -->
+        <div id="playlist-container">
+            <h2>Lista de reproducción</h2>
+            <input type="text" id="search" placeholder="Buscar canal..." oninput="filterPlaylist()">
+            <ul id="playlist"></ul>
         </div>
     </div>
-</div>
 
-<!-- Modal para código de seguridad -->
-<div id="securityModal" class="modal">
-    <div class="modal-content">
-        <h3>Ingresa el código de seguridad</h3>
-        <input type="password" id="securityCode" placeholder="Código de seguridad" required>
-        <div class="modal-buttons">
-            <button class="btn-success" id="confirmAction">Confirmar</button>
-            <button class="btn-primary" onclick="closeSecurityModal()">Cancelar</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    const SECURITY_CODE = "8384"; // Código de seguridad
-    let members = JSON.parse(localStorage.getItem('members')) || [];
-    let selectedMemberIndex = null; // Índice del miembro seleccionado
-
-    // Renderizar la tabla al cargar la página
-    window.onload = renderTable;
-
-    function renderTable() {
-        const tableBody = document.querySelector('#membersTable tbody');
-        tableBody.innerHTML = '';
-
-        members.forEach((member, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${member.name}</td>
-                <td>₡${member.amount.toLocaleString()}</td>
-                <td>
-                    <button class="${member.paid ? 'btn-success' : 'btn-danger'}" onclick="openActionModal(${index})">
-                        ${member.paid ? 'Pagado' : 'No Pagado'}
-                    </button>
-                </td>
-            `;
-            tableBody.appendChild(row);
+    <!-- Scripts -->
+    <script src="https://vjs.zencdn.net/7.15.4/video.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-http-streaming/2.9.3/videojs-http-streaming.min.js"></script>
+    <script>
+        // Inicializar el reproductor
+        const player = videojs('my-video', {
+            fluid: true, // Hace que el reproductor sea responsivo
+            controls: true,
+            preload: 'auto',
+            responsive: true,
+            playbackRates: [0.5, 1, 1.5, 2], // Opciones de velocidad de reproducción
         });
 
-        updateTotal();
-        saveMembers();
-    }
+        // Obtener elementos del DOM
+        const playlistElement = document.getElementById('playlist');
 
-    function addMember() {
-        const name = document.getElementById('name').value.trim();
-        const amount = parseFloat(document.getElementById('amount').value);
+        // Lista de reproducción predeterminada
+        let defaultPlaylist = [
+            { title: "Tele red", url: "https://k20.usastreams.com:8081/telered/index.m3u8" },
+            { title: "Canal 13", url: "https://ssh101.bozztv.com/ssh101/sinart13/chunks.m3u8" },
+            { title: "canal 36", url: "https://liveingesta118.cdnmedia.tv/trivision36live/smil:dvrlive.smil/playlist.m3u8" },
+            { title: "Retro Tv", url: "https://ssh101-fl.bozztv.com/ssh101/retrotvcr/tracks-v1a1/mono.m3u8" },
+            { title: "TELE Clasica", url: "https://ssh101-fl.bozztv.com/ssh101/teleclasik/tracks-v1a1/mono.m3u8" },
+            { title: "Tv Retro", url: "https://ssh101.bozztv.com/ssh101/tvretropalmares/chunks.m3u8" },
+            { title: "Canal 8", url: "https://mdstrm.com/live-stream-playlist/5a7b1e63a8da282c34d65445.m3u8" },
+            { title: "Canal 6", url: "https://d1vr8yxz55pucr.cloudfront.net/index.m3u8" },
+            { title: "Telesistema", url: "https://k20.usastreams.com:8081/telesistema/tracks-v1a1/mono.m3u8" },
+            { title: "Canal 4", url: "https://alba-cr-repretel-c4.stream.mediatiquestream.com/index.m3u8" },
+            { title: "Canal 1", url: "https://59ef525c24caa.streamlock.net/canal1cr/canal1cr/playlist.m3u8" },
+            { title: "Canal 11", url: "https://alba-cr-repretel-c11.stream.mediatiquestream.com/480p.m3u8" },
+            { title: "Extrema TV", url: "https://627bb251f23c7.streamlock.net:444/ExtremaTV/ExtremaTV/playlist.m3u8" },
+            { title: "Nicoya tv", url: "https://59ef525c24caa.streamlock.net/nicoyatv/nicoyatv/chunklist_w1674958038.m3u8" },
+            { title: "Sony Canal Novelas", url: "https://a89829b8dca2471ab52ea9a57bc28a35.mediatailor.us-east-1.amazonaws.com/v1/manifest/0fb304b2320b25f067414d481a779b77db81760d/CanelaTV_SonyCanalNovelas/546d9696-a523-4794-9d79-b340f54b6d76/5.m3u8" },
+            { title: "RCN Más", url: "https://rcntv-rcnmas-1-us.plex.wurl.tv/4300.m3u8" },
+            { title: "Azteca Internacional", url: "https://azt-mun.otteravision.com/azt/mun/mun_1080p.m3u8" },
+        ];
 
-        if (name && amount > 0) {
-            members.push({ name, amount, paid: false });
-            renderTable();
-            document.getElementById('name').value = '';
-            document.getElementById('amount').value = '';
-        } else {
-            alert("Por favor, ingresa un nombre y un monto válido.");
+        // Variable para rastrear el canal activo
+        let activeIndex = localStorage.getItem('lastPlayedIndex') || 0;
+
+        // Función para renderizar la lista de reproducción
+        function renderPlaylist(list = defaultPlaylist) {
+            playlistElement.innerHTML = '';
+            list.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${item.title}</span>`;
+                li.addEventListener('click', () => playVideo(item.url, defaultPlaylist.indexOf(item)));
+                if (defaultPlaylist.indexOf(item) === parseInt(activeIndex)) {
+                    li.classList.add('active'); // Resaltar el canal activo
+                }
+                playlistElement.appendChild(li);
+            });
         }
-    }
 
-    function openActionModal(index) {
-        selectedMemberIndex = index;
-        document.getElementById('actionModal').style.display = 'flex';
-    }
-
-    function closeActionModal() {
-        document.getElementById('actionModal').style.display = 'none';
-        selectedMemberIndex = null;
-    }
-
-    function openSecurityModal() {
-        document.getElementById('securityModal').style.display = 'flex';
-    }
-
-    function closeSecurityModal() {
-        document.getElementById('securityModal').style.display = 'none';
-        document.getElementById('securityCode').value = ''; // Limpiar el campo de código
-    }
-
-    // Marcar como Pagado
-    document.getElementById('markAsPaid').onclick = function() {
-        closeActionModal();
-        members[selectedMemberIndex].paid = !members[selectedMemberIndex].paid;
-        renderTable();
-    };
-
-    // Eliminar miembro
-    document.getElementById('deleteMember').onclick = function() {
-        closeActionModal();
-        openSecurityModal();
-    };
-
-    // Confirmar acción con código de seguridad
-    document.getElementById('confirmAction').onclick = function() {
-        const code = document.getElementById('securityCode').value;
-        if (code === SECURITY_CODE) {
-            members.splice(selectedMemberIndex, 1);
-            renderTable();
-            closeSecurityModal();
-        } else {
-            alert("Código de seguridad incorrecto.");
+        // Función para reproducir un video
+        function playVideo(url, index) {
+            player.src({ src: url, type: 'application/x-mpegURL' });
+            player.play();
+            activeIndex = index; // Actualizar el índice activo
+            localStorage.setItem('lastPlayedIndex', index); // Guardar el índice
+            renderPlaylist(); // Volver a renderizar la lista para resaltar el canal activo
         }
-    };
 
-    function updateTotal() {
-        const totalAmount = members.reduce((sum, member) => sum + member.amount, 0);
-        const paidAmount = members.reduce((sum, member) => member.paid ? sum + member.amount : sum, 0);
-        const pendingAmount = totalAmount - paidAmount;
-
-        document.getElementById('totalAmount').textContent = '₡' + totalAmount.toLocaleString();
-        document.getElementById('paidAmount').textContent = '₡' + paidAmount.toLocaleString();
-        document.getElementById('pendingAmount').textContent = '₡' + pendingAmount.toLocaleString();
-    }
-
-    function saveMembers() {
-        localStorage.setItem('members', JSON.stringify(members));
-    }
-
-    function resetPayments() {
-        if (confirm("¿Estás seguro de que deseas reiniciar todos los pagos?")) {
-            members.forEach(member => member.paid = false);
-            renderTable();
+        // Función para filtrar la lista de reproducción
+        function filterPlaylist() {
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            const filteredList = defaultPlaylist.filter(item => item.title.toLowerCase().includes(searchTerm));
+            renderPlaylist(filteredList);
         }
-    }
-</script>
 
+        // Renderizar la lista al cargar la página
+        renderPlaylist();
+
+        // Reproducir el último canal visto o el primer video de la lista
+        if (defaultPlaylist.length > 0) {
+            playVideo(defaultPlaylist[activeIndex].url, activeIndex);
+        }
+
+        // Manejo de errores
+        player.on('error', () => {
+            console.error('Error al cargar el video.');
+            alert('No se pudo cargar el video. Intenta con otro canal.');
+        });
+
+        // Pantalla completa al girar el teléfono
+        window.addEventListener("orientationchange", () => {
+            if (window.orientation === 90 || window.orientation === -90) {
+                player.requestFullscreen(); // Entrar en pantalla completa
+            } else {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen(); // Salir de pantalla completa
+                }
+            }
+        });
+    </script>
 </body>
 </html>
