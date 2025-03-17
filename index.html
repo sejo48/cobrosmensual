@@ -12,29 +12,32 @@
             padding: 0;
             background-color: #1a1a1a;
             color: #fff;
-            overflow: hidden; /* Prevent scrollbars on the body */
         }
 
         /* Main container */
         .container {
             display: flex;
-            flex-direction: column;
-            height: 100vh; /* Full viewport height */
-            width: 100%;  /* Full viewport width */
-            max-width: none; /* Remove max-width */
-            margin: 0; /* Remove margins */
-            padding: 0; /* Remove padding */
+            flex-direction: column; /* Default to column for mobile-first */
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
             background-color: #2a2a2a;
-             /* Remove border-radius, let the video element handle it */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            height: 100vh; /* Use viewport height */
+            overflow: hidden; /* Prevent double scrollbars */
         }
+
 
         /* Video player container */
         #player-container {
-            position: relative; /* Needed for absolute positioning of the video */
+            position: relative; /* For absolute positioning of the video */
             width: 100%;
-            height: 100%; /* Occupy full container height in portrait */
-            overflow: hidden; /* Hide any overflowing content */
-
+            padding-top: 56.25%; /* 16:9 aspect ratio (for portrait and initial desktop) */
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px; /* Space below video in portrait */
         }
 
         #my-video {
@@ -43,17 +46,70 @@
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Important: Ensure video fits within, maintaining aspect ratio */
-            border-radius: 0; /* Remove any border radius from here */
+            object-fit: cover; /* Use cover to fill, maintaining aspect ratio */
         }
 
 
-        /* Hide playlist container initially in portrait mode */
+        /* Playlist container */
         #playlist-container {
-          display: none;
+            display: flex; /* Use flexbox for internal layout */
+            flex-direction: column;
+            flex: 1; /* Grow to fill remaining space (in portrait) */
+            background-color: #333;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            overflow-y: auto;  /* Allow playlist to scroll */
         }
 
-        .vjs-error .vjs-error-display .vjs-modal-dialog-content{
+
+        #search {
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: #444;
+            color: #fff;
+            font-size: 1em;
+        }
+
+        #playlist {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1; /* Allow playlist items to fill space */
+            overflow-y: auto;  /* Scroll *within* the playlist */
+        }
+
+
+        #playlist li {
+            padding: 10px;
+            border: 1px solid #444;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #444;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        #playlist li:hover {
+            background-color: #555;
+            transform: translateY(-2px);
+        }
+
+        #playlist li.active {
+            background-color: #4CAF50;
+        }
+
+        #playlist li span {
+            font-size: 1em;
+            color: #fff;
+        }
+
+          .vjs-error .vjs-error-display .vjs-modal-dialog-content{
             color: white;
             font-size: 1.5em;
           }
@@ -68,87 +124,43 @@
             z-index: 9999 !important;
         }
 
-        /* Landscape mode styles */
-        @media (orientation: landscape) {
-          .container{
-            flex-direction: row;
-            border-radius: 10px;
 
-          }
+
+        /* Landscape mode (larger screens AND landscape orientation) */
+        @media (min-width: 769px) and (orientation: landscape) {
+            .container {
+                flex-direction: row; /* Horizontal layout */
+                height: 90vh;    /* Reduce height slightly in landscape*/
+                padding: 20px;   /* Add padding back */
+                border-radius: 10px; /* Restore border radius */
+            }
+
             #player-container {
-                flex: 3;
-                height: auto;  /* Let it adjust its height */
-                padding-top: 0; /* Remove the padding-top trick in landscape */
+                flex: 3;        /* Video takes 3/4 of the width */
                 margin-right: 20px;
+                margin-bottom: 0; /* Remove bottom margin */
+                padding-top: 0;    /*Remove aspect ratio padding*/
+                height: auto;      /* Let height be determined by content and flex */
                 border-radius: 10px;
             }
-
-            #my-video{
-              object-fit: cover;
+            #playlist-container{
+              border-radius: 10px;
             }
-
-            #playlist-container {
-                flex: 1;
-                display: flex; /* Show the playlist */
-                flex-direction: column; /* Stack items vertically */
-                overflow-y: auto; /* Allow scrolling within the playlist */
-                padding: 15px;
-                background-color: #333;
-                border-radius: 10px;
-
-            }
-
-            /* Styles for search and list items (same as before) */
-             #search {
-                padding: 10px;
-                margin-bottom: 15px;
-                border: 1px solid #444;
-                border-radius: 5px;
-                background-color: #444;
-                color: #fff;
-                font-size: 1em;
-            }
-             #playlist {
-                list-style-type: none;
-                padding: 0;
-                margin: 0;
-                flex: 1;
-                overflow-y: auto;
-            }
-
-            #playlist li {
-              padding: 10px;
-              border: 1px solid #444;
-              margin-bottom: 10px;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              background-color: #444;
-              border-radius: 5px;
-              transition: background-color 0.3s ease, transform 0.2s ease;
-              cursor: pointer;
-          }
-
-          #playlist li:hover {
-              background-color: #555;
-              transform: translateY(-2px);
-          }
-
-          #playlist li.active {
-              background-color: #4CAF50;
-          }
-
-          #playlist li span {
-              font-size: 1em;
-              color: #fff;
-          }
-
-          h2 {
-            font-size: 1.5em;
-            color: #ccc;
-            margin-bottom: 10px;
         }
+
+        /* Mobile Portrait View */
+        @media (max-width: 768px) and (orientation: portrait) {
+          .container{
+            border-radius: 0; /*Remove border radius*/
+            height: 100vh; /*Full viewport*/
+            padding: 0; /*Remove padding, video goes to the edge*/
+          }
+          #player-container {
+            margin-bottom: 0; /* Remove margin*/
+            border-radius: 0;
+          }
         }
+
     </style>
 </head>
 <body>
@@ -168,24 +180,21 @@
     <script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
     <script src="https://unpkg.com/@videojs/http-streaming@latest/dist/videojs-http-streaming.min.js"></script>
     <script>
-        // --- JavaScript (same as the improved version, with fullscreen logic) ---
-        const player = videojs('my-video', {
-            fluid: false, // Important: Turn off fluid for manual control
+       const player = videojs('my-video', {
+            fluid: false,  // Not fluid, we'll control size
             controls: true,
             preload: 'auto',
-            responsive: false, // Turn off responsive
+            responsive: false, // We'll handle responsiveness manually
             playbackRates: [0.5, 1, 1.5, 2],
-             html5: {
-              vhs: {
-                overrideNative: true
+            html5: {
+                vhs: {
+                  overrideNative: true // Force VHS for better cross-browser HLS
+                }
               }
-            }
         });
 
-          // Obtener elementos del DOM
         const playlistElement = document.getElementById('playlist');
 
-        // Lista de reproducción predeterminada (moved outside for easier management)
         const defaultPlaylist = [
           { title: "Tele red", url: "https://k20.usastreams.com:8081/telered/index.m3u8" },
           { title: "Canal 13", url: "https://ssh101.bozztv.com/ssh101/sinart13/chunks.m3u8" },
@@ -206,10 +215,8 @@
           { title: "Azteca Internacional", url: "https://azt-mun.otteravision.com/azt/mun/mun_1080p.m3u8" },
         ];
 
-        // Variable para rastrear el canal activo
         let activeIndex = parseInt(localStorage.getItem('lastPlayedIndex')) || 0;
 
-        // Función para renderizar la lista de reproducción
         function renderPlaylist(list = defaultPlaylist) {
             playlistElement.innerHTML = '';
             list.forEach((item, index) => {
@@ -217,106 +224,98 @@
                 li.innerHTML = `<span>${item.title}</span>`;
                 li.addEventListener('click', () => playVideo(item.url, index));
                 if (index === activeIndex) {
-                    li.classList.add('active'); // Resaltar el canal activo
+                    li.classList.add('active');
                 }
                 playlistElement.appendChild(li);
             });
-             // Scroll to active item after rendering
             const activeItem = playlistElement.querySelector('.active');
             if (activeItem) {
                 activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
         }
-      // Function to handle automatic fullscreen on orientation change
-        function handleOrientationChange() {
-            if (window.matchMedia("(orientation: landscape)").matches) {
-                // Landscape mode
-                 if (!player.isFullscreen()) {
-                  player.requestFullscreen();
-                }
-                renderPlaylist(); // Show and render playlist in landscape
-            } else {
-                // Portrait mode
-              if (player.isFullscreen()) {
-                player.exitFullscreen();
-               }
-            }
-        }
 
-        // Función para reproducir un video
         function playVideo(url, index) {
-          player.src({ src: url, type: 'application/x-mpegURL' });
+            player.src({ src: url, type: 'application/x-mpegURL' });
 
-          // Set up the error listener *before* calling play()
-          player.one('error', (event) => {
-              console.error('Error al cargar el video:', player.error());
-              // More user-friendly error handling
-              let errorMsg = 'No se pudo cargar el video. Intenta con otro canal.';
+            player.one('error', (event) => {
+                console.error('Error loading video:', player.error());
+                let errorMsg = 'Could not load video. Try another channel.';
+                if (!navigator.onLine) {
+                    errorMsg = "No internet connection. Please check your connection.";
+                }
+                player.error({ message: errorMsg, code: player.error().code });
+                if (index < defaultPlaylist.length - 1) {
+                    setTimeout(() => playVideo(defaultPlaylist[index + 1].url, index + 1), 2000);
+                }
+            });
 
-              //Check network
-              if (!navigator.onLine) {
-                errorMsg = "No hay conexión a Internet. Por favor, verifica tu conexión.";
-              }
-
-              player.error({
-                message: errorMsg, //Custom message
-                code: player.error().code //keep original error code
-              });
-
-              // Optionally, automatically try the next video
-               if (index < defaultPlaylist.length - 1) {
-                   setTimeout(() => playVideo(defaultPlaylist[index + 1].url, index + 1), 2000); // Wait 2 seconds
-               }
-          });
-
-          player.play()
-              .then(() => {
-                  activeIndex = index; // Actualizar el índice activo
-                  localStorage.setItem('lastPlayedIndex', index); // Guardar el índice
-                  renderPlaylist(); // Volver a renderizar la lista para resaltar el canal activo
-
-              })
-              .catch((error) => {
-                  // Handle errors that happen *during* playback (after play() was successful)
-                  // These errors might not trigger the 'error' event, so catch them here too.
-                   console.error('Error during playback:', error);
+            player.play()
+                .then(() => {
+                    activeIndex = index;
+                    localStorage.setItem('lastPlayedIndex', index);
+                    renderPlaylist();
+                })
+                .catch((error) => {
+                    console.error('Error during playback:', error);
                     if (index < defaultPlaylist.length - 1) {
-                      // Try next video on playback error.
-                      setTimeout(() => playVideo(defaultPlaylist[index+1].url, index + 1), 2000);
-                  }
-              });
+                        setTimeout(() => playVideo(defaultPlaylist[index + 1].url, index + 1), 2000);
+                    }
+                });
         }
 
-
-
-        // Función para filtrar la lista de reproducción
         function filterPlaylist() {
             const searchTerm = document.getElementById('search').value.toLowerCase();
             const filteredList = defaultPlaylist.filter(item => item.title.toLowerCase().includes(searchTerm));
             renderPlaylist(filteredList);
         }
+        // --- Fullscreen and Orientation Handling ---
+
+          function handleOrientationChange() {
+              if (window.matchMedia("(orientation: landscape) and (min-width: 769px)").matches) {
+                  // Landscape mode on larger screens (desktops, tablets)
+                  if (!player.isFullscreen()) {
+                      player.requestFullscreen();
+                  }
+              } else if (window.matchMedia("(orientation: landscape)").matches){
+                  //landescape en movil
+                  if (!player.isFullscreen()) {
+                    player.requestFullscreen();
+                  }
+              }
+
+              else {
+                // Portrait
+                if (player.isFullscreen()) {
+                    player.exitFullscreen(); // Exit fullscreen in portrait
+                }
+              }
+          }
 
         // Initial setup
-        if (defaultPlaylist.length > 0) {
-            playVideo(defaultPlaylist[activeIndex].url, activeIndex);
-        }
-        // Add event listener for orientation changes
-        window.addEventListener('orientationchange', handleOrientationChange);
-
-        // Initial check for orientation (in case it's already landscape)
-        handleOrientationChange();
-
-
-         // Prevent mobile browsers from pausing video when the tab is inactive
-        document.addEventListener('visibilitychange', function() {
-          if (document.hidden) {
-            // Page is hidden, but we don't want to pause.
-            // Video.js might try to pause, so we counteract that:
-            if (!player.paused()) {
-              player.play(); // Ensure it's playing (this is a bit of a hack)
-            }
+          if (defaultPlaylist.length > 0) {
+              playVideo(defaultPlaylist[activeIndex].url, activeIndex);
           }
+
+        renderPlaylist();
+
+        // Event listeners
+        window.addEventListener('orientationchange', handleOrientationChange);
+        handleOrientationChange(); // Call on initial load
+
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && !player.paused()) {
+              player.play(); // Keep playing even when tab is inactive
+            }
         });
+
+        // Double-click for fullscreen (for desktop)
+          player.on('dblclick', () => {
+            if (player.isFullscreen()) {
+              player.exitFullscreen();
+            } else {
+              player.requestFullscreen();
+            }
+          });
 
     </script>
 </body>
