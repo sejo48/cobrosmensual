@@ -17,27 +17,24 @@
         /* Main container */
         .container {
             display: flex;
-            flex-direction: column; /* Default to column for mobile-first */
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
+            flex-direction: column;
+            height: 100vh; /* Full viewport height */
+            width: 100%;
+            max-width: none; /* Remove max-width */
+            margin: 0;
+            padding: 0;
             background-color: #2a2a2a;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            height: 100vh; /* Use viewport height */
             overflow: hidden; /* Prevent double scrollbars */
-        }
 
+        }
 
         /* Video player container */
         #player-container {
-            position: relative; /* For absolute positioning of the video */
+            position: relative;
             width: 100%;
-            padding-top: 56.25%; /* 16:9 aspect ratio (for portrait and initial desktop) */
+            padding-top: 56.25%; /* 16:9 aspect ratio */
             overflow: hidden;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-            margin-bottom: 20px; /* Space below video in portrait */
+            /* No border-radius initially, apply in landscape */
         }
 
         #my-video {
@@ -46,20 +43,18 @@
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Use cover to fill, maintaining aspect ratio */
+            object-fit: cover; /* Cover the container */
         }
-
 
         /* Playlist container */
         #playlist-container {
-            display: flex; /* Use flexbox for internal layout */
+            display: flex;
             flex-direction: column;
-            flex: 1; /* Grow to fill remaining space (in portrait) */
+            flex-grow: 1; /* Take remaining space */
             background-color: #333;
-            border-radius: 10px;
             padding: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            overflow-y: auto;  /* Allow playlist to scroll */
+            overflow-y: auto;
+              /* No border-radius initially, apply in landscape */
         }
 
 
@@ -77,22 +72,21 @@
             list-style-type: none;
             padding: 0;
             margin: 0;
-            flex-grow: 1; /* Allow playlist items to fill space */
-            overflow-y: auto;  /* Scroll *within* the playlist */
+            flex-grow: 1;
+            overflow-y: auto;
         }
 
-
         #playlist li {
-            padding: 10px;
-            border: 1px solid #444;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #444;
-            border-radius: 5px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            cursor: pointer;
+          padding: 10px;
+          border: 1px solid #444;
+          margin-bottom: 10px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background-color: #444;
+          border-radius: 5px;
+          transition: background-color 0.3s ease, transform 0.2s ease;
+          cursor: pointer;
         }
 
         #playlist li:hover {
@@ -109,57 +103,58 @@
             color: #fff;
         }
 
-          .vjs-error .vjs-error-display .vjs-modal-dialog-content{
-            color: white;
-            font-size: 1.5em;
-          }
-
-        /* Fullscreen styles (keep as before, for landscape) */
-          .vjs-fullscreen {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            z-index: 9999 !important;
+        .vjs-error .vjs-error-display .vjs-modal-dialog-content{
+          color: white;
+          font-size: 1.5em;
         }
 
 
-
-        /* Landscape mode (larger screens AND landscape orientation) */
-        @media (min-width: 769px) and (orientation: landscape) {
+        /* Landscape mode (MOBILE ONLY) */
+        @media (orientation: landscape) and (max-width: 768px)  {
             .container {
-                flex-direction: row; /* Horizontal layout */
-                height: 90vh;    /* Reduce height slightly in landscape*/
-                padding: 20px;   /* Add padding back */
-                border-radius: 10px; /* Restore border radius */
+              /* No changes to the container itself are strictly needed */
+              /* padding:0;  Remove if causing layout problems */
+              overflow: hidden;
+            }
+            #player-container{
+              padding-top: 0; /* Remove aspect ratio padding in landscape */
+              height: 100%; /* Fill screen height */
+
             }
 
-            #player-container {
-                flex: 3;        /* Video takes 3/4 of the width */
-                margin-right: 20px;
-                margin-bottom: 0; /* Remove bottom margin */
-                padding-top: 0;    /*Remove aspect ratio padding*/
-                height: auto;      /* Let height be determined by content and flex */
-                border-radius: 10px;
+            #playlist-container {
+                display: none; /* Hide playlist in landscape */
             }
-            #playlist-container{
+        }
+
+        /* Styles for all screens larger than mobile */
+        @media (min-width: 769px) {
+           .container{
+              max-width: 1400px;
+              margin: 0 auto;
+              padding: 20px;
               border-radius: 10px;
             }
+          #player-container, #playlist-container{
+            border-radius: 10px; /* Add border-radius for larger screens */
+          }
+            #player-container {
+                flex: 3;          /* Video takes up 3/4 of the space */
+                margin-right: 20px;
+                margin-bottom: 0;
+                height: auto;
+                padding-top:0;  /* remove aspect ratio*/
+            }
+
+            #playlist-container {
+                flex: 1;         /* Playlist takes 1/4 of the space */
+            }
+            .container {
+              flex-direction: row; /* Horizontal layout on larger screens */
+              height: 90vh;
+            }
         }
 
-        /* Mobile Portrait View */
-        @media (max-width: 768px) and (orientation: portrait) {
-          .container{
-            border-radius: 0; /*Remove border radius*/
-            height: 100vh; /*Full viewport*/
-            padding: 0; /*Remove padding, video goes to the edge*/
-          }
-          #player-container {
-            margin-bottom: 0; /* Remove margin*/
-            border-radius: 0;
-          }
-        }
 
     </style>
 </head>
@@ -180,17 +175,18 @@
     <script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
     <script src="https://unpkg.com/@videojs/http-streaming@latest/dist/videojs-http-streaming.min.js"></script>
     <script>
-       const player = videojs('my-video', {
-            fluid: false,  // Not fluid, we'll control size
+
+        const player = videojs('my-video', {
+            fluid: false,
             controls: true,
             preload: 'auto',
-            responsive: false, // We'll handle responsiveness manually
+            responsive: false,
             playbackRates: [0.5, 1, 1.5, 2],
             html5: {
-                vhs: {
-                  overrideNative: true // Force VHS for better cross-browser HLS
-                }
+              vhs: {
+                overrideNative: true
               }
+            }
         });
 
         const playlistElement = document.getElementById('playlist');
@@ -228,7 +224,7 @@
                 }
                 playlistElement.appendChild(li);
             });
-            const activeItem = playlistElement.querySelector('.active');
+             const activeItem = playlistElement.querySelector('.active');
             if (activeItem) {
                 activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
@@ -237,7 +233,7 @@
         function playVideo(url, index) {
             player.src({ src: url, type: 'application/x-mpegURL' });
 
-            player.one('error', (event) => {
+            player.one('error', () => {
                 console.error('Error loading video:', player.error());
                 let errorMsg = 'Could not load video. Try another channel.';
                 if (!navigator.onLine) {
@@ -257,66 +253,59 @@
                 })
                 .catch((error) => {
                     console.error('Error during playback:', error);
-                    if (index < defaultPlaylist.length - 1) {
+                      if (index < defaultPlaylist.length - 1) {
                         setTimeout(() => playVideo(defaultPlaylist[index + 1].url, index + 1), 2000);
                     }
                 });
         }
+
 
         function filterPlaylist() {
             const searchTerm = document.getElementById('search').value.toLowerCase();
             const filteredList = defaultPlaylist.filter(item => item.title.toLowerCase().includes(searchTerm));
             renderPlaylist(filteredList);
         }
+
         // --- Fullscreen and Orientation Handling ---
-
-          function handleOrientationChange() {
-              if (window.matchMedia("(orientation: landscape) and (min-width: 769px)").matches) {
-                  // Landscape mode on larger screens (desktops, tablets)
-                  if (!player.isFullscreen()) {
-                      player.requestFullscreen();
-                  }
-              } else if (window.matchMedia("(orientation: landscape)").matches){
-                  //landescape en movil
-                  if (!player.isFullscreen()) {
-                    player.requestFullscreen();
-                  }
-              }
-
-              else {
-                // Portrait
-                if (player.isFullscreen()) {
-                    player.exitFullscreen(); // Exit fullscreen in portrait
-                }
+        function handleOrientationChange() {
+          if (window.matchMedia("(orientation: landscape) and (max-width: 768px)").matches) {
+            // Landscape mode on MOBILE
+            if (!player.isFullscreen()) {
+                player.requestFullscreen(); // Go fullscreen
+            }
+          }
+           else {
+              // Portrait or larger screens
+              if (player.isFullscreen()) {
+                player.exitFullscreen();
               }
           }
+        }
 
         // Initial setup
-          if (defaultPlaylist.length > 0) {
-              playVideo(defaultPlaylist[activeIndex].url, activeIndex);
-          }
-
+        if (defaultPlaylist.length > 0) {
+            playVideo(defaultPlaylist[activeIndex].url, activeIndex);
+        }
         renderPlaylist();
 
         // Event listeners
         window.addEventListener('orientationchange', handleOrientationChange);
-        handleOrientationChange(); // Call on initial load
+        handleOrientationChange(); // Call on initial load to set correct state
 
         document.addEventListener('visibilitychange', function() {
             if (document.hidden && !player.paused()) {
-              player.play(); // Keep playing even when tab is inactive
+              player.play(); // Keep playing in background
             }
         });
 
-        // Double-click for fullscreen (for desktop)
-          player.on('dblclick', () => {
+         // Double-click for fullscreen (mainly for desktop)
+        player.on('dblclick', () => {
             if (player.isFullscreen()) {
-              player.exitFullscreen();
+                player.exitFullscreen();
             } else {
-              player.requestFullscreen();
+                player.requestFullscreen();
             }
-          });
-
+        });
     </script>
 </body>
 </html>
