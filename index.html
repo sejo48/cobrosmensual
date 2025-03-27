@@ -312,85 +312,76 @@
             transform: translateY(-2px); /* Ligeramente hacia arriba al pasar el mouse */
         }
 
-        /* Estilos para la ventana flotante de instrucciones */
-        #instructions-popup {
-            display: none; /* Inicialmente oculta */
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        /* Estilos para el texto de instrucciones */
+        #instructions-text {
             background-color: rgba(0, 0, 0, 0.9);
             color: white;
             padding: 20px;
             border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-            z-index: 1002; /* Asegurar que esté por encima del botón */
-            max-width: 80%; /* Ancho máximo para pantallas pequeñas */
-            max-height: 80%;
-            overflow-y: auto; /* Añadir scroll si el contenido es muy largo */
+            margin-top: 20px; /* Espacio con el botón de instalación */
+            text-align: left;
+            font-size: 0.9em;
+            line-height: 1.5;
         }
 
-        #instructions-popup h2 {
-            font-size: 1.5em;
+        #instructions-text h2{
+            color: #FFD700;
+            font-size: 1.2em;
             margin-bottom: 10px;
-            color: #FFD700; /* Color dorado para el título */
+            text-align: center;
         }
 
-        #instructions-popup p {
-            font-size: 0.9em;
-            margin-bottom: 15px;
-            line-height: 1.5; /* Mejora la legibilidad del texto */
-        }
-
-        #instructions-popup ul {
-            list-style-type: disc;
-            padding-left: 30px;
-            margin-bottom: 15px;
-            font-size: 0.9em;
-        }
-
-        #instructions-popup li {
+        #instructions-text h3{
+            font-size: 1.1em;
+            margin-top: 15px;
             margin-bottom: 5px;
         }
 
-        .popup-button {
-            background-color: #E50914; /* Color rojo */
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-top: 10px;
+        #instructions-text ol {
+            padding-left: 20px;
+            margin-bottom: 15px;
         }
 
-        .popup-button:hover {
-            background-color: #C62828; /* Un poco más oscuro al pasar el mouse */
+        #instructions-text li{
+            margin-bottom: 5px;
         }
 
-        /* Estilos para cerrar la ventana en pantallas pequeñas */
+        /* Estilos para pantallas pequeñas */
         @media (max-width: 768px) {
-            #instructions-popup {
-                padding: 15px;
-                max-width: 95%;
-                max-height: 95%;
+            .container {
+                margin-top: 60px;
             }
 
-            #instructions-popup h2 {
-                font-size: 1.2em;
+            #player-container {
+                height: 40vh;
             }
 
-            #instructions-popup p,
-            #instructions-popup ul,
-            #instructions-popup li {
+            #playlist-container {
+                margin-top: 40vh;
+            }
+
+            .qr-container h3 {
+                font-size: 1em;
+            }
+
+            .qr-container p {
                 font-size: 0.8em;
             }
 
             #install-button {
                 font-size: 1em;
                 padding: 10px 20px;
+            }
+
+            #instructions-text {
+                font-size: 0.8em;
+                padding: 15px;
+            }
+            #instructions-text h2{
+                 font-size: 1.1em;
+            }
+             #instructions-text h3{
+                 font-size: 1em;
             }
         }
     </style>
@@ -430,9 +421,7 @@
         Volumen: <span id="volume-level">50</span>%
     </div>
 
-
-
-    <div id="instructions-popup">
+    <div id="instructions-text">
         <h2>Cómo añadir un acceso directo a una web en la pantalla de inicio</h2>
         <p>Aquí te dejo los pasos para crear un acceso directo a una página web en tu pantalla de inicio, tanto en Android como en iOS:</p>
 
@@ -457,7 +446,6 @@
         </ol>
 
         <p>¡Y listo! Ahora tendrás un acceso directo a tu página web favorita directamente en la pantalla de inicio de tu dispositivo.</p>
-        <button class="popup-button" id="close-popup">Cerrar</button>
     </div>
 
     <script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
@@ -478,8 +466,8 @@
 
         const playlistElement = document.getElementById('playlist');
         const installButton = document.getElementById('install-button');
-        const instructionsPopup = document.getElementById('instructions-popup');
-        const closePopupBtn = document.getElementById('close-popup');
+        const instructionsPopup = document.getElementById('instructions-text');
+
 
         const defaultPlaylist = [
             {
@@ -886,21 +874,6 @@
 
         renderPlaylist();
 
-        // Eventos para mostrar y ocultar la ventana flotante
-        installButton.addEventListener('click', () => {
-            instructionsPopup.style.display = 'block';
-        });
-
-        closePopupBtn.addEventListener('click', () => {
-            instructionsPopup.style.display = 'none';
-        });
-
-        // Cerrar la ventana si se hace clic fuera de ella
-        window.addEventListener('click', (event) => {
-            if (event.target === instructionsPopup) {
-                instructionsPopup.style.display = 'none';
-            }
-        });
     </script>
 </body>
 </html>
