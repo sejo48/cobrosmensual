@@ -289,29 +289,6 @@
             font-family: 'Poppins', sans-serif;
         }
 
-        /* Estilos para el botón de instalación */
-        #install-button {
-            background-color: #4CAF50; /* Color verde */
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.2em;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            margin-top: 20px; /* Añadido margen superior para separarlo del QR */
-            display: block; /* Asegurar que el botón se muestre como bloque */
-            margin-left: auto;
-            margin-right: auto;
-            width: fit-content;
-        }
-
-        #install-button:hover {
-            background-color: #45a049; /* Un poco más oscuro al pasar el mouse */
-            transform: translateY(-2px); /* Ligeramente hacia arriba al pasar el mouse */
-        }
-
         /* Estilos para el texto de instrucciones */
         #instructions-text {
             background-color: rgba(0, 0, 0, 0.9);
@@ -368,11 +345,6 @@
                 font-size: 0.8em;
             }
 
-            #install-button {
-                font-size: 1em;
-                padding: 10px 20px;
-            }
-
             #instructions-text {
                 font-size: 0.8em;
                 padding: 15px;
@@ -409,7 +381,6 @@
         <h3>¡Escanea el código QR!</h3>
         <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhJMKZYBgrggrXAZC6g9PFNXAyVDQqFl37nEqRhA3mwAxogX6n_WrzwLSmiVNyuS2rAi3Akt-Uu_dkUE1Rn7BKEhtVlZah4sX7k3lVb1JLAkWZxfGhD3wr_bK2ib2ajOqn34jhU_2Lcm24kE6K_3Cd5BEWOgO3fibL0q8yAuCifeM7WANXK4kzRb9op588/s320/JORGE_DEZ-1024.jpeg" alt="Código QR">
         <p>Usa tu cámara para escanear y Compartir la aplicacion.</p>
-        <button id="install-button">Instrucciones de Instalación</button>
     </div>
 
     <div class="visit-counter">
@@ -465,7 +436,6 @@
         });
 
         const playlistElement = document.getElementById('playlist');
-        const installButton = document.getElementById('install-button');
         const instructionsPopup = document.getElementById('instructions-text');
 
 
@@ -638,8 +608,7 @@
                  logo: "https://www.cxtv.com.br/img/Tvs/Logo/webp-m/1fa9bd6990d735dab040d18ab1d044a9.webp",
                  descripcion: "Canal de deportes extremos."
              },
-             {
-                title: "Retro RG",
+             {title: "Retro RG",
                 url: "https://acceso.radiosportstv.online:3259/hybrid/play.m3u8",
                 logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBxvhIPxIJvY8jcD7VFd6XnmqtnwC0YmUcG6Ttgtc3RSOnQrAcpq8bK8DljzNaqKchQbg&usqp=CAU",
                 descripcion: "Canal de música retro."
