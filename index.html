@@ -4,17 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reproductor de TV Online</title>
-    
-    <!-- Favicon -->
+
     <link rel="icon" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEggUOmHTNlRz2-y8SMwEGPxofdbPDkPBpwUMv9CWVZRU_x9zwY6Nw3Txdsfln4ysysGTEYK3tGAZHrElX1J1R9nLrCBVMELt8pEOKl8JkmRD1jqfNy0cpckDzAxjiUNuPwAqatX8QPSvTtgoG5yA1OvsD9gFQ_Pq46akpFxwCrEFM2GUM7KR55JCmo28eM/s320/Miniatura%20de%20YouTube%201280x720%20px.jpeg" type="image/jpeg" sizes="64x64">
     <link rel="apple-touch-icon" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEggUOmHTNlRz2-y8SMwEGPxofdbPDkPBpwUMv9CWVZRU_x9zwY6Nw3Txdsfln4ysysGTEYK3tGAZHrElX1J1R9nLrCBVMELt8pEOKl8JkmRD1jqfNy0cpckDzAxjiUNuPwAqatX8QPSvTtgoG5yA1OvsD9gFQ_Pq46akpFxwCrEFM2GUM7KR55JCmo28eM/s320/Miniatura%20de%20YouTube%201280x720%20px.jpeg">
 
-    <!-- Librerías externas -->
     <link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <!-- Estilos CSS -->
     <style>
         :root {
             --primary-color: #E50914;
@@ -128,9 +125,9 @@
             color: var(--text-color-secondary);
         }
         #search:focus {
-             outline: none;
-             border-color: var(--primary-color);
-             box-shadow: 0 0 5px rgba(229, 9, 20, 0.5);
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(229, 9, 20, 0.5);
         }
 
         #playlist {
@@ -140,7 +137,7 @@
             flex-grow: 1;
             overflow-y: auto;
         }
-        
+
         #playlist::-webkit-scrollbar {
             width: 8px;
         }
@@ -199,7 +196,7 @@
             border-radius: 50%;
             flex-shrink: 0;
             object-fit: cover;
-             border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         #playlist li .channel-details {
@@ -236,14 +233,14 @@
             margin-left: 5px;
         }
         #playlist li .star:hover {
-             transform: scale(1.2);
+            transform: scale(1.2);
         }
 
         #playlist li .star.favorite {
             color: var(--favorite-color);
         }
         #playlist li .star.favorite:hover {
-             color: #e6c300;
+            color: #e6c300;
         }
 
         /* Estilos Video.js */
@@ -298,9 +295,9 @@
             border-radius: 50%;
             width: 1.1em;
             height: 1.1em;
-             top: 50%;
-             transform: translateY(-50%);
-             margin-left: -0.55em;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-left: -0.55em;
         }
         .vjs-slider-handle:before { content: ''; }
 
@@ -321,9 +318,9 @@
         }
 
         .vjs-time-control {
-             font-size: 0.9em;
-             line-height: 3;
-             padding: 0 0.5em;
+            font-size: 0.9em;
+            line-height: 3;
+            padding: 0 0.5em;
         }
         .vjs-remaining-time {
             font-weight: 400;
@@ -387,8 +384,8 @@
             transition: opacity 0.3s ease-out;
             pointer-events: none;
         }
-         .volume-indicator i {
-             margin-right: 5px;
+        .volume-indicator i {
+            margin-right: 5px;
         }
 
         /* Instrucciones */
@@ -427,20 +424,20 @@
         #instructions-text li{
             margin-bottom: 6px;
         }
-         #instructions-text strong {
-             color: var(--text-color);
+        #instructions-text strong {
+            color: var(--text-color);
         }
 
         /* Media Queries (Responsividad) */
         @media (max-width: 1200px) {
-             .container {
-                 max-width: 100%;
-                 margin: 70px 10px 10px 10px;
-                 padding: 15px;
-                 height: calc(100vh - 80px);
+            .container {
+                max-width: 100%;
+                margin: 70px 10px 10px 10px;
+                padding: 15px;
+                height: calc(100vh - 80px);
             }
-             #player-container {
-                 margin-right: 15px;
+            #player-container {
+                margin-right: 15px;
             }
         }
 
@@ -463,31 +460,31 @@
                 overflow: visible;
             }
 
-             #player-container {
-                 flex: none;
-                 height: 45vh;
-                 width: 100%;
-                 margin-right: 0;
-                 margin-bottom: 0;
-                 border-radius: 0;
-                 box-shadow: none;
+            #player-container {
+                flex: none;
+                height: 45vh;
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 0;
+                border-radius: 0;
+                box-shadow: none;
             }
             .video-js {
-                 border-radius: 0;
+                border-radius: 0;
             }
-             .vjs-control-bar {
-                 border-radius: 0;
-                 height: 3.2em;
+            .vjs-control-bar {
+                border-radius: 0;
+                height: 3.2em;
             }
-             .vjs-button > .vjs-icon-placeholder:before {
-                 font-size: 1.4em;
-                 line-height: 2.3;
+            .vjs-button > .vjs-icon-placeholder:before {
+                font-size: 1.4em;
+                line-height: 2.3;
             }
-             .vjs-volume-panel .vjs-volume-control.vjs-volume-horizontal {
-                 width: 4em;
+            .vjs-volume-panel .vjs-volume-control.vjs-volume-horizontal {
+                width: 4em;
             }
 
-             #playlist-container {
+            #playlist-container {
                 flex-grow: 1;
                 width: 100%;
                 border-radius: 0;
@@ -505,15 +502,15 @@
                 width: 30px;
                 height: 30px;
             }
-             #playlist li .channel-title {
-                 font-size: 0.9em;
+            #playlist li .channel-title {
+                font-size: 0.9em;
             }
-             #playlist li .channel-desc {
-                 font-size: 0.7em;
+            #playlist li .channel-desc {
+                font-size: 0.7em;
             }
-             #playlist li .star {
-                 font-size: 1em;
-                 padding: 5px;
+            #playlist li .star {
+                font-size: 1em;
+                padding: 5px;
             }
 
             .qr-container {
@@ -526,7 +523,7 @@
             .qr-container p {
                 font-size: 0.8em;
             }
-             .qr-container img {
+            .qr-container img {
                 width: 110px;
                 height: 110px;
             }
@@ -537,20 +534,20 @@
                 margin: 15px 10px;
             }
             #instructions-text h2{
-                 font-size: 1.1em;
-                 margin-bottom: 10px;
+                font-size: 1.1em;
+                margin-bottom: 10px;
             }
-             #instructions-text h3{
-                 font-size: 1em;
-                 margin-top: 12px;
-                 margin-bottom: 6px;
+            #instructions-text h3{
+                font-size: 1em;
+                margin-top: 12px;
+                margin-bottom: 6px;
             }
-             #instructions-text ol {
-                 padding-left: 18px;
-                 margin-bottom: 12px;
+            #instructions-text ol {
+                padding-left: 18px;
+                margin-bottom: 12px;
             }
-             #instructions-text li{
-                 margin-bottom: 5px;
+            #instructions-text li{
+                margin-bottom: 5px;
             }
 
             .volume-indicator {
@@ -560,19 +557,19 @@
                 padding: 6px 10px;
             }
         }
-         @media (max-width: 480px) {
-             #playlist li .channel-info {
-                 gap: 8px;
+        @media (max-width: 480px) {
+            #playlist li .channel-info {
+                gap: 8px;
             }
-             #playlist li .channel-title {
-                 font-size: 0.85em;
+            #playlist li .channel-title {
+                font-size: 0.85em;
             }
-             #playlist li .channel-desc {
-                 display: none;
+            #playlist li .channel-desc {
+                display: none;
             }
-             .vjs-time-control { display: none; }
-             .vjs-remaining-time { display: block !important; }
-             .vjs-fullscreen-control { margin-left: auto; }
+            .vjs-time-control { display: none; }
+            .vjs-remaining-time { display: block !important; }
+            .vjs-fullscreen-control { margin-left: auto; }
         }
     </style>
 </head>
@@ -584,10 +581,10 @@
     <div class="container">
         <div id="player-container">
             <video id="my-video" class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto" playsinline aria-label="Reproductor de video">
-                 <p class="vjs-no-js">
+                <p class="vjs-no-js">
                     Para ver este video, por favor activa JavaScript y considera actualizar tu navegador a uno que
                     <a href="https://videojs.com/html5-video-support/" target="_blank">soporte video HTML5</a>.
-                 </p>
+                </p>
             </video>
         </div>
 
@@ -612,8 +609,8 @@
     </div>
 
     <div id="volume-indicator" class="volume-indicator">
-         <i class="fas fa-volume-up"></i>
-         <span id="volume-level">50</span>%
+        <i class="fas fa-volume-up"></i>
+        <span id="volume-level">50</span>%
     </div>
 
     <div id="instructions-text">
@@ -634,11 +631,9 @@
         <p style="text-align: center; margin-top: 15px;">¡Acceso rápido a tus canales!</p>
     </div>
 
-    <!-- Librerías JS -->
     <script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
     <script src="https://unpkg.com/@videojs/http-streaming@latest/dist/videojs-http-streaming.min.js"></script>
 
-    <!-- Script Propio -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Elementos del DOM
@@ -954,23 +949,20 @@
             function scrollToSelectedChannel(channelId) {
                 const playlistContainer = document.getElementById('playlist-container');
                 const selectedItem = document.getElementById(`channel-${channelId}`);
-                
+
                 if (!selectedItem || !playlistContainer) return;
-                
-                if (isElementInViewport(selectedItem, playlistContainer)) {
-                    return;
-                }
-                
+
                 const headerHeight = document.querySelector('.header')?.offsetHeight || 0;
-                const scrollPosition = selectedItem.offsetTop - headerHeight;
-                
+                const targetScrollTop = selectedItem.offsetTop - headerHeight - playlistContainer.offsetTop;
+
+
                 if ('scrollBehavior' in document.documentElement.style) {
                     playlistContainer.scrollTo({
-                        top: scrollPosition,
+                        top: targetScrollTop,
                         behavior: 'smooth'
                     });
                 } else {
-                    smoothScrollPolyfill(playlistContainer, scrollPosition, 300);
+                    smoothScrollPolyfill(playlistContainer, targetScrollTop, 300);
                 }
             }
 
@@ -978,7 +970,7 @@
             function isElementInViewport(element, container) {
                 const elementRect = element.getBoundingClientRect();
                 const containerRect = container.getBoundingClientRect();
-                
+
                 return (
                     elementRect.top >= containerRect.top &&
                     elementRect.bottom <= containerRect.bottom
@@ -990,23 +982,23 @@
                 const startPosition = element.scrollTop;
                 const distance = targetPosition - startPosition;
                 const startTime = performance.now();
-                
+
                 function scrollStep(timestamp) {
                     const elapsed = timestamp - startTime;
                     const progress = Math.min(elapsed / duration, 1);
                     const easeProgress = easeInOutQuad(progress);
-                    
+
                     element.scrollTop = startPosition + (distance * easeProgress);
-                    
+
                     if (progress < 1) {
                         requestAnimationFrame(scrollStep);
                     }
                 }
-                
+
                 function easeInOutQuad(t) {
                     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
                 }
-                
+
                 requestAnimationFrame(scrollStep);
             }
 
@@ -1019,21 +1011,21 @@
 
                 highlightCurrentVideo(index);
                 scrollToSelectedChannel(index);
-                
+
                 try {
                     const isHls = url.includes('.m3u8');
                     const sourceType = isHls ? 'application/x-mpegURL' : 'video/mp4';
-                    
+
                     player.src({ type: sourceType, src: url });
                     player.load();
-                    
+
                     const playPromise = player.play();
                     if (playPromise !== undefined) {
                         playPromise.catch(error => {
                             console.warn("Autoplay bloqueado:", error);
                         });
                     }
-                    
+
                     localStorage.setItem('lastPlayedTvChannel', index);
                 } catch (error) {
                     console.error('Error al reproducir:', error);
@@ -1045,7 +1037,7 @@
             function createPlaylistItem(channel) {
                 const li = document.createElement('li');
                 li.id = `channel-${channel.originalIndex}`;
-                
+
                 const isFavorite = favorites.includes(channel.originalIndex.toString());
                 const defaultLogo = `https://via.placeholder.com/35/444/ccc?text=${channel.title.charAt(0).toUpperCase()}`;
                 const logoSrc = channel.logo || defaultLogo;
@@ -1082,7 +1074,7 @@
             // 6. Función para renderizar la playlist
             function renderPlaylist(filter = '') {
                 if (!playlistElement) return;
-                
+
                 const searchTerm = filter.toLowerCase().trim();
                 const filteredPlaylist = fullPlaylist
                     .map((channel, index) => ({ ...channel, originalIndex: index }))
@@ -1253,7 +1245,7 @@
             if (fullPlaylist && fullPlaylist.length > 0) {
                 renderPlaylist();
             } else {
-                if(playlistElement) playlistElement.innerHTML = '<li>No hay canales disponibles.</li>';
+                if (playlistElement) playlistElement.innerHTML = '<li>No hay canales disponibles.</li>';
                 console.error("La lista de reproducción está vacía o no es válida.");
             }
 
