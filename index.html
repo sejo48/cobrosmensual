@@ -4,41 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reproductor de TV Online</title>
-
-    <link rel="icon" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEggUOmHTNlRz2-y8SMwEGPxofdbPDkPBpwUMv9CWVZRU_x9zwY6Nw3Txdsfln4ysysGTEYK3tGAZHrElX1J1R9nLrCBVMELt8pEOKl8JkmRD1jqfNy0cpckDzAxjiUNuPwAqatX8QPSvTtgoG5yA1OvsD9gFQ_Pq46akpFxwCrEFM2GUM7KR55JCmo28eM/s320/Miniatura%20de%20YouTube%201280x720%20px.jpeg" type="image/jpeg" sizes="64x64">
-    <link rel="apple-touch-icon" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEggUOmHTNlRz2-y8SMwEGPxofdbPDkPBpwUMv9CWVZRU_x9zwY6Nw3Txdsfln4ysysGTEYK3tGAZHrElX1J1R9nLrCBVMELt8pEOKl8JkmRD1jqfNy0cpckDzAxjiUNuPwAqatX8QPSvTtgoG5yA1OvsD9gFQ_Pq46akpFxwCrEFM2GUM7KR55JCmo28eM/s320/Miniatura%20de%20YouTube%201280x720%20px.jpeg">
-
-    <link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root {
             --primary-color: #E50914;
             --primary-color-hover: #b80710;
             --background-color: #141414;
             --text-color: #fff;
-            --text-color-secondary: #ccc;
             --card-bg-start: #333;
             --card-bg-end: #222;
             --card-hover-bg-start: #444;
             --card-hover-bg-end: #333;
-            --header-bg-gradient: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
-            --container-shadow: rgba(0, 0, 0, 0.4);
-            --player-shadow: rgba(0, 0, 0, 0.5);
-            --playlist-shadow: rgba(0, 0, 0, 0.3);
-            --card-shadow: rgba(0, 0, 0, 0.2);
-            --card-hover-shadow: rgba(0, 0, 0, 0.3);
             --favorite-color: #ffd700;
             --border-radius-large: 15px;
             --border-radius-medium: 10px;
             --border-radius-small: 5px;
-            --font-family: 'Poppins', sans-serif;
         }
 
-        /* Estilos generales */
         body {
-            font-family: var(--font-family);
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
             background-color: var(--background-color);
@@ -46,7 +31,7 @@
         }
 
         .header {
-            background: var(--header-bg-gradient);
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
             padding: 10px 20px;
             position: fixed;
             top: 0;
@@ -70,8 +55,6 @@
             margin: 80px auto 20px;
             padding: 20px;
             background-color: var(--background-color);
-            box-shadow: 0 8px 32px var(--container-shadow);
-            border-radius: var(--border-radius-large);
             height: 80vh;
             overflow: hidden;
         }
@@ -82,7 +65,7 @@
             margin-right: 20px;
             border-radius: var(--border-radius-large);
             overflow: hidden;
-            box-shadow: 0 4px 12px var(--player-shadow);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             background-color: #000;
         }
 
@@ -98,7 +81,7 @@
             background-color: var(--background-color);
             border-radius: var(--border-radius-large);
             padding: 20px;
-            box-shadow: 0 4px 12px var(--playlist-shadow);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             overflow-y: auto;
             display: flex;
             flex-direction: column;
@@ -119,11 +102,12 @@
             border: 1px solid var(--card-bg-start);
             background-color: var(--card-bg-end);
             color: var(--text-color);
-            font-family: var(--font-family);
         }
+
         #search::placeholder {
-            color: var(--text-color-secondary);
+            color: #ccc;
         }
+
         #search:focus {
             outline: none;
             border-color: var(--primary-color);
@@ -138,22 +122,6 @@
             overflow-y: auto;
         }
 
-        #playlist::-webkit-scrollbar {
-            width: 8px;
-        }
-        #playlist::-webkit-scrollbar-track {
-            background: var(--background-color);
-            border-radius: var(--border-radius-small);
-        }
-        #playlist::-webkit-scrollbar-thumb {
-            background-color: var(--card-bg-start);
-            border-radius: var(--border-radius-small);
-            border: 2px solid var(--background-color);
-        }
-        #playlist::-webkit-scrollbar-thumb:hover {
-            background-color: var(--card-hover-bg-start);
-        }
-
         #playlist li {
             padding: 10px 15px;
             margin-bottom: 8px;
@@ -161,17 +129,16 @@
             border-radius: var(--border-radius-medium);
             cursor: pointer;
             transition: all 0.2s ease-in-out;
-            box-shadow: 0 2px 4px var(--card-shadow);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            overflow: hidden;
         }
 
         #playlist li:hover {
             background: linear-gradient(145deg, var(--card-hover-bg-start), var(--card-hover-bg-end));
             transform: translateY(-2px);
-            box-shadow: 0 4px 6px var(--card-hover-shadow);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
         #playlist li.active {
@@ -181,7 +148,7 @@
             transform: translateY(0);
         }
 
-        #playlist li .channel-info {
+        .channel-info {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -190,7 +157,7 @@
             margin-right: 10px;
         }
 
-        #playlist li .channel-info img {
+        .channel-info img {
             width: 35px;
             height: 35px;
             border-radius: 50%;
@@ -199,11 +166,11 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        #playlist li .channel-details {
+        .channel-details {
             overflow: hidden;
         }
 
-        #playlist li .channel-title {
+        .channel-title {
             font-size: 1em;
             font-weight: 500;
             color: var(--text-color);
@@ -214,241 +181,80 @@
             line-height: 1.3;
         }
 
-        #playlist li .channel-desc {
+        .channel-desc {
             font-size: 0.75em;
-            color: var(--text-color-secondary);
+            color: #ccc;
             margin: 2px 0 0 0;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        #playlist li .star {
+        .star {
             cursor: pointer;
-            color: var(--text-color-secondary);
+            color: #ccc;
             transition: color 0.2s ease, transform 0.2s ease;
             font-size: 1.1em;
             flex-shrink: 0;
             padding: 6px;
             margin-left: 5px;
         }
-        #playlist li .star:hover {
+
+        .star:hover {
             transform: scale(1.2);
         }
 
-        #playlist li .star.favorite {
+        .star.favorite {
             color: var(--favorite-color);
         }
-        #playlist li .star.favorite:hover {
+
+        .star.favorite:hover {
             color: #e6c300;
         }
 
-        /* Estilos Video.js */
-        .video-js {
-            border-radius: var(--border-radius-large);
-            overflow: hidden;
-        }
-
-        .vjs-big-play-button {
-            background-color: rgba(229, 9, 20, 0.7);
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            font-size: 3em;
-            height: 1.5em;
-            width: 1.5em;
-            line-height: 1.5em;
-            margin-top: -0.75em;
-            margin-left: -0.75em;
-        }
-
-        .vjs-big-play-button:hover {
-            background-color: rgba(229, 9, 20, 0.9);
-            transform: scale(1.1);
-        }
-
-        .vjs-control-bar {
-            background-color: rgba(28, 28, 28, 0.8);
-            border-bottom-left-radius: var(--border-radius-large);
-            border-bottom-right-radius: var(--border-radius-large);
-            padding: 5px 15px;
-            height: 3.5em;
-        }
-
-        .vjs-button > .vjs-icon-placeholder:before {
-            font-size: 1.6em;
-            line-height: 1.9;
-        }
-
-        .vjs-volume-panel .vjs-volume-control.vjs-volume-horizontal {
-            width: 5em;
-        }
-
-        .vjs-play-progress {
-            background-color: var(--primary-color) !important;
-        }
-        .vjs-load-progress {
-            background: rgba(255, 255, 255, 0.3) !important;
-        }
-
-        .vjs-slider-handle {
-            background-color: var(--primary-color) !important;
-            border-radius: 50%;
-            width: 1.1em;
-            height: 1.1em;
-            top: 50%;
-            transform: translateY(-50%);
-            margin-left: -0.55em;
-        }
-        .vjs-slider-handle:before { content: ''; }
-
-        .vjs-time-tooltip {
-            background-color: var(--primary-color);
-            color: var(--text-color);
-            padding: 5px 8px;
-            border-radius: var(--border-radius-small);
-            font-size: 0.85em;
-            white-space: nowrap;
-            bottom: 100%;
-            margin-bottom: 5px;
-        }
-
-        .vjs-progress-holder {
-            margin: 0 10px;
-            height: 0.5em;
-        }
-
-        .vjs-time-control {
-            font-size: 0.9em;
-            line-height: 3;
-            padding: 0 0.5em;
-        }
-        .vjs-remaining-time {
-            font-weight: 400;
-            color: #eee;
-        }
-
-        /* Contenedor QR */
-        .qr-container {
-            text-align: center;
-            margin: 30px 20px;
-            padding: 20px;
-            background-color: rgba(0, 0, 0, 0.8);
-            border-radius: var(--border-radius-medium);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .qr-container h3 {
-            font-size: 1.2em;
-            color: var(--text-color);
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-
-        .qr-container img {
-            width: 140px;
-            height: 140px;
-            border: 4px solid var(--text-color);
-            border-radius: var(--border-radius-medium);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .qr-container p {
-            font-size: 0.9em;
-            color: var(--text-color-secondary);
-            margin-top: 15px;
-        }
-
-        /* Contador de visitas */
-        .visit-counter {
-            text-align: center;
-            margin: 20px;
-            color: var(--text-color-secondary);
-        }
-        .visit-counter h3 {
-            font-size: 1em;
-            margin-bottom: 5px;
-        }
-
-        /* Indicador de volumen */
-        .volume-indicator {
+        /* Estilos para el overlay de error */
+        .error-overlay {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: rgba(28, 28, 28, 0.9);
-            padding: 8px 12px;
-            border-radius: var(--border-radius-medium);
-            font-size: 1em;
-            color: var(--text-color);
-            display: none;
-            z-index: 1001;
-            transition: opacity 0.3s ease-out;
-            pointer-events: none;
-        }
-        .volume-indicator i {
-            margin-right: 5px;
-        }
-
-        /* Instrucciones */
-        #instructions-text {
-            background-color: rgba(30, 30, 30, 0.9);
-            color: var(--text-color);
-            padding: 20px 25px;
-            border-radius: var(--border-radius-medium);
-            margin: 30px 20px;
-            text-align: left;
-            font-size: 0.85em;
-            line-height: 1.6;
-            box-shadow: 0 4px 12px var(--playlist-shadow);
-        }
-
-        #instructions-text h2{
-            color: var(--favorite-color);
-            font-size: 1.2em;
-            margin-top: 0;
-            margin-bottom: 15px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            color: white;
             text-align: center;
+            padding: 20px;
+            display: none;
         }
-
-        #instructions-text h3{
-            font-size: 1em;
-            margin-top: 18px;
-            margin-bottom: 8px;
-            color: var(--primary-color);
+        
+        .error-message {
+            font-size: 1.2em;
+            margin-bottom: 20px;
         }
-
-        #instructions-text ol {
-            padding-left: 20px;
-            margin-bottom: 15px;
+        
+        .error-buttons {
+            display: flex;
+            gap: 10px;
         }
-
-        #instructions-text li{
-            margin-bottom: 6px;
+        
+        .error-button {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
         }
-        #instructions-text strong {
-            color: var(--text-color);
-        }
-
-        /* Media Queries (Responsividad) */
-        @media (max-width: 1200px) {
-            .container {
-                max-width: 100%;
-                margin: 70px 10px 10px 10px;
-                padding: 15px;
-                height: calc(100vh - 80px);
-            }
-            #player-container {
-                margin-right: 15px;
-            }
+        
+        .error-button:hover {
+            background-color: var(--primary-color-hover);
         }
 
         @media (max-width: 768px) {
-            .header {
-                padding: 5px 10px;
-            }
-            .header img {
-                height: 45px;
-            }
-
             .container {
                 flex-direction: column;
                 height: auto;
@@ -469,20 +275,6 @@
                 border-radius: 0;
                 box-shadow: none;
             }
-            .video-js {
-                border-radius: 0;
-            }
-            .vjs-control-bar {
-                border-radius: 0;
-                height: 3.2em;
-            }
-            .vjs-button > .vjs-icon-placeholder:before {
-                font-size: 1.4em;
-                line-height: 2.3;
-            }
-            .vjs-volume-panel .vjs-volume-control.vjs-volume-horizontal {
-                width: 4em;
-            }
 
             #playlist-container {
                 flex-grow: 1;
@@ -498,78 +290,24 @@
                 padding: 8px 12px;
                 margin-bottom: 6px;
             }
+
             #playlist li .channel-info img {
                 width: 30px;
                 height: 30px;
             }
+
             #playlist li .channel-title {
                 font-size: 0.9em;
             }
+
             #playlist li .channel-desc {
                 font-size: 0.7em;
             }
+
             #playlist li .star {
                 font-size: 1em;
                 padding: 5px;
             }
-
-            .qr-container {
-                margin: 15px 10px;
-                padding: 15px;
-            }
-            .qr-container h3 {
-                font-size: 1em;
-            }
-            .qr-container p {
-                font-size: 0.8em;
-            }
-            .qr-container img {
-                width: 110px;
-                height: 110px;
-            }
-
-            #instructions-text {
-                font-size: 0.8em;
-                padding: 15px;
-                margin: 15px 10px;
-            }
-            #instructions-text h2{
-                font-size: 1.1em;
-                margin-bottom: 10px;
-            }
-            #instructions-text h3{
-                font-size: 1em;
-                margin-top: 12px;
-                margin-bottom: 6px;
-            }
-            #instructions-text ol {
-                padding-left: 18px;
-                margin-bottom: 12px;
-            }
-            #instructions-text li{
-                margin-bottom: 5px;
-            }
-
-            .volume-indicator {
-                bottom: 10px;
-                right: 10px;
-                font-size: 0.9em;
-                padding: 6px 10px;
-            }
-        }
-        @media (max-width: 480px) {
-            #playlist li .channel-info {
-                gap: 8px;
-            }
-            #playlist li .channel-title {
-                font-size: 0.85em;
-            }
-            #playlist li .channel-desc {
-                display: none;
-            }
-            .vjs-time-control { display: none; }
-            .vjs-remaining-time { display: block !important; }
-            .vjs-fullscreen-control { margin-left: auto; }
         }
     </style>
 </head>
@@ -580,11 +318,9 @@
 
     <div class="container">
         <div id="player-container">
-            <video id="my-video" class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto" playsinline aria-label="Reproductor de video">
-                <p class="vjs-no-js">
-                    Para ver este video, por favor activa JavaScript y considera actualizar tu navegador a uno que
-                    <a href="https://videojs.com/html5-video-support/" target="_blank">soporte video HTML5</a>.
-                </p>
+            <video id="my-video" controls playsinline webkit-playsinline crossorigin="anonymous">
+                <source src="" type="application/x-mpegURL">
+                Tu navegador no soporta el elemento de video.
             </video>
         </div>
 
@@ -592,76 +328,24 @@
             <h2>Lista de reproducción</h2>
             <input type="text" id="search" placeholder="Buscar canal...">
             <ul id="playlist">
-                <li>Cargando canales...</li>
+                <!-- Canales se cargarán aquí -->
             </ul>
         </div>
     </div>
 
-    <div class="qr-container">
-        <h3>¡Escanea el código QR!</h3>
-        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhJMKZYBgrggrXAZC6g9PFNXAyVDQqFl37nEqRhA3mwAxogX6n_WrzwLSmiVNyuS2rAi3Akt-Uu_dkUE1Rn7BKEhtVlZah4sX7k3lVb1JLAkWZxfGhD3wr_bK2ib2ajOqn34jhU_2Lcm24kE6K_3Cd5BEWOgO3fibL0q8yAuCifeM7WANXK4kzRb9op588/s320/JORGE_DEZ-1024.jpeg" alt="Código QR">
-        <p>Usa tu cámara para escanear y compartir la aplicación.</p>
+    <!-- Overlay para mostrar errores -->
+    <div class="error-overlay" id="error-overlay">
+        <div class="error-message" id="error-message">No se pudo cargar el canal. Intente con otro.</div>
+        <div class="error-buttons">
+            <button class="error-button" id="try-again-button">Intentar nuevamente</button>
+            <button class="error-button" id="try-another-button">Probar otro canal</button>
+        </div>
     </div>
-
-    <div class="visit-counter">
-        <h3>Visitas</h3>
-        <script type="text/javascript" src="https://contador.websiteout.com/js/7/0/0/0"></script>
-    </div>
-
-    <div id="volume-indicator" class="volume-indicator">
-        <i class="fas fa-volume-up"></i>
-        <span id="volume-level">50</span>%
-    </div>
-
-    <div id="instructions-text">
-        <h2>Añadir Acceso Directo</h2>
-        <p>Crea un acceso directo a esta página en tu pantalla de inicio:</p>
-        <h3><i class="fab fa-android"></i> Android (Chrome)</h3>
-        <ol>
-            <li>Toca el icono de <strong>Menú</strong> (⋮) en la esquina superior derecha.</li>
-            <li>Selecciona "<strong>Añadir a pantalla de inicio</strong>" o "<strong>Instalar aplicación</strong>".</li>
-            <li>Confirma el nombre y toca "<strong>Añadir</strong>".</li>
-        </ol>
-        <h3><i class="fab fa-apple"></i> iOS (Safari)</h3>
-        <ol>
-            <li>Toca el icono de <strong>Compartir</strong> (<i class="fas fa-share-square"></i> cuadrado con flecha).</li>
-            <li>Desplázate y selecciona "<strong>Añadir a pantalla de inicio</strong>".</li>
-            <li>Confirma el nombre y toca "<strong>Añadir</strong>".</li>
-        </ol>
-        <p style="text-align: center; margin-top: 15px;">¡Acceso rápido a tus canales!</p>
-    </div>
-
-    <script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
-    <script src="https://unpkg.com/@videojs/http-streaming@latest/dist/videojs-http-streaming.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Elementos del DOM
-            const playerContainer = document.getElementById('player-container');
-            const playlistElement = document.getElementById('playlist');
-            const searchInput = document.getElementById('search');
-            const volumeIndicator = document.getElementById('volume-indicator');
-            const volumeLevelSpan = document.getElementById('volume-level');
-            const volumeIcon = volumeIndicator?.querySelector('i');
-
-            // Inicializar reproductor
-            const player = videojs('my-video', {
-                controls: true,
-                preload: 'auto',
-                responsive: false,
-                playbackRates: [0.5, 1, 1.5, 2],
-                html5: {
-                    vhs: {
-                        overrideNative: !videojs.browser.IS_SAFARI,
-                    }
-                },
-                userActions: {
-                    doubleClick: true
-                }
-            });
-
-            // Datos de la playlist
-            const defaultPlaylistData = [
+            // Datos de canales
+            const channels = [
                 {
                     title: "Tele red",
                     url: "https://k20.usastreams.com:8081/telered/index.m3u8",
@@ -712,7 +396,7 @@
                 },
                 {
                     title: "Telesistema",
-                    url: "https://k20.usastreams.com:8081/telesistema/tracks-v1a1/mono.m3u8" ,
+                    url: "https://k20.usastreams.com:8081/telesistema/tracks-v1a1/mono.m3u8",
                     logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9YKvejKBdJWBUfm0Oc32tKTO1QKQXXu2s4A&s",
                     descripcion: "Canal de entretenimiento."
                 },
@@ -937,332 +621,251 @@
                     url: "https://v2.azulstream.com:8081/gamtv/gamtv/tracks-v1a1/mono.m3u8",
                     logo: "https://radiocostarica.net/sites/default/files/styles/player_image/public/2024-06/GAM%20TV%20CR-Costa%20Rica_0.png.webp?itok=ExXxZFSr",
                     descripcion: "Entretenimiento"
+                },
+                // Canales de prueba confiables
+                {
+                    title: "TEST: Big Buck Bunny",
+                    url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+                    logo: "https://peach.blender.org/wp-content/uploads/bbb-splash.png",
+                    descripcion: "Stream de prueba estándar"
+                },
+                {
+                    title: "NASA TV Public",
+                    url: "https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8",
+                    logo: "https://www.nasa.gov/sites/default/files/thumbnails/image/nasa-logo-web-rgb.png",
+                    descripcion: "Canal oficial de NASA"
+                },
+                {
+                    title: "France 24 (English)",
+                    url: "https://static.france24.com/live/F24_EN_LO_HLS/live_web.m3u8",
+                    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/France_24_logo.svg/1200px-France_24_logo.svg.png",
+                    descripcion: "Noticias internacionales"
                 }
             ];
 
-            // Variables globales
-            let fullPlaylist = defaultPlaylistData;
+            // Elementos del DOM
+            const videoPlayer = document.getElementById('my-video');
+            const playlist = document.getElementById('playlist');
+            const searchInput = document.getElementById('search');
+            const playerContainer = document.getElementById('player-container');
+            const playlistContainer = document.getElementById('playlist-container');
+            const errorOverlay = document.getElementById('error-overlay');
+            const errorMessage = document.getElementById('error-message');
+            const tryAgainButton = document.getElementById('try-again-button');
+            const tryAnotherButton = document.getElementById('try-another-button');
+            
+            // Variables de estado
             let favorites = JSON.parse(localStorage.getItem('favoritesTvChannels')) || [];
-            let volumeTimeout;
+            let lastAttemptedChannel = null;
+            let hls = null;
 
-            // 1. Función principal de scroll suave
-            function scrollToSelectedChannel(channelId) {
-                const playlistContainer = document.getElementById('playlist-container');
-                const selectedItem = document.getElementById(`channel-${channelId}`);
-
-                if (!selectedItem || !playlistContainer) return;
-
-                const headerHeight = document.querySelector('.header')?.offsetHeight || 0;
-                const targetScrollTop = selectedItem.offsetTop - headerHeight - playlistContainer.offsetTop;
-
-
-                if ('scrollBehavior' in document.documentElement.style) {
-                    playlistContainer.scrollTo({
-                        top: targetScrollTop,
-                        behavior: 'smooth'
-                    });
-                } else {
-                    smoothScrollPolyfill(playlistContainer, targetScrollTop, 300);
-                }
+            // Función para mostrar errores
+            function showError(message, channelIndex) {
+                lastAttemptedChannel = channelIndex;
+                errorMessage.textContent = message;
+                errorOverlay.style.display = 'flex';
             }
-
-            // 2. Función para verificar visibilidad del elemento
-            function isElementInViewport(element, container) {
-                const elementRect = element.getBoundingClientRect();
-                const containerRect = container.getBoundingClientRect();
-
-                return (
-                    elementRect.top >= containerRect.top &&
-                    elementRect.bottom <= containerRect.bottom
-                );
+            
+            // Función para ocultar errores
+            function hideError() {
+                errorOverlay.style.display = 'none';
             }
-
-            // 3. Polyfill para smooth scroll (soporte legacy)
-            function smoothScrollPolyfill(element, targetPosition, duration) {
-                const startPosition = element.scrollTop;
-                const distance = targetPosition - startPosition;
-                const startTime = performance.now();
-
-                function scrollStep(timestamp) {
-                    const elapsed = timestamp - startTime;
-                    const progress = Math.min(elapsed / duration, 1);
-                    const easeProgress = easeInOutQuad(progress);
-
-                    element.scrollTop = startPosition + (distance * easeProgress);
-
-                    if (progress < 1) {
-                        requestAnimationFrame(scrollStep);
-                    }
+            
+            // Configurar botones de error
+            tryAgainButton.addEventListener('click', () => {
+                hideError();
+                if (lastAttemptedChannel !== null) {
+                    selectChannel(lastAttemptedChannel);
                 }
+            });
+            
+            tryAnotherButton.addEventListener('click', () => {
+                hideError();
+            });
 
-                function easeInOutQuad(t) {
-                    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-                }
-
-                requestAnimationFrame(scrollStep);
-            }
-
-            // 4. Función para reproducir video con auto-scroll
-            function playVideo(url, index) {
-                if (!player) {
-                    console.error("Reproductor no inicializado");
-                    return;
-                }
-
-                highlightCurrentVideo(index);
-                scrollToSelectedChannel(index);
-
-                try {
-                    const isHls = url.includes('.m3u8');
-                    const sourceType = isHls ? 'application/x-mpegURL' : 'video/mp4';
-
-                    player.src({ type: sourceType, src: url });
-                    player.load();
-
-                    const playPromise = player.play();
-                    if (playPromise !== undefined) {
-                        playPromise.catch(error => {
-                            console.warn("Autoplay bloqueado:", error);
-                        });
-                    }
-
-                    localStorage.setItem('lastPlayedTvChannel', index);
-                } catch (error) {
-                    console.error('Error al reproducir:', error);
-                    player.reset();
-                }
-            }
-
-            // 5. Función para crear items de la playlist
-            function createPlaylistItem(channel) {
-                const li = document.createElement('li');
-                li.id = `channel-${channel.originalIndex}`;
-
-                const isFavorite = favorites.includes(channel.originalIndex.toString());
-                const defaultLogo = `https://via.placeholder.com/35/444/ccc?text=${channel.title.charAt(0).toUpperCase()}`;
-                const logoSrc = channel.logo || defaultLogo;
-
-                li.innerHTML = `
-                    <div class="channel-info">
-                        <img src="${logoSrc}" alt="${channel.title || 'Canal'} Logo" loading="lazy" onerror="this.src='${defaultLogo}'; this.onerror=null;">
-                        <div class="channel-details">
-                            <span class="channel-title">${channel.title || 'Canal sin título'}</span>
-                            <p class="channel-desc">${channel.descripcion || ''}</p>
-                        </div>
-                    </div>
-                    <i class="star fas fa-star ${isFavorite ? 'favorite' : ''}"
-                        data-index="${channel.originalIndex}"
-                        aria-label="${isFavorite ? 'Remover de favoritos' : 'Agregar a favoritos'}"
-                        title="${isFavorite ? 'Remover de favoritos' : 'Agregar a favoritos'}"></i>
-                `;
-
-                li.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('star')) return;
-                    playVideo(channel.url, channel.originalIndex);
-                });
-
-                const star = li.querySelector('.star');
-                star.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    toggleFavorite(channel.originalIndex.toString());
-                    renderPlaylist(getCurrentFilter());
-                });
-
-                return li;
-            }
-
-            // 6. Función para renderizar la playlist
-            function renderPlaylist(filter = '') {
-                if (!playlistElement) return;
-
-                const searchTerm = filter.toLowerCase().trim();
-                const filteredPlaylist = fullPlaylist
-                    .map((channel, index) => ({ ...channel, originalIndex: index }))
-                    .filter(channel =>
-                        channel && channel.title &&
-                        (channel.title.toLowerCase().includes(searchTerm) ||
-                        (channel.descripcion && channel.descripcion.toLowerCase().includes(searchTerm)))
-                    );
-
-                filteredPlaylist.sort((a, b) => {
-                    const aIsFavorite = favorites.includes(a.originalIndex.toString());
-                    const bIsFavorite = favorites.includes(b.originalIndex.toString());
+            // Renderizar lista de canales
+            function renderPlaylist(channelsToRender = channels) {
+                playlist.innerHTML = '';
+                
+                // Ordenar favoritos primero
+                const sortedChannels = [...channelsToRender].sort((a, b) => {
+                    const aIndex = channels.findIndex(ch => ch.title === a.title);
+                    const bIndex = channels.findIndex(ch => ch.title === b.title);
+                    const aIsFavorite = favorites.includes(aIndex.toString());
+                    const bIsFavorite = favorites.includes(bIndex.toString());
+                    
                     if (aIsFavorite && !bIsFavorite) return -1;
                     if (!aIsFavorite && bIsFavorite) return 1;
-                    return (a.title || '').localeCompare(b.title || '');
+                    return a.title.localeCompare(b.title);
                 });
 
-                if (filteredPlaylist.length === 0) {
-                    playlistElement.innerHTML = `<li style="cursor: default; text-align: center; color: var(--text-color-secondary);">No se encontraron canales ${searchTerm ? 'para "' + searchTerm + '"': ''}.</li>`;
-                } else {
-                    const fragment = document.createDocumentFragment();
-                    filteredPlaylist.forEach(channel => {
-                        const li = createPlaylistItem(channel);
-                        fragment.appendChild(li);
+                sortedChannels.forEach((channel, index) => {
+                    const originalIndex = channels.findIndex(ch => ch.title === channel.title);
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <div class="channel-info">
+                            <img src="${channel.logo}" alt="${channel.title}" onerror="this.src='https://via.placeholder.com/35/333/fff?text=${channel.title.charAt(0)}'">
+                            <div class="channel-details">
+                                <span class="channel-title">${channel.title}</span>
+                                <p class="channel-desc">${channel.descripcion}</p>
+                            </div>
+                        </div>
+                        <i class="star fas fa-star ${favorites.includes(originalIndex.toString()) ? 'favorite' : ''}" 
+                           data-index="${originalIndex}"></i>
+                    `;
+                    
+                    li.addEventListener('click', (e) => {
+                        // Evitar que el clic en la estrella active el canal
+                        if (!e.target.classList.contains('star')) {
+                            selectChannel(originalIndex);
+                        }
                     });
-                    playlistElement.innerHTML = '';
-                    playlistElement.appendChild(fragment);
-                }
-
-                highlightCurrentVideo();
+                    
+                    // Manejar clic en la estrella
+                    const star = li.querySelector('.star');
+                    star.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleFavorite(originalIndex.toString());
+                        renderPlaylist();
+                    });
+                    
+                    playlist.appendChild(li);
+                });
             }
 
-            // 7. Función para manejar favoritos
-            function toggleFavorite(indexStr) {
-                const indexInFavorites = favorites.indexOf(indexStr);
+            // Seleccionar canal
+            function selectChannel(index) {
+                // Resaltar canal seleccionado
+                document.querySelectorAll('#playlist li').forEach(li => {
+                    li.classList.remove('active');
+                });
+                
+                const selectedLi = document.querySelector(`#playlist li .star[data-index="${index}"]`)?.closest('li');
+                if (selectedLi) selectedLi.classList.add('active');
+                
+                // Reproducir video pasando el índice
+                playVideo(channels[index].url, index);
+                
+                // Auto-scroll para hacer visible el reproductor
+                scrollToPlayer();
+                
+                // Guardar último canal visto
+                localStorage.setItem('lastPlayedTvChannel', index);
+            }
+
+            // Reproducir video con soporte HLS
+            function playVideo(url, channelIndex) {
+                console.log("Intentando reproducir:", url);
+                
+                // Limpiar instancia HLS anterior si existe
+                if (hls) {
+                    hls.destroy();
+                    hls = null;
+                }
+                
+                // Limpiar fuente anterior
+                videoPlayer.src = '';
+                videoPlayer.removeAttribute('src');
+                
+                // Verificar si HLS.js es necesario
+                if (Hls.isSupported() && (url.includes('.m3u8') || url.includes('mpegurl'))) {
+                    hls = new Hls({
+                        enableWorker: true,
+                        lowLatencyMode: true,
+                        backBufferLength: 30
+                    });
+                    hls.loadSource(url);
+                    hls.attachMedia(videoPlayer);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        videoPlayer.play().catch(e => {
+                            showError("Error al iniciar reproducción: " + e.message, channelIndex);
+                        });
+                    });
+                    
+                    hls.on(Hls.Events.ERROR, function(event, data) {
+                        if (data.fatal) {
+                            switch(data.type) {
+                                case Hls.ErrorTypes.NETWORK_ERROR:
+                                    showError("Error de red al cargar el stream", channelIndex);
+                                    break;
+                                case Hls.ErrorTypes.MEDIA_ERROR:
+                                    showError("Error en el formato del video", channelIndex);
+                                    break;
+                                default:
+                                    showError("Error en el reproductor", channelIndex);
+                                    hls.destroy();
+                            }
+                        }
+                    });
+                } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                    // Soporte nativo para HLS (Safari)
+                    videoPlayer.src = url;
+                    videoPlayer.addEventListener('loadedmetadata', function() {
+                        videoPlayer.play().catch(e => {
+                            showError("Error al iniciar reproducción: " + e.message, channelIndex);
+                        });
+                    });
+                } else {
+                    // Intentar reproducción directa
+                    videoPlayer.src = url;
+                    videoPlayer.load();
+                    videoPlayer.play().catch(e => {
+                        showError("Tu navegador no soporta este formato de video", channelIndex);
+                    });
+                }
+                
+                // Manejar eventos de error genéricos
+                videoPlayer.addEventListener('error', function() {
+                    if (!errorOverlay.style.display || errorOverlay.style.display === 'none') {
+                        showError("Error al cargar el video", channelIndex);
+                    }
+                });
+            }
+
+            // Función de auto-scroll
+            function scrollToPlayer() {
+                const playerRect = playerContainer.getBoundingClientRect();
+                const isPlayerVisible = (
+                    playerRect.top >= 0 &&
+                    playerRect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
+                );
+
+                if (!isPlayerVisible) {
+                    playerContainer.scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'nearest'
+                    });
+                }
+            }
+
+            // Manejar favoritos
+            function toggleFavorite(index) {
+                const indexInFavorites = favorites.indexOf(index);
                 if (indexInFavorites > -1) {
                     favorites.splice(indexInFavorites, 1);
                 } else {
-                    favorites.push(indexStr);
+                    favorites.push(index);
                 }
-                try {
-                    localStorage.setItem('favoritesTvChannels', JSON.stringify(favorites));
-                } catch (e) {
-                    console.warn("No se pudo guardar en localStorage:", e);
-                }
+                localStorage.setItem('favoritesTvChannels', JSON.stringify(favorites));
             }
 
-            // 8. Función para resaltar el video actual
-            function highlightCurrentVideo(currentIndex = null) {
-                if (!playlistElement) return;
-
-                const lastPlayedIndexStr = (currentIndex !== null)
-                    ? currentIndex.toString()
-                    : localStorage.getItem('lastPlayedTvChannel');
-
-                playlistElement.querySelectorAll('li.active').forEach(item => item.classList.remove('active'));
-
-                if (lastPlayedIndexStr !== null) {
-                    const activeLi = playlistElement.querySelector(`li .star[data-index="${lastPlayedIndexStr}"]`)?.closest('li');
-                    if (activeLi) {
-                        activeLi.classList.add('active');
-                    }
-                }
-            }
-
-            // 9. Función para obtener el filtro actual
-            function getCurrentFilter() {
-                return searchInput?.value || '';
-            }
-
-            // 10. Función para actualizar el indicador de volumen
-            function updateVolumeIndicator(volume) {
-                if (!volumeIndicator || !volumeLevelSpan) return;
-
-                const currentVolume = Math.round(volume * 100);
-                const isMuted = player.muted();
-
-                volumeLevelSpan.textContent = isMuted ? 'Muted' : `${currentVolume}`;
-
-                if (volumeIcon) {
-                    volumeIcon.className = 'fas';
-                    if (isMuted || currentVolume === 0) {
-                        volumeIcon.classList.add('fa-volume-mute');
-                    } else if (currentVolume < 50) {
-                        volumeIcon.classList.add('fa-volume-down');
-                    } else {
-                        volumeIcon.classList.add('fa-volume-up');
-                    }
-                }
-
-                if (volumeIndicator.style.display !== 'block') {
-                    volumeIndicator.style.opacity = '0';
-                    volumeIndicator.style.display = 'block';
-                    void volumeIndicator.offsetWidth;
-                    volumeIndicator.style.opacity = '1';
-                } else {
-                    volumeIndicator.style.opacity = '1';
-                }
-
-                clearTimeout(volumeTimeout);
-                volumeTimeout = setTimeout(() => {
-                    volumeIndicator.style.opacity = '0';
-                    setTimeout(() => {
-                        if (volumeIndicator.style.opacity === '0') {
-                            volumeIndicator.style.display = 'none';
-                        }
-                    }, 300);
-                }, 1500);
-            }
-
-            // Event listeners
-            if (searchInput) {
-                searchInput.addEventListener('input', debounce(() => {
-                    renderPlaylist(getCurrentFilter());
-                }, 300));
-            }
-
-            if (playerContainer) {
-                playerContainer.addEventListener('wheel', (e) => {
-                    if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && e.target.closest('#player-container')) {
-                        e.preventDefault();
-                        const delta = Math.sign(e.deltaY);
-                        let newVolume = player.volume() - (delta * 0.05);
-                        newVolume = Math.max(0, Math.min(1, newVolume));
-                        player.volume(newVolume);
-                        player.muted(false);
-                    }
-                }, { passive: false });
-            }
-
-            player.on('volumechange', () => {
-                updateVolumeIndicator(player.volume());
+            // Búsqueda de canales
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filtered = channels.filter(channel => 
+                    channel.title.toLowerCase().includes(searchTerm) || 
+                    channel.descripcion.toLowerCase().includes(searchTerm)
+                );
+                renderPlaylist(filtered);
             });
 
-            player.on('error', () => {
-                const error = player.error();
-                if (!error) return;
-
-                console.error('Error de Video.js:', error);
-                const messages = {
-                    1: "Descarga abortada.", 2: "Error de red.",
-                    3: "Error de decodificación.", 4: "Fuente no soportada o inválida.",
-                    5: "Video encriptado."
-                };
-                const errorMessage = messages[error.code] || error.message || 'Error desconocido';
-                console.warn(`Error en reproductor (Código ${error.code}): ${errorMessage}`);
-            });
-
-            player.ready(() => {
-                console.log("Reproductor listo.");
-                updateVolumeIndicator(player.volume());
-            });
-
-            // Función debounce
-            function debounce(func, wait) {
-                let timeout;
-                return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
-                    clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
-                };
-            }
-
-            // Inicialización
-            if (fullPlaylist && fullPlaylist.length > 0) {
-                renderPlaylist();
-            } else {
-                if (playlistElement) playlistElement.innerHTML = '<li>No hay canales disponibles.</li>';
-                console.error("La lista de reproducción está vacía o no es válida.");
-            }
-
+            // Inicializar
+            renderPlaylist();
+            
             // Reproducir último canal visto
-            const lastPlayedIndexStr = localStorage.getItem('lastPlayedTvChannel');
-            if (lastPlayedIndexStr !== null && fullPlaylist && fullPlaylist.length > 0) {
-                const index = parseInt(lastPlayedIndexStr, 10);
-                if (!isNaN(index) && index >= 0 && index < fullPlaylist.length) {
-                    const channel = fullPlaylist[index];
-                    if (channel && channel.url) {
-                        playVideo(channel.url, index);
-                    } else {
-                        localStorage.removeItem('lastPlayedTvChannel');
-                    }
-                } else {
-                    localStorage.removeItem('lastPlayedTvChannel');
-                }
+            const lastPlayedIndex = localStorage.getItem('lastPlayedTvChannel');
+            if (lastPlayedIndex !== null && channels[lastPlayedIndex]) {
+                selectChannel(parseInt(lastPlayedIndex));
             }
         });
     </script>
