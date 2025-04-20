@@ -9,6 +9,9 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         /* Estilos personalizados adicionales */
+        html {
+             scroll-behavior: smooth; /* Habilita scroll suave globalmente */
+        }
         body {
             font-family: 'Roboto', sans-serif; /* Considerar cargar Roboto desde Google Fonts */
             overflow-y: hidden; /* Evita el scroll vertical en el body */
@@ -37,7 +40,7 @@
             #sidebar { display: none; position: fixed; top: 0; left: 0; height: 100%; z-index: 40; transition: transform 0.3s ease-in-out; transform: translateX(-100%); }
             #sidebar.open { display: block; transform: translateX(0); }
 
-            /* --- NUEVO: Ocultar detalles al hacer scroll up en la lista de canales en móvil --- */
+            /* Ocultar detalles al hacer scroll up en la lista de canales en móvil */
             #video-details-wrapper.hidden-on-scroll {
                 display: none;
             }
@@ -352,42 +355,38 @@
         const clearFavoritesBtn = document.getElementById('clear-favorites-btn');
         const clearHistoryBtn = document.getElementById('clear-history-btn');
         const reloadM3uBtn = document.getElementById('reload-m3u-btn');
-        // --- NUEVO: Referencia al wrapper de detalles ---
         const videoDetailsWrapper = document.getElementById('video-details-wrapper');
 
 
         // --- URL del M3U y Configuración de Caché ---
         const m3uUrl = 'https://raw.githubusercontent.com/sejo48/chanejorgedez/refs/heads/main/listaoficial.m3u';
-        const CACHE_KEY = 'm3u_cache'; // Clave para guardar/recuperar la caché del M3U en localStorage
-        const CACHE_EXPIRATION = 6 * 60 * 60 * 1000; // 6 horas en milisegundos
+        const CACHE_KEY = 'm3u_cache';
+        const CACHE_EXPIRATION = 6 * 60 * 60 * 1000; // 6 horas
 
         // --- Estado de la Aplicación ---
-        // Variables para mantener el estado actual del reproductor y la interfaz
-        let hls = null; // Instancia de HLS.js
-        let channels = []; // Array para almacenar los canales parseados del M3U
-        let currentChannelIndex = -1; // Índice del canal actualmente seleccionado/reproduciendo
-        const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2]; // Velocidades de reproducción disponibles
-        let currentSpeedIndex = 2; // Índice de la velocidad actual (1x por defecto)
-        let favoriteChannelUrls = new Set(); // Conjunto para almacenar URLs de canales favoritos
-        const FAVORITES_KEY = 'youtubeClone_favorites'; // Clave para localStorage de favoritos
-        let recentlyWatchedUrls = []; // Array para almacenar URLs de canales vistos recientemente (historial)
-        const HISTORY_KEY = 'youtubeClone_history'; // Clave para localStorage del historial
-        const MAX_HISTORY_SIZE = 20; // Tamaño máximo del historial
-        let currentView = 'all'; // Vista actual ('all', 'favorites', 'history', 'category', 'settings')
-        let currentCategoryGroup = null; // Grupo de categoría seleccionado
-        let previousView = 'all'; // Vista anterior (para volver desde configuración)
-        let isDarkMode = false; // Estado del tema oscuro/claro
-        const THEME_KEY = 'youtubeClone_theme'; // Clave para localStorage del tema
-        let activeCategoryLinkElement = null; // Elemento del enlace de categoría activo en el sidebar
-        let retryCount = 0; // Contador de reintentos para cargar el M3U
-        const MAX_RETRIES = 3; // Máximo número de reintentos
-        // --- NUEVO: Estado para el scroll en móvil ---
-        let lastScrollTop = 0; // Última posición de scroll de la lista de canales
-        const scrollThreshold = 10; // Umbral en píxeles para detectar scroll significativo
+        let hls = null;
+        let channels = [];
+        let currentChannelIndex = -1;
+        const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2];
+        let currentSpeedIndex = 2;
+        let favoriteChannelUrls = new Set();
+        const FAVORITES_KEY = 'youtubeClone_favorites';
+        let recentlyWatchedUrls = [];
+        const HISTORY_KEY = 'youtubeClone_history';
+        const MAX_HISTORY_SIZE = 20;
+        let currentView = 'all';
+        let currentCategoryGroup = null;
+        let previousView = 'all';
+        let isDarkMode = false;
+        const THEME_KEY = 'youtubeClone_theme';
+        let activeCategoryLinkElement = null;
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
+        let lastScrollTop = 0;
+        const scrollThreshold = 10;
 
 
         // --- Datos de Comentarios Simulados ---
-        // Array de objetos para simular comentarios (no se guardan)
         const sampleComments = [
             { author: "Usuario Alfa", timestamp: "Hace 15 minutos", text: "¡Excelente transmisión! Se ve muy nítido.", likes: 12, avatarColor: "#3B82F6" },
             { author: "Beta Tester", timestamp: "Hace 1 hora", text: "¿Alguien sabe si pasarán el partido más tarde?", likes: 3, avatarColor: "#10B981" },
@@ -397,27 +396,15 @@
         ];
 
         // --- Funciones Tema Oscuro/Claro ---
-
-        /**
-         * Carga el tema (oscuro/claro) desde localStorage o prefiere el del sistema.
-         */
         function loadTheme() {
             const savedTheme = localStorage.getItem(THEME_KEY);
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             isDarkMode = savedTheme === 'dark' || (!savedTheme && prefersDark);
             applyTheme();
         }
-
-        /**
-         * Guarda la preferencia de tema actual en localStorage.
-         */
         function saveTheme() {
             localStorage.setItem(THEME_KEY, isDarkMode ? 'dark' : 'light');
         }
-
-        /**
-         * Aplica el tema actual (añade/quita la clase 'dark' del HTML) y actualiza el icono del botón.
-         */
         function applyTheme() {
             htmlElement.classList.toggle('dark', isDarkMode);
             if (themeToggleBtn) {
@@ -425,10 +412,6 @@
                 themeToggleBtn.setAttribute('aria-label', isDarkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
             }
         }
-
-        /**
-         * Cambia entre modo oscuro y claro.
-         */
         function toggleTheme() {
             isDarkMode = !isDarkMode;
             applyTheme();
@@ -436,10 +419,6 @@
         }
 
         // --- Funciones Favoritos ---
-
-        /**
-         * Carga los URLs de canales favoritos desde localStorage.
-         */
         function loadFavorites() {
             const storedFavorites = localStorage.getItem(FAVORITES_KEY);
             if (storedFavorites) {
@@ -457,26 +436,12 @@
                 }
             }
         }
-
-        /**
-         * Guarda el conjunto actual de URLs favoritas en localStorage.
-         */
         function saveFavorites() {
             localStorage.setItem(FAVORITES_KEY, JSON.stringify(Array.from(favoriteChannelUrls)));
         }
-
-        /**
-         * Comprueba si una URL de canal está en el conjunto de favoritos.
-         * @param {string} channelUrl - La URL del canal a comprobar.
-         * @returns {boolean} - True si es favorito, false si no.
-         */
         function isFavorite(channelUrl) {
             return favoriteChannelUrls.has(channelUrl);
         }
-
-        /**
-         * Añade o quita el canal actual de la lista de favoritos.
-         */
         function toggleFavorite() {
             if (currentChannelIndex < 0 || currentChannelIndex >= channels.length) return;
             const currentChannel = channels[currentChannelIndex];
@@ -494,10 +459,6 @@
                 renderChannelList();
             }
         }
-
-        /**
-         * Actualiza el estado visual (icono, clase, aria-label) del botón de favoritos.
-         */
         function updateFavoriteButtonState() {
             if (currentChannelIndex < 0 || currentChannelIndex >= channels.length) {
                 favoriteBtn.classList.remove('is-favorite');
@@ -518,10 +479,6 @@
             favoriteBtn.querySelector('i').classList.toggle('dark:text-gray-400', !isFav);
             favoriteBtn.setAttribute('aria-label', isFav ? 'Quitar de Favoritos' : 'Añadir a Favoritos');
         }
-
-        /**
-         * Borra todos los canales favoritos guardados (previa confirmación).
-         */
         function clearFavorites() {
             if (confirm('¿Estás seguro de que quieres borrar TODOS tus favoritos? Esta acción no se puede deshacer.')) {
                 favoriteChannelUrls.clear();
@@ -535,10 +492,6 @@
         }
 
         // --- Funciones Historial ---
-
-        /**
-         * Carga el historial de URLs vistas desde localStorage.
-         */
         function loadHistory() {
             const storedHistory = localStorage.getItem(HISTORY_KEY);
             if (storedHistory) {
@@ -555,19 +508,9 @@
                 }
             }
         }
-
-        /**
-         * Guarda el array actual del historial en localStorage.
-         */
         function saveHistory() {
             localStorage.setItem(HISTORY_KEY, JSON.stringify(recentlyWatchedUrls));
         }
-
-        /**
-         * Añade una URL de canal al principio del historial.
-         * Elimina duplicados y limita el tamaño del historial.
-         * @param {string} channelUrl - La URL del canal a añadir.
-         */
         function addToHistory(channelUrl) {
             if (!channelUrl) return;
             recentlyWatchedUrls = recentlyWatchedUrls.filter(url => url !== channelUrl);
@@ -580,10 +523,6 @@
                 renderChannelList();
             }
         }
-
-        /**
-         * Borra todo el historial de reproducción (previa confirmación).
-         */
         function clearHistory() {
             if (confirm('¿Estás seguro de que quieres borrar TODO tu historial de reproducción? Esta acción no se puede deshacer.')) {
                 recentlyWatchedUrls = [];
@@ -596,19 +535,10 @@
         }
 
         // --- Funciones de Navegación y Vistas ---
-
-        /**
-         * Muestra el área de contenido principal (reproductor y lista) y oculta la configuración.
-         */
         function showMainContent() {
             mainContentArea.classList.remove('hidden');
             settingsView.classList.add('hidden');
         }
-
-        /**
-         * Muestra la vista de configuración y oculta el contenido principal.
-         * Guarda la vista anterior para poder volver.
-         */
         function showSettingsView() {
             previousView = currentView !== 'settings' ? currentView : previousView;
             currentView = 'settings';
@@ -617,12 +547,6 @@
             updateSidebarActiveLink('settings');
             m3uUrlDisplay.textContent = m3uUrl;
         }
-
-        /**
-         * Cambia a una vista específica (home, favoritos, historial, categoría).
-         * @param {string} view - El nombre de la vista ('all', 'favorites', 'history', 'category').
-         * @param {string|null} [categoryGroup=null] - El grupo de categoría (solo si view es 'category').
-         */
         function navigateToView(view, categoryGroup = null) {
             showMainContent();
             currentView = view;
@@ -635,29 +559,16 @@
         }
 
         // --- Inicialización HLS.js ---
-
-        /**
-         * Inicializa la instancia de HLS.js si es soportado por el navegador.
-         * Configura los listeners de eventos para errores y carga del manifiesto.
-         */
         function initializeHls() {
             if (Hls.isSupported()) {
                 hls = new Hls({
-                    maxMaxBufferLength: 30,
-                    maxBufferSize: 60 * 1000 * 1000,
-                    maxBufferLength: 30,
-                    lowLatencyMode: false,
-                    manifestLoadingTimeOut: 20000,
-                    levelLoadingTimeOut: 20000,
-                    fragLoadingTimeOut: 30000,
-                    startLoadOnInit: false
+                    maxMaxBufferLength: 30, maxBufferSize: 60 * 1000 * 1000, maxBufferLength: 30,
+                    lowLatencyMode: false, manifestLoadingTimeOut: 20000, levelLoadingTimeOut: 20000,
+                    fragLoadingTimeOut: 30000, startLoadOnInit: false
                 });
                 hls.on(Hls.Events.ERROR, handleHlsError);
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    videoPlayer.play().catch(e => {
-                        console.warn("Autoplay falló:", e.message);
-                        showPlayerMessage("Presiona Play para iniciar", false);
-                    });
+                    videoPlayer.play().catch(e => { console.warn("Autoplay falló:", e.message); showPlayerMessage("Presiona Play para iniciar", false); });
                 });
                 hls.attachMedia(videoPlayer);
             } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
@@ -669,1065 +580,283 @@
         }
 
         // --- Parseo del M3U ---
-
-        /**
-         * Parsea el contenido de un archivo M3U y extrae la información de los canales.
-         * @param {string} text - El contenido del archivo M3U como texto.
-         * @returns {Array<object>} - Un array de objetos, cada uno representando un canal.
-         */
         function parseM3U(text) {
-            const lines = text.split('\n');
-            const parsedChannels = [];
-            let currentChannel = null;
-            let channelIdCounter = 0;
+            const lines = text.split('\n'); const parsedChannels = []; let currentChannel = null; let channelIdCounter = 0;
             for (const line of lines) {
                 const trimmedLine = line.trim();
                 if (trimmedLine.startsWith('#EXTINF:')) {
-                    currentChannel = {
-                        id: `channel-${channelIdCounter++}`,
-                        name: 'Canal Desconocido',
-                        url: '',
-                        logo: null,
-                        group: 'General'
-                    };
-                    const parts = trimmedLine.split(/:(.+)/)[1].split(',');
-                    const attributes = parts[0];
+                    currentChannel = { id: `channel-${channelIdCounter++}`, name: 'Canal Desconocido', url: '', logo: null, group: 'General' };
+                    const parts = trimmedLine.split(/:(.+)/)[1].split(','); const attributes = parts[0];
                     currentChannel.name = parts[1]?.trim() || 'Canal Desconocido';
-                    const logoMatch = attributes.match(/tvg-logo="([^"]*)"/i);
-                    if (logoMatch && logoMatch[1]) {
-                        currentChannel.logo = logoMatch[1].trim();
-                    }
-                    const groupMatch = attributes.match(/group-title="([^"]*)"/i);
-                    if (groupMatch && groupMatch[1]) {
-                        currentChannel.group = groupMatch[1].trim() || 'General';
-                    }
+                    const logoMatch = attributes.match(/tvg-logo="([^"]*)"/i); if (logoMatch && logoMatch[1]) { currentChannel.logo = logoMatch[1].trim(); }
+                    const groupMatch = attributes.match(/group-title="([^"]*)"/i); if (groupMatch && groupMatch[1]) { currentChannel.group = groupMatch[1].trim() || 'General'; }
                 } else if (currentChannel && trimmedLine && !trimmedLine.startsWith('#')) {
-                    if (trimmedLine.startsWith('http://') || trimmedLine.startsWith('https://')) {
-                        currentChannel.url = trimmedLine;
-                        parsedChannels.push(currentChannel);
-                        currentChannel = null;
-                    }
+                    if (trimmedLine.startsWith('http://') || trimmedLine.startsWith('https://')) { currentChannel.url = trimmedLine; parsedChannels.push(currentChannel); currentChannel = null; }
                 }
-            }
-            return parsedChannels;
+            } return parsedChannels;
         }
 
         // --- Carga y Parseo del M3U con caché ---
-
-        /**
-         * Carga el archivo M3U desde la URL, usando caché si está disponible y no ha expirado.
-         * Parsea el contenido y actualiza la interfaz.
-         * @param {string} url - La URL del archivo M3U.
-         */
         async function fetchAndLoadM3U(url) {
-            mainLoader.style.display = 'block';
-            appContainer.classList.add('hidden');
-            loadErrorMessageContainer.classList.add('hidden');
+            mainLoader.style.display = 'block'; appContainer.classList.add('hidden'); loadErrorMessageContainer.classList.add('hidden');
             try {
-                const cachedData = localStorage.getItem(CACHE_KEY);
-                let m3uText = null;
+                const cachedData = localStorage.getItem(CACHE_KEY); let m3uText = null;
                 if (cachedData) {
-                    const { timestamp, data } = JSON.parse(cachedData);
-                    const age = Date.now() - timestamp;
-                    if (age < CACHE_EXPIRATION) {
-                        m3uText = data;
-                        console.log("Usando lista M3U desde caché");
-                    } else {
-                        console.log("Caché M3U expirada.");
-                        localStorage.removeItem(CACHE_KEY);
-                    }
+                    const { timestamp, data } = JSON.parse(cachedData); const age = Date.now() - timestamp;
+                    if (age < CACHE_EXPIRATION) { m3uText = data; console.log("Usando lista M3U desde caché"); }
+                    else { console.log("Caché M3U expirada."); localStorage.removeItem(CACHE_KEY); }
                 }
                 if (!m3uText) {
-                    console.log("Cargando lista M3U desde la red...");
-                    const response = await fetch(`${url}?t=${Date.now()}`);
-                    if (!response.ok) {
-                        throw new Error(`Error al cargar M3U: ${response.status} ${response.statusText}`);
-                    }
-                    m3uText = await response.text();
-                    localStorage.setItem(CACHE_KEY, JSON.stringify({
-                        timestamp: Date.now(),
-                        data: m3uText
-                    }));
-                    console.log("Lista M3U guardada en caché.");
+                    console.log("Cargando lista M3U desde la red..."); const response = await fetch(`${url}?t=${Date.now()}`);
+                    if (!response.ok) { throw new Error(`Error al cargar M3U: ${response.status} ${response.statusText}`); }
+                    m3uText = await response.text(); localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data: m3uText })); console.log("Lista M3U guardada en caché.");
                 }
-                if (!m3uText || !m3uText.includes('#EXTINF')) {
-                    throw new Error("El archivo M3U descargado no parece tener un formato válido.");
-                }
-                channels = parseM3U(m3uText);
-                if (channels.length === 0) {
-                    throw new Error("No se encontraron canales válidos en la lista M3U.");
-                }
-                generateCategoryLinks();
-                navigateToView('all');
-                appContainer.classList.remove('hidden');
-                retryCount = 0;
+                if (!m3uText || !m3uText.includes('#EXTINF')) { throw new Error("El archivo M3U descargado no parece tener un formato válido."); }
+                channels = parseM3U(m3uText); if (channels.length === 0) { throw new Error("No se encontraron canales válidos en la lista M3U."); }
+                generateCategoryLinks(); navigateToView('all'); appContainer.classList.remove('hidden'); retryCount = 0;
             } catch (error) {
                 console.error("Error fatal al cargar o procesar M3U:", error);
                 if ((error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) && retryCount < MAX_RETRIES) {
-                    retryCount++;
-                    console.log(`Error de red. Reintentando cargar M3U (${retryCount}/${MAX_RETRIES})...`);
-                    setTimeout(() => fetchAndLoadM3U(url), 3000 * retryCount);
-                    return;
+                    retryCount++; console.log(`Error de red. Reintentando cargar M3U (${retryCount}/${MAX_RETRIES})...`); setTimeout(() => fetchAndLoadM3U(url), 3000 * retryCount); return;
                 }
-                loadErrorMessageContainer.innerHTML = `
-                    <div class="text-red-500 dark:text-red-400">
-                        <h1 class="text-xl font-bold mb-2">Error al Cargar la Lista</h1>
-                        <p class="text-sm">${error.message}</p>
-                        <p class="text-xs mt-2">Verifica tu conexión o la URL del M3U.</p>
-                        <button onclick="location.reload()" class="mt-3 px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">
-                            Reintentar Carga
-                        </button>
-                    </div>`;
+                loadErrorMessageContainer.innerHTML = `<div class="text-red-500 dark:text-red-400"><h1 class="text-xl font-bold mb-2">Error al Cargar la Lista</h1><p class="text-sm">${error.message}</p><p class="text-xs mt-2">Verifica tu conexión o la URL del M3U.</p><button onclick="location.reload()" class="mt-3 px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">Reintentar Carga</button></div>`;
                 loadErrorMessageContainer.classList.remove('hidden');
-            } finally {
-                mainLoader.style.display = 'none';
-            }
+            } finally { mainLoader.style.display = 'none'; }
         }
-
 
         // --- Generar Links de Categorías Dinámicas ---
-
-        /**
-         * Genera los enlaces para cada grupo/categoría encontrada en los canales
-         * y los añade al sidebar izquierdo.
-         */
         function generateCategoryLinks() {
-            dynamicCategoriesContainer.innerHTML = '';
-            const groups = [...new Set(channels.map(c => c.group?.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
-            if (groups.length === 0 || (groups.length === 1 && groups[0].toLowerCase() === 'general')) {
-                categoriesPlaceholder.textContent = "No hay categorías definidas.";
-                categoriesPlaceholder.style.display = 'block';
-                return;
-            }
+            dynamicCategoriesContainer.innerHTML = ''; const groups = [...new Set(channels.map(c => c.group?.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+            if (groups.length === 0 || (groups.length === 1 && groups[0].toLowerCase() === 'general')) { categoriesPlaceholder.textContent = "No hay categorías definidas."; categoriesPlaceholder.style.display = 'block'; return; }
             categoriesPlaceholder.style.display = 'none';
             groups.forEach(group => {
-                const link = document.createElement('a');
-                link.href = '#';
-                link.classList.add('sidebar-link', 'category-link', 'flex', 'items-center', 'space-x-4', 'px-3', 'py-2', 'rounded-lg', 'hover:bg-gray-100', 'dark:hover:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
-                link.dataset.group = group;
-                const iconClass = getIconForCategory(group);
-                link.innerHTML = `<i class="${iconClass} fa-fw text-gray-500 dark:text-gray-400 w-5 text-center"></i> <span>${group}</span>`;
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    navigateToView('category', group);
-                });
-                dynamicCategoriesContainer.appendChild(link);
+                const link = document.createElement('a'); link.href = '#'; link.classList.add('sidebar-link', 'category-link', 'flex', 'items-center', 'space-x-4', 'px-3', 'py-2', 'rounded-lg', 'hover:bg-gray-100', 'dark:hover:bg-gray-700', 'text-gray-700', 'dark:text-gray-300'); link.dataset.group = group;
+                const iconClass = getIconForCategory(group); link.innerHTML = `<i class="${iconClass} fa-fw text-gray-500 dark:text-gray-400 w-5 text-center"></i> <span>${group}</span>`;
+                link.addEventListener('click', (e) => { e.preventDefault(); navigateToView('category', group); }); dynamicCategoriesContainer.appendChild(link);
             });
         }
-
-        /**
-         * Devuelve una clase de icono de Font Awesome basada en el nombre del grupo.
-         * @param {string} groupName - El nombre del grupo/categoría.
-         * @returns {string} - La clase CSS del icono (ej: 'fas fa-music').
-         */
         function getIconForCategory(groupName) {
-            if (!groupName) return 'fas fa-tv';
-            const lowerGroup = groupName.toLowerCase();
-            if (lowerGroup.includes('music') || lowerGroup.includes('música')) return 'fas fa-music';
-            if (lowerGroup.includes('game') || lowerGroup.includes('juego')) return 'fas fa-gamepad';
-            if (lowerGroup.includes('news') || lowerGroup.includes('noticia')) return 'fas fa-newspaper';
-            if (lowerGroup.includes('sport') || lowerGroup.includes('deporte')) return 'fas fa-futbol';
-            if (lowerGroup.includes('movie') || lowerGroup.includes('cine') || lowerGroup.includes('película')) return 'fas fa-film';
-            if (lowerGroup.includes('infantil') || lowerGroup.includes('kids')) return 'fas fa-child';
-            if (lowerGroup.includes('docu') || lowerGroup.includes('cultura')) return 'fas fa-book-open';
-            return 'fas fa-tv';
+            if (!groupName) return 'fas fa-tv'; const lowerGroup = groupName.toLowerCase();
+            if (lowerGroup.includes('music') || lowerGroup.includes('música')) return 'fas fa-music'; if (lowerGroup.includes('game') || lowerGroup.includes('juego')) return 'fas fa-gamepad';
+            if (lowerGroup.includes('news') || lowerGroup.includes('noticia')) return 'fas fa-newspaper'; if (lowerGroup.includes('sport') || lowerGroup.includes('deporte')) return 'fas fa-futbol';
+            if (lowerGroup.includes('movie') || lowerGroup.includes('cine') || lowerGroup.includes('película')) return 'fas fa-film'; if (lowerGroup.includes('infantil') || lowerGroup.includes('kids')) return 'fas fa-child';
+            if (lowerGroup.includes('docu') || lowerGroup.includes('cultura')) return 'fas fa-book-open'; return 'fas fa-tv';
         }
 
-
         // --- Renderizar Canales ---
-
-        /**
-         * Muestra la lista de canales en el sidebar derecho según la vista actual (todos, favoritos, historial, categoría).
-         */
         function renderChannelList() {
-            channelListContainer.innerHTML = '';
-            let channelsToDisplay = [];
-            let title = "Canales Disponibles";
+            channelListContainer.innerHTML = ''; let channelsToDisplay = []; let title = "Canales Disponibles";
             switch (currentView) {
-                case 'favorites':
-                    channelsToDisplay = channels.filter(channel => isFavorite(channel.url));
-                    title = "Canales Favoritos";
-                    break;
-                case 'history':
-                    channelsToDisplay = recentlyWatchedUrls
-                        .map(url => channels.find(channel => channel.url === url))
-                        .filter(channel => channel !== undefined);
-                    title = "Historial de Reproducción";
-                    break;
-                case 'category':
-                    channelsToDisplay = channels.filter(channel => channel.group === currentCategoryGroup);
-                    title = `Categoría: ${currentCategoryGroup}`;
-                    break;
-                case 'all':
-                default:
-                    channelsToDisplay = channels;
-                    title = "Todos los Canales";
-                    break;
+                case 'favorites': channelsToDisplay = channels.filter(channel => isFavorite(channel.url)); title = "Canales Favoritos"; break;
+                case 'history': channelsToDisplay = recentlyWatchedUrls.map(url => channels.find(channel => channel.url === url)).filter(channel => channel !== undefined); title = "Historial de Reproducción"; break;
+                case 'category': channelsToDisplay = channels.filter(channel => channel.group === currentCategoryGroup); title = `Categoría: ${currentCategoryGroup}`; break;
+                case 'all': default: channelsToDisplay = channels; title = "Todos los Canales"; break;
             }
             channelListTitle.textContent = title;
             if (channelsToDisplay.length === 0) {
-                let placeholderText = "No hay canales para mostrar.";
-                if (currentView === 'favorites') placeholderText = "No tienes canales favoritos marcados.";
-                else if (currentView === 'history') placeholderText = "Tu historial de reproducción está vacío.";
-                else if (currentView === 'category') placeholderText = `No hay canales en la categoría "${currentCategoryGroup}".`;
-                channelListPlaceholder.textContent = placeholderText;
-                channelListPlaceholder.style.display = 'block';
-                return;
+                let placeholderText = "No hay canales para mostrar."; if (currentView === 'favorites') placeholderText = "No tienes canales favoritos marcados."; else if (currentView === 'history') placeholderText = "Tu historial de reproducción está vacío."; else if (currentView === 'category') placeholderText = `No hay canales en la categoría "${currentCategoryGroup}".`;
+                channelListPlaceholder.textContent = placeholderText; channelListPlaceholder.style.display = 'block'; return;
             }
             channelListPlaceholder.style.display = 'none';
             channelsToDisplay.forEach((channel) => {
-                const originalIndex = channels.findIndex(c => c.id === channel.id);
-                const videoElement = document.createElement('div');
+                const originalIndex = channels.findIndex(c => c.id === channel.id); const videoElement = document.createElement('div');
                 videoElement.classList.add('flex', 'space-x-3', 'cursor-pointer', 'channel-item', 'p-2', 'rounded-lg', 'hover:bg-gray-200', 'dark:hover:bg-gray-700', 'items-center');
-                videoElement.setAttribute('role', 'button');
-                videoElement.setAttribute('tabindex', '0');
-                videoElement.setAttribute('aria-label', `Reproducir ${channel.name}`);
-                videoElement.dataset.index = originalIndex;
-                videoElement.dataset.url = channel.url;
-                videoElement.dataset.id = channel.id;
-                const thumbContainer = document.createElement('div');
-                thumbContainer.classList.add('w-24', 'h-14', 'flex-shrink-0', 'relative', 'bg-gray-200', 'dark:bg-gray-700', 'rounded', 'overflow-hidden', 'flex', 'items-center', 'justify-center');
+                videoElement.setAttribute('role', 'button'); videoElement.setAttribute('tabindex', '0'); videoElement.setAttribute('aria-label', `Reproducir ${channel.name}`);
+                videoElement.dataset.index = originalIndex; videoElement.dataset.url = channel.url; videoElement.dataset.id = channel.id;
+                const thumbContainer = document.createElement('div'); thumbContainer.classList.add('w-24', 'h-14', 'flex-shrink-0', 'relative', 'bg-gray-200', 'dark:bg-gray-700', 'rounded', 'overflow-hidden', 'flex', 'items-center', 'justify-center');
                 if (channel.logo && channel.logo.startsWith('http')) {
-                    const logoImg = document.createElement('img');
-                    logoImg.alt = "";
-                    logoImg.classList.add('recommended-thumbnail');
-                    logoImg.loading = 'lazy';
-                    logoImg.src = channel.logo;
-                    logoImg.onerror = () => {
-                        thumbContainer.innerHTML = `<i class="fas ${getIconForCategory(channel.group)} text-3xl text-gray-500 dark:text-gray-400"></i>`;
-                    };
-                    thumbContainer.appendChild(logoImg);
-                } else {
-                    thumbContainer.innerHTML = `<i class="fas ${getIconForCategory(channel.group)} text-3xl text-gray-500 dark:text-gray-400"></i>`;
-                }
-                const infoDiv = document.createElement('div');
-                infoDiv.classList.add('flex-1', 'overflow-hidden');
-                infoDiv.innerHTML = `
-                    <h3 class="text-sm font-semibold line-clamp-2 text-gray-800 dark:text-gray-200">${channel.name}</h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">${channel.group || 'General'}</p>
-                `;
-                videoElement.appendChild(thumbContainer);
-                videoElement.appendChild(infoDiv);
-                const loadHandler = () => {
-                    loadVideo(originalIndex);
-                };
-                videoElement.addEventListener('click', loadHandler);
-                videoElement.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        loadHandler();
-                    }
-                });
+                    const logoImg = document.createElement('img'); logoImg.alt = ""; logoImg.classList.add('recommended-thumbnail'); logoImg.loading = 'lazy'; logoImg.src = channel.logo;
+                    logoImg.onerror = () => { thumbContainer.innerHTML = `<i class="fas ${getIconForCategory(channel.group)} text-3xl text-gray-500 dark:text-gray-400"></i>`; }; thumbContainer.appendChild(logoImg);
+                } else { thumbContainer.innerHTML = `<i class="fas ${getIconForCategory(channel.group)} text-3xl text-gray-500 dark:text-gray-400"></i>`; }
+                const infoDiv = document.createElement('div'); infoDiv.classList.add('flex-1', 'overflow-hidden'); infoDiv.innerHTML = `<h3 class="text-sm font-semibold line-clamp-2 text-gray-800 dark:text-gray-200">${channel.name}</h3><p class="text-xs text-gray-500 dark:text-gray-400 truncate">${channel.group || 'General'}</p>`;
+                videoElement.appendChild(thumbContainer); videoElement.appendChild(infoDiv);
+                const loadHandler = () => { loadVideo(originalIndex); }; videoElement.addEventListener('click', loadHandler);
+                videoElement.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); loadHandler(); } });
                 channelListContainer.appendChild(videoElement);
             });
             highlightChannelInList(currentChannelIndex);
         }
 
-
         // --- Cargar y Reproducir un Vídeo/Canal ---
-
-        /**
-         * Carga y comienza la reproducción de un canal específico por su índice.
-         * @param {number} index - El índice del canal en el array `channels` original.
-         */
         function loadVideo(index) {
-            if (index < 0 || index >= channels.length) {
-                showPlayerMessage("Índice de canal no válido", true);
-                return;
-            }
-            if (hls) {
-                hls.stopLoad();
-                hls.detachMedia();
-            }
-            videoPlayer.removeAttribute('src');
-            videoPlayer.load();
-            currentChannelIndex = index;
-            const channel = channels[index];
-            const videoUrl = channel.url;
+            if (index < 0 || index >= channels.length) { showPlayerMessage("Índice de canal no válido", true); return; }
+            if (hls) { hls.stopLoad(); hls.detachMedia(); }
+            videoPlayer.removeAttribute('src'); videoPlayer.load();
+            currentChannelIndex = index; const channel = channels[index]; const videoUrl = channel.url;
             console.log(`Cargando canal [${index}]: ${channel.name} (${videoUrl})`);
-            playerLoader.classList.remove('hidden');
-            videoPlayer.style.opacity = '0.5';
-            videoTitle.textContent = channel.name;
-            videoDescription.textContent = `Reproduciendo: ${channel.name}${channel.group ? ' (' + channel.group + ')' : ''}`;
-            channelNameElement.textContent = channel.name;
-            subscriberCountElement.textContent = channel.group || '';
-            channelLogoImg.classList.add('hidden');
-            channelLogoIcon.classList.remove('hidden');
-            channelLogoIcon.className = `fas ${getIconForCategory(channel.group)} text-xl`;
-            channelLogoContainer.classList.remove('bg-gray-500', 'bg-blue-500');
+            playerLoader.classList.remove('hidden'); videoPlayer.style.opacity = '0.5';
+            videoTitle.textContent = channel.name; videoDescription.textContent = `Reproduciendo: ${channel.name}${channel.group ? ' (' + channel.group + ')' : ''}`;
+            channelNameElement.textContent = channel.name; subscriberCountElement.textContent = channel.group || '';
+            channelLogoImg.classList.add('hidden'); channelLogoIcon.classList.remove('hidden'); channelLogoIcon.className = `fas ${getIconForCategory(channel.group)} text-xl`; channelLogoContainer.classList.remove('bg-gray-500', 'bg-blue-500');
             if (channel.logo && channel.logo.startsWith('http')) {
-                channelLogoImg.src = channel.logo;
-                channelLogoImg.classList.remove('hidden');
-                channelLogoIcon.classList.add('hidden');
-                channelLogoImg.onerror = () => {
-                    channelLogoImg.classList.add('hidden');
-                    channelLogoIcon.classList.remove('hidden');
-                    channelLogoContainer.classList.add('bg-gray-500');
-                };
-            } else {
-                channelLogoContainer.classList.add('bg-gray-500');
-            }
-            highlightChannelInList(index);
-            setPlaybackSpeed(1);
-            updateFavoriteButtonState();
-            renderComments(sampleComments);
+                channelLogoImg.src = channel.logo; channelLogoImg.classList.remove('hidden'); channelLogoIcon.classList.add('hidden');
+                channelLogoImg.onerror = () => { channelLogoImg.classList.add('hidden'); channelLogoIcon.classList.remove('hidden'); channelLogoContainer.classList.add('bg-gray-500'); };
+            } else { channelLogoContainer.classList.add('bg-gray-500'); }
+            highlightChannelInList(index); setPlaybackSpeed(1); updateFavoriteButtonState(); renderComments(sampleComments);
             try {
                 if (videoUrl.toLowerCase().endsWith('.m3u8')) {
-                    if (hls) {
-                        hls.loadSource(videoUrl);
-                        hls.attachMedia(videoPlayer);
-                        hls.startLoad();
-                    } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-                        videoPlayer.src = videoUrl;
-                        videoPlayer.load();
-                        videoPlayer.play().catch(e => {
-                            console.warn("Fallo al auto-reproducir HLS nativo:", e.message);
-                            showPlayerMessage("Presiona Play para iniciar", false);
-                        });
-                    } else {
-                        throw new Error('HLS no es soportado por este navegador.');
-                    }
+                    if (hls) { hls.loadSource(videoUrl); hls.attachMedia(videoPlayer); hls.startLoad(); }
+                    else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) { videoPlayer.src = videoUrl; videoPlayer.load(); videoPlayer.play().catch(e => { console.warn("Fallo al auto-reproducir HLS nativo:", e.message); showPlayerMessage("Presiona Play para iniciar", false); }); }
+                    else { throw new Error('HLS no es soportado por este navegador.'); }
                 } else {
-                    if (hls) hls.detachMedia();
-                    videoPlayer.src = videoUrl;
-                    videoPlayer.load();
-                    videoPlayer.play().catch(e => {
-                        console.warn("Fallo al auto-reproducir fuente directa:", e.message);
-                        showPlayerMessage("Presiona Play para iniciar", false);
-                    });
+                    if (hls) hls.detachMedia(); videoPlayer.src = videoUrl; videoPlayer.load(); videoPlayer.play().catch(e => { console.warn("Fallo al auto-reproducir fuente directa:", e.message); showPlayerMessage("Presiona Play para iniciar", false); });
                 }
-            } catch (error) {
-                console.error("Error al configurar la fuente del vídeo:", error);
-                handlePlaybackError(error);
+            } catch (error) { console.error("Error al configurar la fuente del vídeo:", error); handlePlaybackError(error); }
+
+            // --- NUEVO: Scroll hacia el reproductor en móvil al seleccionar canal ---
+            const isMobileView = window.innerWidth <= 768; // Usar el mismo breakpoint que el CSS
+            if (isMobileView && videoPlayerContainer) {
+                 // Usar scrollIntoView para mover el contenedor del reproductor a la vista
+                 videoPlayerContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
 
-
         // --- Resaltar Canal en la Lista ---
-
-        /**
-         * Marca visualmente el canal seleccionado en la lista derecha y asegura que sea visible.
-         * @param {number} selectedIndex - El índice del canal seleccionado (del array `channels` original).
-         */
         function highlightChannelInList(selectedIndex) {
             const items = channelListContainer.querySelectorAll('.channel-item');
             items.forEach((item) => {
-                const itemIndex = parseInt(item.dataset.index, 10);
-                const isSelected = itemIndex === selectedIndex;
+                const itemIndex = parseInt(item.dataset.index, 10); const isSelected = itemIndex === selectedIndex;
                 item.classList.toggle('selected', isSelected);
-                if (isSelected) {
-                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
+                if (isSelected) { item.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
             });
         }
 
         // --- Manejador de Errores HLS.js ---
-
-        /**
-         * Callback para manejar errores emitidos por la instancia de HLS.js.
-         * Intenta recuperar errores fatales si es posible.
-         * @param {string} event - Nombre del evento de error.
-         * @param {object} data - Datos del error proporcionados por HLS.js.
-         */
         function handleHlsError(event, data) {
             console.error('Error de HLS.js:', data.type, data.details, data);
             if (data.fatal) {
                 switch(data.type) {
                     case Hls.ErrorTypes.NETWORK_ERROR:
                         showPlayerMessage("Error de red, intentando reconectar...", true);
-                        if (hls && channels[currentChannelIndex]?.url === data.url) {
-                            setTimeout(() => {
-                                if (hls) {
-                                   console.log("Reintentando carga HLS después de error de red...");
-                                   hls.startLoad();
-                                }
-                            }, 3000);
-                        }
+                        if (hls && channels[currentChannelIndex]?.url === data.url) { setTimeout(() => { if (hls) { console.log("Reintentando carga HLS después de error de red..."); hls.startLoad(); } }, 3000); }
                         break;
                     case Hls.ErrorTypes.MEDIA_ERROR:
                         showPlayerMessage("Error de stream, intentando recuperar...", true);
-                        if (hls && data.details !== 'bufferStalledError') {
-                            try {
-                                console.log("Intentando recuperar de Media Error HLS...");
-                                hls.recoverMediaError();
-                            } catch (e) {
-                                console.error("Fallo al recuperar media error HLS, reiniciando HLS:", e);
-                                if (hls) hls.destroy();
-                                initializeHls();
-                                if (currentChannelIndex !== -1) loadVideo(currentChannelIndex);
-                            }
-                        } else if (hls && data.details === 'bufferStalledError') {
-                            console.warn("Buffer Stalled Error detectado.");
-                        }
+                        if (hls && data.details !== 'bufferStalledError') { try { console.log("Intentando recuperar de Media Error HLS..."); hls.recoverMediaError(); } catch (e) { console.error("Fallo al recuperar media error HLS, reiniciando HLS:", e); if (hls) hls.destroy(); initializeHls(); if (currentChannelIndex !== -1) loadVideo(currentChannelIndex); } }
+                        else if (hls && data.details === 'bufferStalledError') { console.warn("Buffer Stalled Error detectado."); }
                         break;
                     default:
                         handlePlaybackError(new Error(`Error HLS (${data.type}): ${data.details || 'Detalle desconocido'}`));
-                        if (hls) {
-                            hls.destroy();
-                            initializeHls();
-                        }
-                        break;
+                        if (hls) { hls.destroy(); initializeHls(); } break;
                 }
-            } else {
-                console.warn("Error no fatal de HLS.js:", data.type, data.details);
-            }
+            } else { console.warn("Error no fatal de HLS.js:", data.type, data.details); }
         }
 
         // --- Manejador de Errores de Reproducción General ---
-
-        /**
-         * Maneja errores genéricos del elemento <video> o errores fatales de HLS no recuperados.
-         * @param {Error|MediaError|null} error - El objeto de error.
-         */
         function handlePlaybackError(error) {
-            console.error("Error de reproducción:", error);
-            playerLoader.classList.add('hidden');
-            videoPlayer.style.opacity = '1';
-            const errorMessage = error?.message || 'No se pudo reproducir el canal.';
-            showPlayerMessage(`Error: ${errorMessage}`, true);
-            if (currentChannelIndex >= 0 && currentChannelIndex < channels.length) {
-                videoTitle.textContent = `Error al cargar: ${channels[currentChannelIndex].name}`;
-            } else {
-                videoTitle.textContent = "Error al cargar canal";
-            }
+            console.error("Error de reproducción:", error); playerLoader.classList.add('hidden'); videoPlayer.style.opacity = '1';
+            const errorMessage = error?.message || 'No se pudo reproducir el canal.'; showPlayerMessage(`Error: ${errorMessage}`, true);
+            if (currentChannelIndex >= 0 && currentChannelIndex < channels.length) { videoTitle.textContent = `Error al cargar: ${channels[currentChannelIndex].name}`; }
+            else { videoTitle.textContent = "Error al cargar canal"; }
         }
 
         // --- Mostrar Mensaje sobre el Reproductor ---
         let playerMessageTimeoutId = null;
-
-        /**
-         * Muestra un mensaje temporal sobre el reproductor o en la vista de configuración.
-         * @param {string} message - El texto del mensaje.
-         * @param {boolean} [isError=false] - Si es un mensaje de error (fondo rojo).
-         * @param {HTMLElement} [container=playerMessage] - El elemento donde mostrar el mensaje.
-         */
         function showPlayerMessage(message, isError = false, container = playerMessage) {
-            if (!container) return;
-            container.textContent = message;
-            container.classList.toggle('bg-red-600/80', isError);
-            container.classList.toggle('text-white', true);
-            container.classList.toggle('bg-green-600/80', !isError && container === settingsView);
-            container.classList.toggle('bg-black/70', !isError && container !== settingsView);
-            container.classList.remove('hidden');
-            void container.offsetWidth;
-            container.style.opacity = '1';
+            if (!container) return; container.textContent = message;
+            container.classList.toggle('bg-red-600/80', isError); container.classList.toggle('text-white', true);
+            container.classList.toggle('bg-green-600/80', !isError && container === settingsView); container.classList.toggle('bg-black/70', !isError && container !== settingsView);
+            container.classList.remove('hidden'); void container.offsetWidth; container.style.opacity = '1';
             if (playerMessageTimeoutId) clearTimeout(playerMessageTimeoutId);
             playerMessageTimeoutId = setTimeout(() => {
-                container.style.opacity = '0';
-                setTimeout(() => {
-                    container.classList.add('hidden');
-                    playerMessageTimeoutId = null;
-                }, 500);
+                container.style.opacity = '0'; setTimeout(() => { container.classList.add('hidden'); playerMessageTimeoutId = null; }, 500);
             }, 3000);
         }
 
-
         // --- Renderizar Comentarios Simulados ---
-
-        /**
-         * Muestra una lista de comentarios simulados bajo el video.
-         * @param {Array<object>} commentsToRender - Array de objetos de comentario.
-         */
         function renderComments(commentsToRender) {
-            if (!commentListContainerJS || !commentCountElement) {
-                console.warn("Elementos de comentarios no encontrados en el DOM.");
-                return;
-            }
-            commentListContainerJS.innerHTML = '';
-            if (!commentsToRender || commentsToRender.length === 0) {
-                commentCountElement.textContent = '0';
-                return;
-            }
+            if (!commentListContainerJS || !commentCountElement) { console.warn("Elementos de comentarios no encontrados en el DOM."); return; }
+            commentListContainerJS.innerHTML = ''; if (!commentsToRender || commentsToRender.length === 0) { commentCountElement.textContent = '0'; return; }
             commentCountElement.textContent = commentsToRender.length.toLocaleString();
             commentsToRender.forEach(comment => {
-                const commentDiv = document.createElement('div');
-                commentDiv.classList.add('flex', 'items-start', 'space-x-3');
-                const avatarDiv = document.createElement('div');
-                avatarDiv.classList.add('w-10', 'h-10', 'rounded-full', 'flex-shrink-0', 'flex', 'items-center', 'justify-center', 'text-white', 'font-semibold');
-                avatarDiv.style.backgroundColor = comment.avatarColor || '#A0AEC0';
-                avatarDiv.textContent = comment.author.charAt(0).toUpperCase();
-                const contentDiv = document.createElement('div');
-                contentDiv.classList.add('flex-1');
-                const infoDiv = document.createElement('div');
-                infoDiv.classList.add('text-sm');
-                infoDiv.innerHTML = `
-                    <span class="font-semibold mr-2 text-gray-900 dark:text-gray-100">${comment.author}</span>
-                    <span class="text-gray-500 dark:text-gray-400">${comment.timestamp}</span>
-                `;
-                const textP = document.createElement('p');
-                textP.classList.add('text-sm', 'mt-1', 'text-gray-900', 'dark:text-gray-100');
-                textP.textContent = comment.text;
-                const actionsDiv = document.createElement('div');
-                actionsDiv.classList.add('flex', 'items-center', 'space-x-3', 'text-xs', 'text-gray-500', 'dark:text-gray-400', 'mt-2');
-                actionsDiv.innerHTML = `
-                    <button class="hover:text-black dark:hover:text-white focus:outline-none opacity-50 cursor-not-allowed">
-                        <i class="far fa-thumbs-up"></i> ${comment.likes || 0}
-                    </button>
-                    <button class="hover:text-black dark:hover:text-white focus:outline-none opacity-50 cursor-not-allowed">
-                        <i class="far fa-thumbs-down"></i>
-                    </button>
-                    <button class="font-semibold hover:text-black dark:hover:text-white focus:outline-none uppercase opacity-50 cursor-not-allowed">
-                        Responder
-                    </button>
-                `;
-                contentDiv.appendChild(infoDiv);
-                contentDiv.appendChild(textP);
-                contentDiv.appendChild(actionsDiv);
-                commentDiv.appendChild(avatarDiv);
-                commentDiv.appendChild(contentDiv);
-                commentListContainerJS.appendChild(commentDiv);
+                const commentDiv = document.createElement('div'); commentDiv.classList.add('flex', 'items-start', 'space-x-3');
+                const avatarDiv = document.createElement('div'); avatarDiv.classList.add('w-10', 'h-10', 'rounded-full', 'flex-shrink-0', 'flex', 'items-center', 'justify-center', 'text-white', 'font-semibold'); avatarDiv.style.backgroundColor = comment.avatarColor || '#A0AEC0'; avatarDiv.textContent = comment.author.charAt(0).toUpperCase();
+                const contentDiv = document.createElement('div'); contentDiv.classList.add('flex-1'); const infoDiv = document.createElement('div'); infoDiv.classList.add('text-sm'); infoDiv.innerHTML = `<span class="font-semibold mr-2 text-gray-900 dark:text-gray-100">${comment.author}</span><span class="text-gray-500 dark:text-gray-400">${comment.timestamp}</span>`;
+                const textP = document.createElement('p'); textP.classList.add('text-sm', 'mt-1', 'text-gray-900', 'dark:text-gray-100'); textP.textContent = comment.text;
+                const actionsDiv = document.createElement('div'); actionsDiv.classList.add('flex', 'items-center', 'space-x-3', 'text-xs', 'text-gray-500', 'dark:text-gray-400', 'mt-2'); actionsDiv.innerHTML = `<button class="hover:text-black dark:hover:text-white focus:outline-none opacity-50 cursor-not-allowed"><i class="far fa-thumbs-up"></i> ${comment.likes || 0}</button><button class="hover:text-black dark:hover:text-white focus:outline-none opacity-50 cursor-not-allowed"><i class="far fa-thumbs-down"></i></button><button class="font-semibold hover:text-black dark:hover:text-white focus:outline-none uppercase opacity-50 cursor-not-allowed">Responder</button>`;
+                contentDiv.appendChild(infoDiv); contentDiv.appendChild(textP); contentDiv.appendChild(actionsDiv); commentDiv.appendChild(avatarDiv); commentDiv.appendChild(contentDiv); commentListContainerJS.appendChild(commentDiv);
             });
         }
 
-
         // --- Controles del Reproductor ---
-
-        /**
-         * Formatea un tiempo en segundos a un string MM:SS.
-         * @param {number} time - Tiempo en segundos.
-         * @returns {string} - Tiempo formateado o '00:00' si es inválido/infinito.
-         */
-        function formatTime(time) {
-            if (isNaN(time) || !isFinite(time)) {
-                return '--:--';
-            }
-            const minutes = Math.floor(time / 60);
-            const seconds = Math.floor(time % 60);
-            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        }
-
-        /**
-         * Alterna entre reproducir y pausar el video.
-         */
-        function togglePlayPause() {
-            if (currentChannelIndex < 0) return;
-            if (videoPlayer.paused || videoPlayer.ended) {
-                videoPlayer.play().catch(handlePlaybackError);
-            } else {
-                videoPlayer.pause();
-            }
-        }
-
-        /**
-         * Actualiza el icono del botón Play/Pause según el estado del video.
-         */
-        function updatePlayPauseIcon() {
-            if (videoPlayer.paused || videoPlayer.ended) {
-                playPauseIcon.classList.remove('fa-pause');
-                playPauseIcon.classList.add('fa-play');
-                playPauseBtn.setAttribute('aria-label', 'Reproducir');
-            } else {
-                playPauseIcon.classList.remove('fa-play');
-                playPauseIcon.classList.add('fa-pause');
-                playPauseBtn.setAttribute('aria-label', 'Pausar');
-            }
-        }
-
-        /**
-         * Actualiza la barra de progreso y el display de tiempo.
-         */
-        function updateProgressBar() {
-            const duration = videoPlayer.duration;
-            let percentage = 0;
-            if (duration && isFinite(duration)) {
-                percentage = (videoPlayer.currentTime / duration) * 100;
-                progressBar.value = percentage || 0;
-                const sliderTrackColor = isDarkMode ? '#4b5563' : '#e0e0e0';
-                progressBar.style.background = `linear-gradient(to right, #ff0000 ${percentage}%, ${sliderTrackColor} ${percentage}%)`;
-                progressBar.disabled = false;
-            } else {
-                progressBar.value = 100;
-                progressBar.style.background = '#ff0000';
-                progressBar.disabled = true;
-            }
-        }
-
-        /**
-         * Actualiza el texto que muestra el tiempo actual y la duración total.
-         */
-        function updateTimeDisplay() {
-            const currentTimeFormatted = formatTime(videoPlayer.currentTime);
-            const durationFormatted = isFinite(videoPlayer.duration) ? formatTime(videoPlayer.duration) : 'EN VIVO';
-            timeDisplay.textContent = `${currentTimeFormatted} / ${durationFormatted}`;
-        }
-
-        /**
-         * Adelanta o retrocede el video un número específico de segundos.
-         * Solo funciona si la duración es finita.
-         * @param {number} change - Segundos a cambiar (positivo para adelantar, negativo para retroceder).
-         */
-        function seekVideo(change) {
-            if (!isFinite(videoPlayer.duration)) return;
-            const newTime = videoPlayer.currentTime + change;
-            videoPlayer.currentTime = Math.max(0, Math.min(newTime, videoPlayer.duration));
-            updateProgressBar();
-        }
-
-        /**
-         * Establece el tiempo de reproducción basado en el valor actual de la barra de progreso.
-         * Solo funciona si la duración es finita.
-         */
-        function seekVideoFromBar() {
-            if (!isFinite(videoPlayer.duration)) return;
-            const time = (progressBar.value / 100) * videoPlayer.duration;
-            videoPlayer.currentTime = time;
-        }
-
-        /**
-         * Alterna el estado de silencio (mute) del video.
-         */
-        function toggleMute() {
-            videoPlayer.muted = !videoPlayer.muted;
-            updateVolumeUI();
-            volumeBtn.setAttribute('aria-label', videoPlayer.muted ? 'Activar Sonido' : 'Silenciar');
-        }
-
-        /**
-         * Ajusta el volumen del video en pequeños incrementos/decrementos.
-         * @param {number} change - Cantidad a cambiar el volumen (ej. 0.1 o -0.1).
-         */
-        function adjustVolume(change) {
-            let newVolume = videoPlayer.volume + change;
-            newVolume = Math.max(0, Math.min(1, newVolume));
-            videoPlayer.volume = newVolume;
-            videoPlayer.muted = newVolume === 0;
-            updateVolumeUI();
-            showPlayerMessage(`Volumen: ${Math.round(videoPlayer.volume * 100)}%`);
-        }
-
-        /**
-         * Establece el volumen del video basado en el valor actual del slider de volumen.
-         */
-        function setVolumeFromSlider() {
-            const newVolume = parseFloat(volumeSlider.value);
-            videoPlayer.volume = newVolume;
-            videoPlayer.muted = newVolume === 0;
-        }
-
-        /**
-         * Actualiza el icono de volumen y el slider según el volumen y estado mute actuales.
-         */
-        function updateVolumeUI() {
-            const volumePercentage = videoPlayer.muted ? 0 : videoPlayer.volume * 100;
-            if (videoPlayer.muted || videoPlayer.volume === 0) {
-                volumeIcon.classList.remove('fa-volume-up', 'fa-volume-down');
-                volumeIcon.classList.add('fa-volume-mute');
-                volumeSlider.value = 0;
-            } else if (videoPlayer.volume < 0.5) {
-                volumeIcon.classList.remove('fa-volume-up', 'fa-volume-mute');
-                volumeIcon.classList.add('fa-volume-down');
-                volumeSlider.value = videoPlayer.volume;
-            } else {
-                volumeIcon.classList.remove('fa-volume-down', 'fa-volume-mute');
-                volumeIcon.classList.add('fa-volume-up');
-                volumeSlider.value = videoPlayer.volume;
-            }
-            const volumeSliderTrackColor = isDarkMode ? '#4b5563' : '#e0e0e0';
-            volumeSlider.style.background = `linear-gradient(to right, #ff0000 ${volumePercentage}%, ${volumeSliderTrackColor} ${volumePercentage}%)`;
-        }
-
-        /**
-         * Cambia a la siguiente velocidad de reproducción en el ciclo definido.
-         */
-        function cyclePlaybackSpeed() {
-            currentSpeedIndex = (currentSpeedIndex + 1) % playbackRates.length;
-            const newRate = playbackRates[currentSpeedIndex];
-            setPlaybackSpeed(newRate);
-            showPlayerMessage(`Velocidad: ${newRate}x`);
-        }
-
-        /**
-         * Establece la velocidad de reproducción del video y actualiza el botón.
-         * @param {number} rate - La nueva velocidad de reproducción (ej. 1, 1.5, 2).
-         */
-        function setPlaybackSpeed(rate) {
-            videoPlayer.playbackRate = rate;
-            speedBtn.textContent = `${rate}x`;
-            currentSpeedIndex = playbackRates.indexOf(rate);
-            if (currentSpeedIndex === -1) {
-                currentSpeedIndex = playbackRates.indexOf(1);
-            }
-        }
-
-        /**
-         * Entra o sale del modo de pantalla completa para el contenedor del video.
-         */
-        function toggleFullScreen() {
-            const elementToFullscreen = videoPlayerContainer;
-            if (!document.fullscreenElement &&
-                !document.webkitFullscreenElement &&
-                !document.mozFullScreenElement &&
-                !document.msFullscreenElement)
-            {
-                if (elementToFullscreen.requestFullscreen) {
-                    elementToFullscreen.requestFullscreen().catch(err => console.error("Error al entrar en Fullscreen:", err));
-                } else if (elementToFullscreen.webkitRequestFullscreen) { /* Safari */
-                    elementToFullscreen.webkitRequestFullscreen();
-                } else if (elementToFullscreen.mozRequestFullScreen) { /* Firefox */
-                    elementToFullscreen.mozRequestFullScreen();
-                } else if (elementToFullscreen.msRequestFullscreen) { /* IE11 */
-                    elementToFullscreen.msRequestFullscreen();
-                }
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) { /* Safari */
-                    document.webkitExitFullscreen();
-                } else if (document.mozCancelFullScreen) { /* Firefox */
-                    document.mozCancelFullScreen();
-                } else if (document.msExitFullscreen) { /* IE11 */
-                    document.msExitFullscreen();
-                }
-            }
-        }
-
-        /**
-         * Actualiza el icono del botón de pantalla completa según el estado actual.
-         */
-        function updateFullscreenIcon() {
-            const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
-            if (isFullscreen) {
-                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
-                fullscreenBtn.setAttribute('aria-label', 'Salir de Pantalla Completa');
-                videoPlayerContainer.classList.add('is-fullscreen');
-            } else {
-                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
-                fullscreenBtn.setAttribute('aria-label', 'Pantalla Completa');
-                videoPlayerContainer.classList.remove('is-fullscreen');
-            }
-        }
-
-        /**
-         * Muestra u oculta la barra lateral izquierda (en móviles).
-         */
-        function toggleSidebar() {
-            const isOpen = sidebar.classList.toggle('open');
-            sidebarOverlay.classList.toggle('hidden');
-            menuToggle.setAttribute('aria-expanded', isOpen.toString());
-        }
+        function formatTime(time) { if (isNaN(time) || !isFinite(time)) { return '--:--'; } const minutes = Math.floor(time / 60); const seconds = Math.floor(time % 60); return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`; }
+        function togglePlayPause() { if (currentChannelIndex < 0) return; if (videoPlayer.paused || videoPlayer.ended) { videoPlayer.play().catch(handlePlaybackError); } else { videoPlayer.pause(); } }
+        function updatePlayPauseIcon() { if (videoPlayer.paused || videoPlayer.ended) { playPauseIcon.classList.remove('fa-pause'); playPauseIcon.classList.add('fa-play'); playPauseBtn.setAttribute('aria-label', 'Reproducir'); } else { playPauseIcon.classList.remove('fa-play'); playPauseIcon.classList.add('fa-pause'); playPauseBtn.setAttribute('aria-label', 'Pausar'); } }
+        function updateProgressBar() { const duration = videoPlayer.duration; let percentage = 0; if (duration && isFinite(duration)) { percentage = (videoPlayer.currentTime / duration) * 100; progressBar.value = percentage || 0; const sliderTrackColor = isDarkMode ? '#4b5563' : '#e0e0e0'; progressBar.style.background = `linear-gradient(to right, #ff0000 ${percentage}%, ${sliderTrackColor} ${percentage}%)`; progressBar.disabled = false; } else { progressBar.value = 100; progressBar.style.background = '#ff0000'; progressBar.disabled = true; } }
+        function updateTimeDisplay() { const currentTimeFormatted = formatTime(videoPlayer.currentTime); const durationFormatted = isFinite(videoPlayer.duration) ? formatTime(videoPlayer.duration) : 'EN VIVO'; timeDisplay.textContent = `${currentTimeFormatted} / ${durationFormatted}`; }
+        function seekVideo(change) { if (!isFinite(videoPlayer.duration)) return; const newTime = videoPlayer.currentTime + change; videoPlayer.currentTime = Math.max(0, Math.min(newTime, videoPlayer.duration)); updateProgressBar(); }
+        function seekVideoFromBar() { if (!isFinite(videoPlayer.duration)) return; const time = (progressBar.value / 100) * videoPlayer.duration; videoPlayer.currentTime = time; }
+        function toggleMute() { videoPlayer.muted = !videoPlayer.muted; updateVolumeUI(); volumeBtn.setAttribute('aria-label', videoPlayer.muted ? 'Activar Sonido' : 'Silenciar'); }
+        function adjustVolume(change) { let newVolume = videoPlayer.volume + change; newVolume = Math.max(0, Math.min(1, newVolume)); videoPlayer.volume = newVolume; videoPlayer.muted = newVolume === 0; updateVolumeUI(); showPlayerMessage(`Volumen: ${Math.round(videoPlayer.volume * 100)}%`); }
+        function setVolumeFromSlider() { const newVolume = parseFloat(volumeSlider.value); videoPlayer.volume = newVolume; videoPlayer.muted = newVolume === 0; }
+        function updateVolumeUI() { const volumePercentage = videoPlayer.muted ? 0 : videoPlayer.volume * 100; if (videoPlayer.muted || videoPlayer.volume === 0) { volumeIcon.classList.remove('fa-volume-up', 'fa-volume-down'); volumeIcon.classList.add('fa-volume-mute'); volumeSlider.value = 0; } else if (videoPlayer.volume < 0.5) { volumeIcon.classList.remove('fa-volume-up', 'fa-volume-mute'); volumeIcon.classList.add('fa-volume-down'); volumeSlider.value = videoPlayer.volume; } else { volumeIcon.classList.remove('fa-volume-down', 'fa-volume-mute'); volumeIcon.classList.add('fa-volume-up'); volumeSlider.value = videoPlayer.volume; } const volumeSliderTrackColor = isDarkMode ? '#4b5563' : '#e0e0e0'; volumeSlider.style.background = `linear-gradient(to right, #ff0000 ${volumePercentage}%, ${volumeSliderTrackColor} ${volumePercentage}%)`; }
+        function cyclePlaybackSpeed() { currentSpeedIndex = (currentSpeedIndex + 1) % playbackRates.length; const newRate = playbackRates[currentSpeedIndex]; setPlaybackSpeed(newRate); showPlayerMessage(`Velocidad: ${newRate}x`); }
+        function setPlaybackSpeed(rate) { videoPlayer.playbackRate = rate; speedBtn.textContent = `${rate}x`; currentSpeedIndex = playbackRates.indexOf(rate); if (currentSpeedIndex === -1) { currentSpeedIndex = playbackRates.indexOf(1); } }
+        function toggleFullScreen() { const elementToFullscreen = videoPlayerContainer; if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) { if (elementToFullscreen.requestFullscreen) { elementToFullscreen.requestFullscreen().catch(err => console.error("Error al entrar en Fullscreen:", err)); } else if (elementToFullscreen.webkitRequestFullscreen) { elementToFullscreen.webkitRequestFullscreen(); } else if (elementToFullscreen.mozRequestFullScreen) { elementToFullscreen.mozRequestFullScreen(); } else if (elementToFullscreen.msRequestFullscreen) { elementToFullscreen.msRequestFullscreen(); } } else { if (document.exitFullscreen) { document.exitFullscreen(); } else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); } else if (document.mozCancelFullScreen) { document.mozCancelFullScreen(); } else if (document.msExitFullscreen) { document.msExitFullscreen(); } } }
+        function updateFullscreenIcon() { const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement); if (isFullscreen) { fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>'; fullscreenBtn.setAttribute('aria-label', 'Salir de Pantalla Completa'); videoPlayerContainer.classList.add('is-fullscreen'); } else { fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>'; fullscreenBtn.setAttribute('aria-label', 'Pantalla Completa'); videoPlayerContainer.classList.remove('is-fullscreen'); } }
+        function toggleSidebar() { const isOpen = sidebar.classList.toggle('open'); sidebarOverlay.classList.toggle('hidden'); menuToggle.setAttribute('aria-expanded', isOpen.toString()); }
 
         // --- Actualizar Estilo Activo Sidebar Izquierdo ---
-
-        /**
-         * Marca el enlace correspondiente en el sidebar izquierdo como activo.
-         * @param {string} activeView - La vista activa ('home', 'favorites', 'history', 'settings', 'category').
-         * @param {string|null} [activeGroup=null] - El grupo de categoría activo (si activeView es 'category').
-         */
         function updateSidebarActiveLink(activeView, activeGroup = null) {
-            [homeLink, favoritesLink, historyLink, settingsLink].forEach(link => link?.classList.remove('active'));
-            if (activeCategoryLinkElement) {
-                activeCategoryLinkElement.classList.remove('active');
-                activeCategoryLinkElement = null;
-            }
+            [homeLink, favoritesLink, historyLink, settingsLink].forEach(link => link?.classList.remove('active')); if (activeCategoryLinkElement) { activeCategoryLinkElement.classList.remove('active'); activeCategoryLinkElement = null; }
             switch (activeView) {
-                case 'all':
-                    homeLink?.classList.add('active');
-                    break;
-                case 'favorites':
-                    favoritesLink?.classList.add('active');
-                    break;
-                case 'history':
-                    historyLink?.classList.add('active');
-                    break;
-                case 'settings':
-                    settingsLink?.classList.add('active');
-                    break;
-                case 'category':
-                    const categoryLinks = dynamicCategoriesContainer.querySelectorAll('.category-link');
-                    categoryLinks.forEach(link => {
-                        if (link.dataset.group === activeGroup) {
-                            link.classList.add('active');
-                            activeCategoryLinkElement = link;
-                        }
-                    });
-                    break;
+                case 'all': homeLink?.classList.add('active'); break; case 'favorites': favoritesLink?.classList.add('active'); break;
+                case 'history': historyLink?.classList.add('active'); break; case 'settings': settingsLink?.classList.add('active'); break;
+                case 'category': const categoryLinks = dynamicCategoriesContainer.querySelectorAll('.category-link'); categoryLinks.forEach(link => { if (link.dataset.group === activeGroup) { link.classList.add('active'); activeCategoryLinkElement = link; } }); break;
             }
         }
-
 
         // --- Navegación por Teclado en Lista de Canales ---
-
-        /**
-         * Permite navegar por la lista de canales derecha usando las flechas arriba/abajo.
-         * @param {number} direction - Dirección del movimiento (-1 para arriba, 1 para abajo).
-         */
         function navigateChannelList(direction) {
-            const items = Array.from(channelListContainer.querySelectorAll('.channel-item'));
-            if (items.length === 0) return;
-            const currentFocusElement = document.activeElement;
-            let currentVisualIndex = -1;
-            if (currentFocusElement && currentFocusElement.classList.contains('channel-item') &&
-                channelListContainer.contains(currentFocusElement)) {
-                currentVisualIndex = items.indexOf(currentFocusElement);
-            } else {
-                const logicalIndexInVisual = items.findIndex(item => parseInt(item.dataset.index, 10) === currentChannelIndex);
-                currentVisualIndex = (logicalIndexInVisual !== -1) ? logicalIndexInVisual : -1;
-            }
-            let nextVisualIndex = currentVisualIndex + direction;
-            nextVisualIndex = Math.max(0, Math.min(nextVisualIndex, items.length - 1));
-            if (nextVisualIndex >= 0 && nextVisualIndex < items.length) {
-                const nextElement = items[nextVisualIndex];
-                if (nextElement) {
-                    nextElement.focus();
-                }
-            }
+            const items = Array.from(channelListContainer.querySelectorAll('.channel-item')); if (items.length === 0) return; const currentFocusElement = document.activeElement; let currentVisualIndex = -1;
+            if (currentFocusElement && currentFocusElement.classList.contains('channel-item') && channelListContainer.contains(currentFocusElement)) { currentVisualIndex = items.indexOf(currentFocusElement); }
+            else { const logicalIndexInVisual = items.findIndex(item => parseInt(item.dataset.index, 10) === currentChannelIndex); currentVisualIndex = (logicalIndexInVisual !== -1) ? logicalIndexInVisual : -1; }
+            let nextVisualIndex = currentVisualIndex + direction; nextVisualIndex = Math.max(0, Math.min(nextVisualIndex, items.length - 1));
+            if (nextVisualIndex >= 0 && nextVisualIndex < items.length) { const nextElement = items[nextVisualIndex]; if (nextElement) { nextElement.focus(); } }
         }
 
-        // --- NUEVO: Función para manejar el scroll en la lista de canales ---
-        /**
-         * Controla la visibilidad de los detalles del video al hacer scroll
-         * en la lista de canales en vista móvil.
-         */
+        // --- Función para manejar el scroll en la lista de canales ---
         function handleChannelScroll() {
-            const currentScrollTop = channelListContainer.scrollTop;
-            const isMobile = window.innerWidth <= 768; // Punto de corte de Tailwind 'md'
-
-            if (!videoDetailsWrapper) return; // Salir si el wrapper no existe
-
+            const currentScrollTop = channelListContainer.scrollTop; const isMobile = window.innerWidth <= 768;
+            if (!videoDetailsWrapper) return;
             if (isMobile) {
-                // Determinar dirección del scroll (con umbral)
-                if (currentScrollTop > lastScrollTop + scrollThreshold) {
-                    // Scrolling Down
-                    videoDetailsWrapper.classList.remove('hidden-on-scroll');
-                    mainContentArea.classList.remove('details-hidden-layout'); // Quitar clase del layout si se usa
-                } else if (currentScrollTop < lastScrollTop - scrollThreshold && currentScrollTop > scrollThreshold) {
-                    // Scrolling Up (y no estamos justo en el top)
-                    videoDetailsWrapper.classList.add('hidden-on-scroll');
-                    mainContentArea.classList.add('details-hidden-layout'); // Añadir clase al layout si se usa
-                } else if (currentScrollTop <= scrollThreshold) {
-                     // Si estamos muy cerca o en el top, mostrar detalles
-                     videoDetailsWrapper.classList.remove('hidden-on-scroll');
-                     mainContentArea.classList.remove('details-hidden-layout');
-                }
-            } else {
-                // Si no es móvil, asegurarse que los detalles siempre sean visibles
-                videoDetailsWrapper.classList.remove('hidden-on-scroll');
-                mainContentArea.classList.remove('details-hidden-layout');
-            }
-
-            // Actualizar última posición de scroll (solo si el cambio es mayor que el umbral para evitar ruido)
-            if(Math.abs(currentScrollTop - lastScrollTop) > scrollThreshold || currentScrollTop === 0) {
-               lastScrollTop = currentScrollTop <= 0 ? 0 : currentScrollTop; // Evitar valores negativos
-            }
+                if (currentScrollTop > lastScrollTop + scrollThreshold) { videoDetailsWrapper.classList.remove('hidden-on-scroll'); mainContentArea.classList.remove('details-hidden-layout'); }
+                else if (currentScrollTop < lastScrollTop - scrollThreshold && currentScrollTop > scrollThreshold) { videoDetailsWrapper.classList.add('hidden-on-scroll'); mainContentArea.classList.add('details-hidden-layout'); }
+                else if (currentScrollTop <= scrollThreshold) { videoDetailsWrapper.classList.remove('hidden-on-scroll'); mainContentArea.classList.remove('details-hidden-layout'); }
+            } else { videoDetailsWrapper.classList.remove('hidden-on-scroll'); mainContentArea.classList.remove('details-hidden-layout'); }
+            if(Math.abs(currentScrollTop - lastScrollTop) > scrollThreshold || currentScrollTop === 0) { lastScrollTop = currentScrollTop <= 0 ? 0 : currentScrollTop; }
         }
-
 
         // --- Event Listeners ---
-        // Asignación de funciones a eventos de los elementos de la UI
-
-        // Controles del reproductor
-        playPauseBtn.addEventListener('click', togglePlayPause);
-        speedBtn.addEventListener('click', cyclePlaybackSpeed);
-        videoPlayerContainer.addEventListener('dblclick', toggleFullScreen);
-        favoriteBtn.addEventListener('click', toggleFavorite);
-        themeToggleBtn.addEventListener('click', toggleTheme);
-        volumeBtn.addEventListener('click', toggleMute);
-        volumeSlider.addEventListener('input', setVolumeFromSlider);
-        fullscreenBtn.addEventListener('click', toggleFullScreen);
-        progressBar.addEventListener('input', seekVideoFromBar);
-
-        // Listeners Sidebar Izquierdo (Navegación)
-        homeLink.addEventListener('click', (e) => { e.preventDefault(); navigateToView('all'); });
-        favoritesLink.addEventListener('click', (e) => { e.preventDefault(); navigateToView('favorites'); });
-        historyLink.addEventListener('click', (e) => { e.preventDefault(); navigateToView('history'); });
-        settingsLink.addEventListener('click', (e) => { e.preventDefault(); showSettingsView(); });
-
-        // Listeners Vista Configuración
-        closeSettingsBtn.addEventListener('click', () => { navigateToView(previousView || 'all', currentCategoryGroup); });
-        backToPlayerBtn.addEventListener('click', () => { navigateToView(previousView || 'all', currentCategoryGroup); });
-        clearFavoritesBtn.addEventListener('click', clearFavorites);
-        clearHistoryBtn.addEventListener('click', clearHistory);
-        reloadM3uBtn.addEventListener('click', () => {
-            localStorage.removeItem(CACHE_KEY);
-            fetchAndLoadM3U(m3uUrl);
-            showPlayerMessage("Recargando lista de canales...", false, settingsView);
-        });
-
-        // Listeners del elemento <video>
-        videoPlayer.addEventListener('play', updatePlayPauseIcon);
-        videoPlayer.addEventListener('pause', updatePlayPauseIcon);
-        videoPlayer.addEventListener('ended', updatePlayPauseIcon);
-        videoPlayer.addEventListener('timeupdate', () => {
-            updateProgressBar();
-            updateTimeDisplay();
-        });
-        videoPlayer.addEventListener('loadedmetadata', () => {
-            updateTimeDisplay();
-            updateProgressBar();
-            updateVolumeUI();
-        });
-        videoPlayer.addEventListener('durationchange', () => {
-            updateTimeDisplay();
-            updateProgressBar();
-        });
-        videoPlayer.addEventListener('playing', () => {
-            playerLoader.classList.add('hidden');
-            videoPlayer.style.opacity = '1';
-            if (currentChannelIndex >= 0 && currentChannelIndex < channels.length) {
-                addToHistory(channels[currentChannelIndex].url);
-            }
-        });
-        videoPlayer.addEventListener('waiting', () => {
-            playerLoader.classList.remove('hidden');
-            videoPlayer.style.opacity = '0.5';
-        });
-        videoPlayer.addEventListener('error', (e) => {
-            if (!hls || !hls.url || (videoPlayer.src && !videoPlayer.src.toLowerCase().endsWith('.m3u8'))) {
-                 handlePlaybackError(videoPlayer.error || new Error('Error desconocido del reproductor'));
-            }
-        });
-        videoPlayer.addEventListener('volumechange', updateVolumeUI);
-
-        // Listeners de Pantalla Completa
-        document.addEventListener('fullscreenchange', updateFullscreenIcon);
-        document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
-        document.addEventListener('mozfullscreenchange', updateFullscreenIcon);
-        document.addEventListener('MSFullscreenChange', updateFullscreenIcon);
-
-        // Listeners Sidebar Móvil
-        menuToggle.addEventListener('click', toggleSidebar);
-        sidebarOverlay.addEventListener('click', toggleSidebar);
-
-        // --- NUEVO: Listener para el scroll en la lista de canales ---
-        if (channelListContainer) {
-            channelListContainer.addEventListener('scroll', handleChannelScroll);
-        }
-        // --- NUEVO: Listener para resize para resetear estado si se pasa a desktop ---
-        window.addEventListener('resize', handleChannelScroll);
-
-
-        // Listener Teclado Global (Atajos)
+        playPauseBtn.addEventListener('click', togglePlayPause); speedBtn.addEventListener('click', cyclePlaybackSpeed); videoPlayerContainer.addEventListener('dblclick', toggleFullScreen); favoriteBtn.addEventListener('click', toggleFavorite); themeToggleBtn.addEventListener('click', toggleTheme); volumeBtn.addEventListener('click', toggleMute); volumeSlider.addEventListener('input', setVolumeFromSlider); fullscreenBtn.addEventListener('click', toggleFullScreen); progressBar.addEventListener('input', seekVideoFromBar);
+        homeLink.addEventListener('click', (e) => { e.preventDefault(); navigateToView('all'); }); favoritesLink.addEventListener('click', (e) => { e.preventDefault(); navigateToView('favorites'); }); historyLink.addEventListener('click', (e) => { e.preventDefault(); navigateToView('history'); }); settingsLink.addEventListener('click', (e) => { e.preventDefault(); showSettingsView(); });
+        closeSettingsBtn.addEventListener('click', () => { navigateToView(previousView || 'all', currentCategoryGroup); }); backToPlayerBtn.addEventListener('click', () => { navigateToView(previousView || 'all', currentCategoryGroup); }); clearFavoritesBtn.addEventListener('click', clearFavorites); clearHistoryBtn.addEventListener('click', clearHistory); reloadM3uBtn.addEventListener('click', () => { localStorage.removeItem(CACHE_KEY); fetchAndLoadM3U(m3uUrl); showPlayerMessage("Recargando lista de canales...", false, settingsView); });
+        videoPlayer.addEventListener('play', updatePlayPauseIcon); videoPlayer.addEventListener('pause', updatePlayPauseIcon); videoPlayer.addEventListener('ended', updatePlayPauseIcon); videoPlayer.addEventListener('timeupdate', () => { updateProgressBar(); updateTimeDisplay(); }); videoPlayer.addEventListener('loadedmetadata', () => { updateTimeDisplay(); updateProgressBar(); updateVolumeUI(); }); videoPlayer.addEventListener('durationchange', () => { updateTimeDisplay(); updateProgressBar(); }); videoPlayer.addEventListener('playing', () => { playerLoader.classList.add('hidden'); videoPlayer.style.opacity = '1'; if (currentChannelIndex >= 0 && currentChannelIndex < channels.length) { addToHistory(channels[currentChannelIndex].url); } }); videoPlayer.addEventListener('waiting', () => { playerLoader.classList.remove('hidden'); videoPlayer.style.opacity = '0.5'; }); videoPlayer.addEventListener('error', (e) => { if (!hls || !hls.url || (videoPlayer.src && !videoPlayer.src.toLowerCase().endsWith('.m3u8'))) { handlePlaybackError(videoPlayer.error || new Error('Error desconocido del reproductor')); } }); videoPlayer.addEventListener('volumechange', updateVolumeUI);
+        document.addEventListener('fullscreenchange', updateFullscreenIcon); document.addEventListener('webkitfullscreenchange', updateFullscreenIcon); document.addEventListener('mozfullscreenchange', updateFullscreenIcon); document.addEventListener('MSFullscreenChange', updateFullscreenIcon);
+        menuToggle.addEventListener('click', toggleSidebar); sidebarOverlay.addEventListener('click', toggleSidebar);
+        if (channelListContainer) { channelListContainer.addEventListener('scroll', handleChannelScroll); } window.addEventListener('resize', handleChannelScroll);
         document.addEventListener('keydown', (e) => {
-            const targetTagName = e.target.tagName.toLowerCase();
-            const isInputFocused = ['input', 'textarea', 'select'].includes(targetTagName);
-            const activeElement = document.activeElement;
-            const isChannelListFocused = channelListContainer &&
-                (channelListContainer.contains(activeElement) || activeElement === channelListContainer);
-            const isSettingsVisible = !settingsView.classList.contains('hidden');
-
-            if (isSettingsVisible) {
-                if (e.key === 'Escape') {
-                    e.preventDefault();
-                    navigateToView(previousView || 'all', currentCategoryGroup);
-                }
-                return;
-            }
-            if (isInputFocused) return;
-            if ((e.key === 'Escape' || e.key === 'b' || e.key === 'B') && sidebar.classList.contains('open')) {
-                 e.preventDefault();
-                 toggleSidebar();
-                 if (menuToggle && document.body.contains(menuToggle)) menuToggle.focus();
-                 else if (videoPlayer && document.body.contains(videoPlayer)) videoPlayer.focus();
-                 return;
-            }
-            if (isChannelListFocused) {
-                if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    navigateChannelList(-1);
-                    return;
-                }
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    navigateChannelList(1);
-                    return;
-                }
-                if ((e.key === 'Enter' || e.key === ' ') && activeElement && activeElement.classList.contains('channel-item')) {
-                    e.preventDefault();
-                    const indexToLoad = parseInt(activeElement.dataset.index, 10);
-                    if (!isNaN(indexToLoad)) {
-                        loadVideo(indexToLoad);
-                    }
-                    return;
-                }
-            }
+            const targetTagName = e.target.tagName.toLowerCase(); const isInputFocused = ['input', 'textarea', 'select'].includes(targetTagName); const activeElement = document.activeElement; const isChannelListFocused = channelListContainer && (channelListContainer.contains(activeElement) || activeElement === channelListContainer); const isSettingsVisible = !settingsView.classList.contains('hidden');
+            if (isSettingsVisible) { if (e.key === 'Escape') { e.preventDefault(); navigateToView(previousView || 'all', currentCategoryGroup); } return; } if (isInputFocused) return;
+            if ((e.key === 'Escape' || e.key === 'b' || e.key === 'B') && sidebar.classList.contains('open')) { e.preventDefault(); toggleSidebar(); if (menuToggle && document.body.contains(menuToggle)) menuToggle.focus(); else if (videoPlayer && document.body.contains(videoPlayer)) videoPlayer.focus(); return; }
+            if (isChannelListFocused) { if (e.key === 'ArrowUp') { e.preventDefault(); navigateChannelList(-1); return; } if (e.key === 'ArrowDown') { e.preventDefault(); navigateChannelList(1); return; } if ((e.key === 'Enter' || e.key === ' ') && activeElement && activeElement.classList.contains('channel-item')) { e.preventDefault(); const indexToLoad = parseInt(activeElement.dataset.index, 10); if (!isNaN(indexToLoad)) { loadVideo(indexToLoad); } return; } }
             if (!isChannelListFocused) {
                  switch(e.key) {
-                    case ' ': case 'k': case 'K':
-                         e.preventDefault();
-                         togglePlayPause();
-                         break;
-                    case 'f': case 'F':
-                         e.preventDefault();
-                         toggleFullScreen();
-                         break;
-                    case 'm': case 'M':
-                         e.preventDefault();
-                         toggleMute();
-                         break;
-                    case 'ArrowLeft': case 'j': case 'J':
-                         e.preventDefault();
-                         if (isFinite(videoPlayer.duration)) {
-                             const seekAmount = (e.key === 'j' || e.key === 'J') ? -10 : -5;
-                             seekVideo(seekAmount);
-                             showPlayerMessage(`${seekAmount}s`);
-                         }
-                         break;
-                    case 'ArrowRight': case 'l': case 'L':
-                         e.preventDefault();
-                         if (isFinite(videoPlayer.duration)) {
-                             const seekAmount = (e.key === 'l' || e.key === 'L') ? 10 : 5;
-                             seekVideo(seekAmount);
-                             showPlayerMessage(`+${seekAmount}s`);
-                         }
-                         break;
-                    case 'ArrowUp':
-                         e.preventDefault();
-                         adjustVolume(0.05);
-                         break;
-                    case 'ArrowDown':
-                         e.preventDefault();
-                         adjustVolume(-0.05);
-                         break;
-                    case '>':
-                         if (e.shiftKey) {
-                             e.preventDefault();
-                             const nextSpeedIndex = Math.min(playbackRates.length - 1, currentSpeedIndex + 1);
-                             if (nextSpeedIndex !== currentSpeedIndex) {
-                                 setPlaybackSpeed(playbackRates[nextSpeedIndex]);
-                                 showPlayerMessage(`Velocidad: ${videoPlayer.playbackRate}x`);
-                             }
-                         }
-                         break;
-                    case '<':
-                         if (e.shiftKey) {
-                             e.preventDefault();
-                             const nextSpeedIndex = Math.max(0, currentSpeedIndex - 1);
-                             if (nextSpeedIndex !== currentSpeedIndex) {
-                                 setPlaybackSpeed(playbackRates[nextSpeedIndex]);
-                                 showPlayerMessage(`Velocidad: ${videoPlayer.playbackRate}x`);
-                             }
-                         }
-                         break;
-                    case '0': case '1': case '2': case '3': case '4':
-                    case '5': case '6': case '7': case '8': case '9':
-                        if (isFinite(videoPlayer.duration)) {
-                            e.preventDefault();
-                            const percentage = parseInt(e.key) * 10;
-                            const time = (percentage / 100) * videoPlayer.duration;
-                            videoPlayer.currentTime = time;
-                            updateProgressBar();
-                            showPlayerMessage(`Saltar a ${percentage}%`);
-                        }
-                        break;
+                    case ' ': case 'k': case 'K': e.preventDefault(); togglePlayPause(); break; case 'f': case 'F': e.preventDefault(); toggleFullScreen(); break; case 'm': case 'M': e.preventDefault(); toggleMute(); break;
+                    case 'ArrowLeft': case 'j': case 'J': e.preventDefault(); if (isFinite(videoPlayer.duration)) { const seekAmount = (e.key === 'j' || e.key === 'J') ? -10 : -5; seekVideo(seekAmount); showPlayerMessage(`${seekAmount}s`); } break;
+                    case 'ArrowRight': case 'l': case 'L': e.preventDefault(); if (isFinite(videoPlayer.duration)) { const seekAmount = (e.key === 'l' || e.key === 'L') ? 10 : 5; seekVideo(seekAmount); showPlayerMessage(`+${seekAmount}s`); } break;
+                    case 'ArrowUp': e.preventDefault(); adjustVolume(0.05); break; case 'ArrowDown': e.preventDefault(); adjustVolume(-0.05); break;
+                    case '>': if (e.shiftKey) { e.preventDefault(); const nextSpeedIndex = Math.min(playbackRates.length - 1, currentSpeedIndex + 1); if (nextSpeedIndex !== currentSpeedIndex) { setPlaybackSpeed(playbackRates[nextSpeedIndex]); showPlayerMessage(`Velocidad: ${videoPlayer.playbackRate}x`); } } break;
+                    case '<': if (e.shiftKey) { e.preventDefault(); const nextSpeedIndex = Math.max(0, currentSpeedIndex - 1); if (nextSpeedIndex !== currentSpeedIndex) { setPlaybackSpeed(playbackRates[nextSpeedIndex]); showPlayerMessage(`Velocidad: ${videoPlayer.playbackRate}x`); } } break;
+                    case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': if (isFinite(videoPlayer.duration)) { e.preventDefault(); const percentage = parseInt(e.key) * 10; const time = (percentage / 100) * videoPlayer.duration; videoPlayer.currentTime = time; updateProgressBar(); showPlayerMessage(`Saltar a ${percentage}%`); } break;
                  }
             }
         });
 
-
         // --- Inicialización al Cargar la Página ---
         document.addEventListener('DOMContentLoaded', () => {
-            loadTheme();
-            loadFavorites();
-            loadHistory();
-            initializeHls();
-            fetchAndLoadM3U(m3uUrl);
-            updateVolumeUI();
-            updateFavoriteButtonState();
-            renderComments(sampleComments);
-            // --- NUEVO: Llamada inicial para el estado del scroll ---
-            handleChannelScroll();
+            loadTheme(); loadFavorites(); loadHistory(); initializeHls(); fetchAndLoadM3U(m3uUrl); updateVolumeUI(); updateFavoriteButtonState(); renderComments(sampleComments); handleChannelScroll();
         });
-
     </script>
 </body>
 </html>
