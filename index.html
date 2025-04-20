@@ -10,37 +10,57 @@
     <style>
         /* Estilos personalizados adicionales */
         body {
-            font-family: 'Roboto', sans-serif;
-            overflow-y: hidden;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            font-family: 'Roboto', sans-serif; /* Considerar cargar Roboto desde Google Fonts */
+            overflow-y: hidden; /* Evita el scroll vertical en el body */
+            transition: background-color 0.3s ease, color 0.3s ease; /* Transición suave para cambio de tema */
         }
+
+        /* Estilos para la barra de progreso (input range) */
         input[type="range"]::-webkit-slider-runnable-track { background: #e0e0e0; height: 5px; border-radius: 3px; }
         input[type="range"]::-moz-range-track { background: #e0e0e0; height: 5px; border-radius: 3px; }
         input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 15px; height: 15px; background: #ff0000; border-radius: 50%; cursor: pointer; margin-top: -5px; }
         input[type="range"]::-moz-range-thumb { width: 15px; height: 15px; background: #ff0000; border-radius: 50%; cursor: pointer; border: none; }
 
+        /* Estilos barra de progreso en modo oscuro */
         .dark input[type="range"]::-webkit-slider-runnable-track { background: #4b5563; }
         .dark input[type="range"]::-moz-range-track { background: #4b5563; }
 
+        /* Ocultar controles nativos del video */
         video::-webkit-media-controls { display:none !important; }
         video::-webkit-media-controls-enclosure { display:none !important; }
         video::-webkit-media-controls-panel { display:none !important; }
         video::-webkit-media-controls-play-button { display:none !important; }
         video::-webkit-media-controls-start-playback-button { display:none !important; }
 
+        /* Estilos responsivos para la barra lateral */
         @media (max-width: 768px) {
             #sidebar { display: none; position: fixed; top: 0; left: 0; height: 100%; z-index: 40; transition: transform 0.3s ease-in-out; transform: translateX(-100%); }
             #sidebar.open { display: block; transform: translateX(0); }
+
+            /* --- NUEVO: Ocultar detalles al hacer scroll up en la lista de canales en móvil --- */
+            #video-details-wrapper.hidden-on-scroll {
+                display: none;
+            }
+            /* Ajustar el layout del main content cuando los detalles están ocultos */
+            #main-content-area.details-hidden-layout {
+                 /* Puedes ajustar flex-direction o alturas si es necesario,
+                    pero display:none en el wrapper suele ser suficiente */
+            }
         }
+
+        /* Limitar texto a 2 líneas con puntos suspensivos */
         .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 
+        /* Loader principal (pantalla completa) */
         #main-loader { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 5px solid #f3f3f3; border-top: 5px solid #ff0000; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; z-index: 100; }
         .dark #main-loader { border-color: #4b5563; border-top-color: #ff0000; }
         @keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
 
+        /* Estilo para miniaturas de canales recomendados */
         .recommended-thumbnail { width: 100%; height: 100%; object-fit: cover; background-color: #e5e7eb; color: #4b5563; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
         .dark .recommended-thumbnail { background-color: #374151; color: #9ca3af; }
 
+        /* Estilos personalizados para la barra de scroll */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px;}
@@ -49,28 +69,32 @@
         .dark ::-webkit-scrollbar-thumb { background: #4b5563; }
         .dark ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
 
+        /* Transición para mensajes del reproductor */
         #player-message { transition: opacity 0.5s ease-out; }
-        #favorite-btn.is-favorite i { font-weight: 900; color: #FACC15; } /* yellow-400 */
 
-        /* Estilo activo sidebar claro */
-        .sidebar-link.active { background-color: #f3f4f6; color: #DC2626; font-weight: 600; } /* gray-100, red-600 */
+        /* Estilo para el botón de favorito cuando está activo */
+        #favorite-btn.is-favorite i { font-weight: 900; color: #FACC15; } /* Tailwind yellow-400 */
+
+        /* Estilo activo para enlaces de la barra lateral (modo claro) */
+        .sidebar-link.active { background-color: #f3f4f6; color: #DC2626; font-weight: 600; } /* Tailwind gray-100, red-600 */
         .sidebar-link.active i { color: #DC2626; }
-        /* Estilo activo sidebar oscuro */
-        .dark .sidebar-link.active { background-color: #374151; color: #f87171; } /* gray-700, red-400 */
+        /* Estilo activo para enlaces de la barra lateral (modo oscuro) */
+        .dark .sidebar-link.active { background-color: #374151; color: #f87171; } /* Tailwind gray-700, red-400 */
         .dark .sidebar-link.active i { color: #f87171; }
-        /* Estilo focus item canal claro */
-        .channel-item:focus { outline: 2px solid #3B82F6; outline-offset: -1px; background-color: #e5e7eb; } /* gray-200 */
-        .channel-item.selected { background-color: #d1d5db; } /* gray-300 */
-        .channel-item.selected:focus { background-color: #9ca3af; } /* gray-400 */
-        /* Estilo focus item canal oscuro */
-        .dark .channel-item { color: #d1d5db; } /* gray-300 texto por defecto */
-        .dark .channel-item:hover { background-color: #374151; } /* gray-700 */
-        .dark .channel-item:focus { background-color: #4b5563; } /* gray-600 */
-        .dark .channel-item.selected { background-color: #4b5563; color: #f9fafb; } /* gray-600, gray-50 */
-        .dark .channel-item.selected:focus { background-color: #52525b; } /* zinc-600 */
 
-        /* Estilos para la vista de configuración */
-        #settings-view { display: none; } /* Oculto por defecto */
+        /* Estilo focus para items de canal (modo claro) */
+        .channel-item:focus { outline: 2px solid #3B82F6; outline-offset: -1px; background-color: #e5e7eb; } /* Tailwind gray-200 */
+        .channel-item.selected { background-color: #d1d5db; } /* Tailwind gray-300 */
+        .channel-item.selected:focus { background-color: #9ca3af; } /* Tailwind gray-400 */
+        /* Estilo focus para items de canal (modo oscuro) */
+        .dark .channel-item { color: #d1d5db; } /* Texto por defecto gray-300 */
+        .dark .channel-item:hover { background-color: #374151; } /* Tailwind gray-700 */
+        .dark .channel-item:focus { background-color: #4b5563; } /* Tailwind gray-600 */
+        .dark .channel-item.selected { background-color: #4b5563; color: #f9fafb; } /* Tailwind gray-600, gray-50 */
+        .dark .channel-item.selected:focus { background-color: #52525b; } /* Tailwind zinc-600 */
+
+        /* Estilos para la vista de configuración (oculta por defecto) */
+        #settings-view { display: none; }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -81,46 +105,70 @@
     <div id="app-container" class="flex flex-col h-screen hidden">
 
         <header class="bg-white dark:bg-gray-800 shadow-md dark:shadow-lg p-3 flex items-center justify-between sticky top-0 z-30 flex-shrink-0 border-b border-gray-200 dark:border-gray-700">
-             <div class="flex items-center space-x-4">
-                 <button id="menu-toggle" class="md:hidden text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"> <i class="fas fa-bars fa-lg"></i> </button>
-                 <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjtH1eFwNcBk9FvfM8ozeG6zjDtvJR2j2CdfNtfn8rj0JP9PRWR7zeL_ayD_dwmmuqOe8-sTp-TcOGCVsg5yhUNBO_PqRVI9gCMu3B1x2MQ1ZsitAg-1NKxQ70x3H-O9eehCsQO6DzLPxcB_uZpfGmfziYNcXQ0JylvrGY1PE-sc9nJ76l2c62PG3Kcvs/w457-h136/JORGEDEZ-19-3-2025.png" alt="Logo Principal" class="h-8 w-auto object-contain">
-             </div>
-             <div class="flex-1 max-w-xl mx-4 hidden md:flex">
-                 <input type="text" placeholder="Buscar (no funcional)" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-l-full focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400">
-                 <button class="bg-gray-100 dark:bg-gray-700 px-4 py-2 border border-gray-300 dark:border-gray-600 border-l-0 rounded-r-full text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"> <i class="fas fa-search"></i> </button>
-             </div>
-             <div class="flex items-center space-x-1"> <button id="theme-toggle-btn" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" aria-label="Cambiar tema">
-                     <i class="fas fa-moon"></i> </button>
-                 <button class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"> <i class="fas fa-video fa-lg"></i> </button>
-                 <button class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"> <i class="fas fa-bell fa-lg"></i> </button>
-                 <button class="w-8 h-8 rounded-full bg-gray-400 dark:bg-gray-600 text-white flex-shrink-0 flex items-center justify-center ml-1"> J </button> </div>
+            <div class="flex items-center space-x-4">
+                <button id="menu-toggle" class="md:hidden text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <i class="fas fa-bars fa-lg"></i>
+                </button>
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjtH1eFwNcBk9FvfM8ozeG6zjDtvJR2j2CdfNtfn8rj0JP9PRWR7zeL_ayD_dwmmuqOe8-sTp-TcOGCVsg5yhUNBO_PqRVI9gCMu3B1x2MQ1ZsitAg-1NKxQ70x3H-O9eehCsQO6DzLPxcB_uZpfGmfziYNcXQ0JylvrGY1PE-sc9nJ76l2c62PG3Kcvs/w457-h136/JORGEDEZ-19-3-2025.png" alt="Logo Principal" class="h-8 w-auto object-contain">
+            </div>
+            <div class="flex-1 max-w-xl mx-4 hidden md:flex">
+                <input type="text" placeholder="Buscar (no funcional)" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-l-full focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400">
+                <button class="bg-gray-100 dark:bg-gray-700 px-4 py-2 border border-gray-300 dark:border-gray-600 border-l-0 rounded-r-full text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <div class="flex items-center space-x-1">
+                <button id="theme-toggle-btn" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" aria-label="Cambiar tema">
+                    <i class="fas fa-moon"></i> </button>
+                <button class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <i class="fas fa-video fa-lg"></i>
+                </button>
+                <button class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <i class="fas fa-bell fa-lg"></i>
+                </button>
+                <button class="w-8 h-8 rounded-full bg-gray-400 dark:bg-gray-600 text-white flex-shrink-0 flex items-center justify-center ml-1"> J </button> </div>
         </header>
 
         <div class="flex flex-1 overflow-hidden">
+
             <aside id="sidebar" class="w-60 bg-white dark:bg-gray-800 h-full overflow-y-auto p-4 space-y-6 transition-transform duration-300 ease-in-out transform md:translate-x-0 -translate-x-full md:relative fixed z-40 shadow-lg dark:shadow-none md:shadow-none flex-shrink-0 border-r border-gray-200 dark:border-gray-700">
-                 <nav class="space-y-2">
-                     <a href="#" id="home-link" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"> <i class="fas fa-home fa-fw text-gray-500 dark:text-gray-400"></i> <span>Inicio</span> </a>
-                     <a href="#" id="favorites-link" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"> <i class="fas fa-star fa-fw text-gray-500 dark:text-gray-400"></i> <span>Favoritos</span> </a>
-                     <a href="#" id="history-link" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"> <i class="fas fa-history fa-fw text-gray-500 dark:text-gray-400"></i> <span>Historial</span> </a>
-                     <a href="#" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 opacity-50 cursor-not-allowed"> <i class="fas fa-photo-video fa-fw text-gray-500 dark:text-gray-400"></i> <span>Suscripciones</span> </a>
-                 </nav>
-                 <hr class="border-gray-200 dark:border-gray-700">
-                 <nav class="space-y-2">
-                     <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase px-3">Biblioteca</h3>
-                     <a href="#" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 opacity-50 cursor-not-allowed"> <i class="fas fa-clock fa-fw text-gray-500 dark:text-gray-400"></i> <span>Ver más tarde</span> </a>
-                     <a href="#" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 opacity-50 cursor-not-allowed"> <i class="fas fa-thumbs-up fa-fw text-gray-500 dark:text-gray-400"></i> <span>Vídeos que me gustan</span> </a>
-                 </nav>
-                 <hr class="border-gray-200 dark:border-gray-700">
-                 <div id="categories-section" class="space-y-2">
-                     <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase px-3">Categorías</h3>
-                     <div id="dynamic-categories-container" class="space-y-1">
-                         <p id="categories-placeholder" class="px-3 text-xs text-gray-400 dark:text-gray-500">Cargando categorías...</p>
-                     </div>
-                 </div>
-                 <hr class="border-gray-200 dark:border-gray-700">
-                 <nav class="space-y-2">
-                      <a href="#" id="settings-link" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"> <i class="fas fa-cog fa-fw text-gray-500 dark:text-gray-400"></i> <span>Configuración</span> </a>
-                 </nav>
+                <nav class="space-y-2">
+                    <a href="#" id="home-link" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
+                        <i class="fas fa-home fa-fw text-gray-500 dark:text-gray-400"></i> <span>Inicio</span>
+                    </a>
+                    <a href="#" id="favorites-link" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
+                        <i class="fas fa-star fa-fw text-gray-500 dark:text-gray-400"></i> <span>Favoritos</span>
+                    </a>
+                    <a href="#" id="history-link" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
+                        <i class="fas fa-history fa-fw text-gray-500 dark:text-gray-400"></i> <span>Historial</span>
+                    </a>
+                    <a href="#" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 opacity-50 cursor-not-allowed">
+                        <i class="fas fa-photo-video fa-fw text-gray-500 dark:text-gray-400"></i> <span>Suscripciones</span>
+                    </a>
+                </nav>
+                <hr class="border-gray-200 dark:border-gray-700">
+                <nav class="space-y-2">
+                    <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase px-3">Biblioteca</h3>
+                    <a href="#" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 opacity-50 cursor-not-allowed">
+                        <i class="fas fa-clock fa-fw text-gray-500 dark:text-gray-400"></i> <span>Ver más tarde</span>
+                    </a>
+                    <a href="#" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 opacity-50 cursor-not-allowed">
+                        <i class="fas fa-thumbs-up fa-fw text-gray-500 dark:text-gray-400"></i> <span>Vídeos que me gustan</span>
+                    </a>
+                </nav>
+                <hr class="border-gray-200 dark:border-gray-700">
+                <div id="categories-section" class="space-y-2">
+                    <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase px-3">Categorías</h3>
+                    <div id="dynamic-categories-container" class="space-y-1">
+                        <p id="categories-placeholder" class="px-3 text-xs text-gray-400 dark:text-gray-500">Cargando categorías...</p>
+                        </div>
+                </div>
+                <hr class="border-gray-200 dark:border-gray-700">
+                <nav class="space-y-2">
+                    <a href="#" id="settings-link" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
+                        <i class="fas fa-cog fa-fw text-gray-500 dark:text-gray-400"></i> <span>Configuración</span>
+                    </a>
+                </nav>
             </aside>
 
             <div id="sidebar-overlay" class="fixed inset-0 bg-black opacity-50 z-30 hidden md:hidden"></div>
@@ -128,89 +176,130 @@
             <main id="main-content-area" class="flex-1 flex flex-col md:flex-row overflow-y-auto overflow-x-hidden p-4 md:p-6 bg-gray-100 dark:bg-gray-900 transition-colors duration-300 ease-in-out min-w-0">
 
                 <div class="flex-1 md:pr-6 mb-6 md:mb-0 min-w-0">
-                     <div id="video-player-container" class="relative bg-black aspect-video rounded-lg overflow-hidden mb-4 shadow-lg group">
-                         <video id="video-player" class="w-full h-full" preload="metadata" playsinline controlslist="nodownload nofullscreen noremoteplayback" disablepictureinpicture> <track label="Español" kind="subtitles" srclang="es" src="subtitulos_es.vtt"> Tu navegador no soporta la etiqueta de vídeo. </video>
-                         <div id="player-loader" class="absolute inset-0 flex items-center justify-center bg-black/50 hidden"> <div class="border-4 border-gray-500 border-t-white rounded-full w-12 h-12 animate-spin"></div> </div>
-                         <div id="player-message" class="absolute top-4 left-4 right-4 p-3 rounded text-white text-sm z-20 text-center pointer-events-none hidden opacity-0 transition-opacity duration-500"></div>
-                         <div id="video-controls" class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300 z-10">
-                             <input type="range" id="progress-bar" value="0" step="0.1" class="w-full h-1.5 mb-2 cursor-pointer appearance-none">
-                             <div class="flex items-center justify-between text-white">
-                                 <div class="flex items-center space-x-3"> <button id="play-pause-btn" class="text-xl focus:outline-none w-8 h-8 flex items-center justify-center" aria-label="Reproducir/Pausar"> <i class="fas fa-play"></i> </button> <span id="time-display" class="text-xs font-mono">00:00 / 00:00</span> </div>
-                                 <div class="flex items-center space-x-2"> <button id="speed-btn" class="text-xs font-semibold focus:outline-none px-2 py-1 rounded hover:bg-white/20" aria-label="Velocidad de reproducción">1x</button> <button id="volume-btn" class="text-xl focus:outline-none w-8 h-8 flex items-center justify-center" aria-label="Silenciar/Activar Sonido"> <i class="fas fa-volume-up"></i> </button> <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" class="w-20 h-1.5 cursor-pointer appearance-none hidden md:inline-block" aria-label="Control de volumen"> <button id="fullscreen-btn" class="text-xl focus:outline-none w-8 h-8 flex items-center justify-center" aria-label="Pantalla Completa"> <i class="fas fa-expand"></i> </button> </div>
-                             </div>
-                         </div>
-                     </div>
-                     <div class="mb-4"> <h1 id="video-title" class="text-xl md:text-2xl font-bold mb-1 text-gray-900 dark:text-gray-100">Cargando lista...</h1> </div>
+                    <div id="video-player-container" class="relative bg-black aspect-video rounded-lg overflow-hidden mb-4 shadow-lg group">
+                        <video id="video-player" class="w-full h-full" preload="metadata" playsinline controlslist="nodownload nofullscreen noremoteplayback" disablepictureinpicture>
+                            <track label="Español" kind="subtitles" srclang="es" src="subtitulos_es.vtt">
+                            Tu navegador no soporta la etiqueta de vídeo.
+                        </video>
+                        <div id="player-loader" class="absolute inset-0 flex items-center justify-center bg-black/50 hidden">
+                            <div class="border-4 border-gray-500 border-t-white rounded-full w-12 h-12 animate-spin"></div>
+                        </div>
+                        <div id="player-message" class="absolute top-4 left-4 right-4 p-3 rounded text-white text-sm z-20 text-center pointer-events-none hidden opacity-0 transition-opacity duration-500"></div>
+                        <div id="video-controls" class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300 z-10">
+                            <input type="range" id="progress-bar" value="0" step="0.1" class="w-full h-1.5 mb-2 cursor-pointer appearance-none">
+                            <div class="flex items-center justify-between text-white">
+                                <div class="flex items-center space-x-3">
+                                    <button id="play-pause-btn" class="text-xl focus:outline-none w-8 h-8 flex items-center justify-center" aria-label="Reproducir/Pausar">
+                                        <i class="fas fa-play"></i> </button>
+                                    <span id="time-display" class="text-xs font-mono">00:00 / 00:00</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button id="speed-btn" class="text-xs font-semibold focus:outline-none px-2 py-1 rounded hover:bg-white/20" aria-label="Velocidad de reproducción">1x</button>
+                                    <button id="volume-btn" class="text-xl focus:outline-none w-8 h-8 flex items-center justify-center" aria-label="Silenciar/Activar Sonido">
+                                        <i class="fas fa-volume-up"></i> </button>
+                                    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" class="w-20 h-1.5 cursor-pointer appearance-none hidden md:inline-block" aria-label="Control de volumen">
+                                    <button id="fullscreen-btn" class="text-xl focus:outline-none w-8 h-8 flex items-center justify-center" aria-label="Pantalla Completa">
+                                        <i class="fas fa-expand"></i> </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 pb-4 border-b border-gray-200 dark:border-gray-700 gap-4">
-                         <div class="flex items-center space-x-3 min-w-0 flex-grow">
-                             <div id="channel-logo-container" class="w-10 h-10 rounded-full bg-gray-500 text-white flex items-center justify-center text-xl overflow-hidden flex-shrink-0"> <i class="fas fa-tv"></i> <img id="channel-logo-img" src="" alt="" class="w-full h-full object-contain hidden"> </div>
-                             <div class="flex-1 min-w-0 mr-4"> <div id="channel-name" class="font-semibold truncate text-gray-900 dark:text-gray-100">Nombre del Canal</div> <div id="subscriber-count" class="text-xs text-gray-500 dark:text-gray-400 truncate">Grupo/Subtítulo</div> </div>
-                             <button class="bg-black dark:bg-gray-700 text-white dark:text-gray-200 px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-800 dark:hover:bg-gray-600 flex-shrink-0 opacity-50 cursor-not-allowed">Suscribirse</button>
-                         </div>
-                         <div class="flex items-center space-x-1 text-gray-700 dark:text-gray-300 flex-shrink-0">
-                             <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden"> <button id="like-btn" class="flex items-center space-x-1 px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none text-gray-700 dark:text-gray-300 opacity-50 cursor-not-allowed" aria-label="Me gusta"> <i class="far fa-thumbs-up"></i> <span id="like-count" class="text-sm">--</span> </button> <div class="border-l border-gray-300 dark:border-gray-600 h-6 self-center"></div> <button id="dislike-btn" class="flex items-center px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none text-gray-700 dark:text-gray-300 opacity-50 cursor-not-allowed" aria-label="No me gusta"> <i class="far fa-thumbs-down"></i> </button> </div>
-                             <button class="flex items-center space-x-1 px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none text-gray-700 dark:text-gray-300 opacity-50 cursor-not-allowed" aria-label="Compartir"> <i class="fas fa-share"></i> <span class="hidden lg:inline">Compartir</span> </button>
-                             <button class="flex items-center space-x-1 px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none text-gray-700 dark:text-gray-300 opacity-50 cursor-not-allowed" aria-label="Guardar"> <i class="fas fa-plus-square"></i> <span class="hidden lg:inline">Guardar</span> </button>
-                             <button id="favorite-btn" class="flex items-center px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none ml-1" aria-label="Añadir a Favoritos"> <i class="far fa-star text-gray-600 dark:text-gray-400"></i> </button>
-                         </div>
-                     </div>
-                     <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg mb-6 text-sm text-gray-700 dark:text-gray-300"> <p id="video-description">Selecciona un canal de la lista de recomendados para empezar.</p> </div>
+                    <div id="video-details-wrapper">
+                        <div class="mb-4">
+                            <h1 id="video-title" class="text-xl md:text-2xl font-bold mb-1 text-gray-900 dark:text-gray-100">Cargando lista...</h1>
+                        </div>
 
-                     <div id="comments-section" class="mb-6">
-                         <h2 class="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100"><span id="comment-count">0</span> Comentarios</h2>
-                         <div class="flex items-start space-x-3 mb-6"> <div class="w-10 h-10 rounded-full bg-gray-400 dark:bg-gray-600 flex-shrink-0 flex items-center justify-center text-white"> <i class="fas fa-user"></i> </div> <input type="text" placeholder="Añade un comentario..." class="w-full border-b-2 border-gray-300 dark:border-gray-600 focus:border-black dark:focus:border-gray-400 focus:outline-none py-1 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"> </div>
-                         <div id="comment-list" class="space-y-5"> </div>
-                     </div>
-                 </div>
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 pb-4 border-b border-gray-200 dark:border-gray-700 gap-4">
+                            <div class="flex items-center space-x-3 min-w-0 flex-grow">
+                                <div id="channel-logo-container" class="w-10 h-10 rounded-full bg-gray-500 text-white flex items-center justify-center text-xl overflow-hidden flex-shrink-0">
+                                    <i class="fas fa-tv"></i> <img id="channel-logo-img" src="" alt="" class="w-full h-full object-contain hidden"> </div>
+                                <div class="flex-1 min-w-0 mr-4">
+                                    <div id="channel-name" class="font-semibold truncate text-gray-900 dark:text-gray-100">Nombre del Canal</div>
+                                    <div id="subscriber-count" class="text-xs text-gray-500 dark:text-gray-400 truncate">Grupo/Subtítulo</div>
+                                </div>
+                                <button class="bg-black dark:bg-gray-700 text-white dark:text-gray-200 px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-800 dark:hover:bg-gray-600 flex-shrink-0 opacity-50 cursor-not-allowed">Suscribirse</button>
+                            </div>
+                            <div class="flex items-center space-x-1 text-gray-700 dark:text-gray-300 flex-shrink-0">
+                                <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
+                                    <button id="like-btn" class="flex items-center space-x-1 px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none text-gray-700 dark:text-gray-300 opacity-50 cursor-not-allowed" aria-label="Me gusta">
+                                        <i class="far fa-thumbs-up"></i> <span id="like-count" class="text-sm">--</span>
+                                    </button>
+                                    <div class="border-l border-gray-300 dark:border-gray-600 h-6 self-center"></div>
+                                    <button id="dislike-btn" class="flex items-center px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none text-gray-700 dark:text-gray-300 opacity-50 cursor-not-allowed" aria-label="No me gusta">
+                                        <i class="far fa-thumbs-down"></i>
+                                    </button>
+                                </div>
+                                <button class="flex items-center space-x-1 px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none text-gray-700 dark:text-gray-300 opacity-50 cursor-not-allowed" aria-label="Compartir">
+                                    <i class="fas fa-share"></i> <span class="hidden lg:inline">Compartir</span>
+                                </button>
+                                <button class="flex items-center space-x-1 px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none text-gray-700 dark:text-gray-300 opacity-50 cursor-not-allowed" aria-label="Guardar">
+                                    <i class="fas fa-plus-square"></i> <span class="hidden lg:inline">Guardar</span>
+                                </button>
+                                <button id="favorite-btn" class="flex items-center px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none ml-1" aria-label="Añadir a Favoritos">
+                                    <i class="far fa-star text-gray-600 dark:text-gray-400"></i> </button>
+                            </div>
+                        </div>
 
-                 <aside id="channel-list-sidebar" class="w-full md:w-96 flex-shrink-0">
-                     <h2 id="channel-list-title" class="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">Canales Disponibles</h2>
-                     <div id="channel-list-container" tabindex="-1" class="space-y-3 max-h-[calc(100vh-250px)] overflow-y-auto focus:outline-none">
-                         <p id="channel-list-placeholder" class="text-gray-500 dark:text-gray-400">Cargando canales...</p>
-                     </div>
-                 </aside>
+                        <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg mb-6 text-sm text-gray-700 dark:text-gray-300">
+                            <p id="video-description">Selecciona un canal de la lista de recomendados para empezar.</p>
+                        </div>
+
+                        <div id="comments-section" class="mb-6">
+                            <h2 class="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100"><span id="comment-count">0</span> Comentarios</h2>
+                            <div class="flex items-start space-x-3 mb-6">
+                                <div class="w-10 h-10 rounded-full bg-gray-400 dark:bg-gray-600 flex-shrink-0 flex items-center justify-center text-white">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <input type="text" placeholder="Añade un comentario..." class="w-full border-b-2 border-gray-300 dark:border-gray-600 focus:border-black dark:focus:border-gray-400 focus:outline-none py-1 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400">
+                            </div>
+                            <div id="comment-list" class="space-y-5">
+                                </div>
+                        </div>
+                    </div> </div> <aside id="channel-list-sidebar" class="w-full md:w-96 flex-shrink-0">
+                    <h2 id="channel-list-title" class="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">Canales Disponibles</h2>
+                    <div id="channel-list-container" tabindex="-1" class="space-y-3 max-h-[calc(100vh-250px)] md:max-h-[calc(100vh-150px)] overflow-y-auto focus:outline-none">
+                        <p id="channel-list-placeholder" class="text-gray-500 dark:text-gray-400">Cargando canales...</p>
+                        </div>
+                </aside>
             </main>
 
-            <div id="settings-view" class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-100 dark:bg-gray-900 transition-colors duration-300 ease-in-out min-w-0 hidden">
-                 <div class="max-w-2xl mx-auto">
+            <div id="settings-view" class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-100 dark:bg-gray-900 transition-colors duration-300 ease-in-out hidden">
+                <div class="max-w-2xl mx-auto">
                     <div class="flex items-center justify-between mb-6">
-                         <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Configuración</h1>
-                         <button id="close-settings-btn" class="text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 focus:outline-none text-2xl">&times;</button>
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Configuración</h1>
+                        <button id="close-settings-btn" class="text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 focus:outline-none text-2xl">&times;</button>
                     </div>
 
                     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
-                         <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Fuente de Canales</h2>
-                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">URL del archivo M3U actual:</p>
-                         <p id="m3u-url-display" class="text-xs text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 p-2 rounded break-all"></p>
-                         <div class="mt-4">
-                             <button id="reload-m3u-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Recargar Lista</button>
-                         </div>
+                        <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Fuente de Canales</h2>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">URL del archivo M3U actual:</p>
+                        <p id="m3u-url-display" class="text-xs text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 p-2 rounded break-all"></p>
+                        <div class="mt-4">
+                            <button id="reload-m3u-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Recargar Lista</button>
+                        </div>
                     </div>
 
                     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
-                         <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Gestión de Datos</h2>
-                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                             <p class="text-sm text-gray-600 dark:text-gray-400">Borrar todos los canales favoritos guardados.</p>
-                             <button id="clear-favorites-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 flex-shrink-0">Borrar Favoritos</button>
-                         </div>
-                         <hr class="my-4 border-gray-200 dark:border-gray-700">
-                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                             <p class="text-sm text-gray-600 dark:text-gray-400">Borrar el historial de canales reproducidos.</p>
-                             <button id="clear-history-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 flex-shrink-0">Borrar Historial</button>
-                         </div>
+                        <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Gestión de Datos</h2>
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Borrar todos los canales favoritos guardados.</p>
+                            <button id="clear-favorites-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 flex-shrink-0">Borrar Favoritos</button>
+                        </div>
+                        <hr class="my-4 border-gray-200 dark:border-gray-700">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Borrar el historial de canales reproducidos.</p>
+                            <button id="clear-history-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 flex-shrink-0">Borrar Historial</button>
+                        </div>
                     </div>
 
                     <div class="text-center mt-8">
-                         <button id="back-to-player-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">Volver al Reproductor</button>
+                        <button id="back-to-player-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">Volver al Reproductor</button>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
+            </div> </div> </div> <script>
         // --- Elementos del DOM ---
+        // Se obtienen referencias a los elementos HTML necesarios para la interactividad
         const mainLoader = document.getElementById('main-loader');
         const appContainer = document.getElementById('app-container');
         const mainContentArea = document.getElementById('main-content-area');
@@ -255,7 +344,7 @@
         const categoriesPlaceholder = document.getElementById('categories-placeholder');
         const favoriteBtn = document.getElementById('favorite-btn');
         const themeToggleBtn = document.getElementById('theme-toggle-btn');
-        const htmlElement = document.documentElement;
+        const htmlElement = document.documentElement; // Referencia al elemento <html> para el tema
         const loadErrorMessageContainer = document.getElementById('load-error-message');
         const closeSettingsBtn = document.getElementById('close-settings-btn');
         const backToPlayerBtn = document.getElementById('back-to-player-btn');
@@ -263,33 +352,42 @@
         const clearFavoritesBtn = document.getElementById('clear-favorites-btn');
         const clearHistoryBtn = document.getElementById('clear-history-btn');
         const reloadM3uBtn = document.getElementById('reload-m3u-btn');
+        // --- NUEVO: Referencia al wrapper de detalles ---
+        const videoDetailsWrapper = document.getElementById('video-details-wrapper');
 
-        // --- URL del M3U ---
+
+        // --- URL del M3U y Configuración de Caché ---
         const m3uUrl = 'https://raw.githubusercontent.com/sejo48/chanejorgedez/refs/heads/main/listaoficial.m3u';
-        const CACHE_KEY = 'm3u_cache';
+        const CACHE_KEY = 'm3u_cache'; // Clave para guardar/recuperar la caché del M3U en localStorage
         const CACHE_EXPIRATION = 6 * 60 * 60 * 1000; // 6 horas en milisegundos
 
         // --- Estado de la Aplicación ---
-        let hls = null;
-        let channels = [];
-        let currentChannelIndex = -1;
-        const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2];
-        let currentSpeedIndex = 2;
-        let favoriteChannelUrls = new Set();
-        const FAVORITES_KEY = 'youtubeClone_favorites';
-        let recentlyWatchedUrls = [];
-        const HISTORY_KEY = 'youtubeClone_history';
-        const MAX_HISTORY_SIZE = 20;
-        let currentView = 'all';
-        let currentCategoryGroup = null;
-        let previousView = 'all';
-        let isDarkMode = false;
-        const THEME_KEY = 'youtubeClone_theme';
-        let activeCategoryLinkElement = null;
-        let retryCount = 0;
-        const MAX_RETRIES = 3;
+        // Variables para mantener el estado actual del reproductor y la interfaz
+        let hls = null; // Instancia de HLS.js
+        let channels = []; // Array para almacenar los canales parseados del M3U
+        let currentChannelIndex = -1; // Índice del canal actualmente seleccionado/reproduciendo
+        const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2]; // Velocidades de reproducción disponibles
+        let currentSpeedIndex = 2; // Índice de la velocidad actual (1x por defecto)
+        let favoriteChannelUrls = new Set(); // Conjunto para almacenar URLs de canales favoritos
+        const FAVORITES_KEY = 'youtubeClone_favorites'; // Clave para localStorage de favoritos
+        let recentlyWatchedUrls = []; // Array para almacenar URLs de canales vistos recientemente (historial)
+        const HISTORY_KEY = 'youtubeClone_history'; // Clave para localStorage del historial
+        const MAX_HISTORY_SIZE = 20; // Tamaño máximo del historial
+        let currentView = 'all'; // Vista actual ('all', 'favorites', 'history', 'category', 'settings')
+        let currentCategoryGroup = null; // Grupo de categoría seleccionado
+        let previousView = 'all'; // Vista anterior (para volver desde configuración)
+        let isDarkMode = false; // Estado del tema oscuro/claro
+        const THEME_KEY = 'youtubeClone_theme'; // Clave para localStorage del tema
+        let activeCategoryLinkElement = null; // Elemento del enlace de categoría activo en el sidebar
+        let retryCount = 0; // Contador de reintentos para cargar el M3U
+        const MAX_RETRIES = 3; // Máximo número de reintentos
+        // --- NUEVO: Estado para el scroll en móvil ---
+        let lastScrollTop = 0; // Última posición de scroll de la lista de canales
+        const scrollThreshold = 10; // Umbral en píxeles para detectar scroll significativo
+
 
         // --- Datos de Comentarios Simulados ---
+        // Array de objetos para simular comentarios (no se guardan)
         const sampleComments = [
             { author: "Usuario Alfa", timestamp: "Hace 15 minutos", text: "¡Excelente transmisión! Se ve muy nítido.", likes: 12, avatarColor: "#3B82F6" },
             { author: "Beta Tester", timestamp: "Hace 1 hora", text: "¿Alguien sabe si pasarán el partido más tarde?", likes: 3, avatarColor: "#10B981" },
@@ -299,6 +397,10 @@
         ];
 
         // --- Funciones Tema Oscuro/Claro ---
+
+        /**
+         * Carga el tema (oscuro/claro) desde localStorage o prefiere el del sistema.
+         */
         function loadTheme() {
             const savedTheme = localStorage.getItem(THEME_KEY);
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -306,10 +408,16 @@
             applyTheme();
         }
 
+        /**
+         * Guarda la preferencia de tema actual en localStorage.
+         */
         function saveTheme() {
             localStorage.setItem(THEME_KEY, isDarkMode ? 'dark' : 'light');
         }
 
+        /**
+         * Aplica el tema actual (añade/quita la clase 'dark' del HTML) y actualiza el icono del botón.
+         */
         function applyTheme() {
             htmlElement.classList.toggle('dark', isDarkMode);
             if (themeToggleBtn) {
@@ -318,6 +426,9 @@
             }
         }
 
+        /**
+         * Cambia entre modo oscuro y claro.
+         */
         function toggleTheme() {
             isDarkMode = !isDarkMode;
             applyTheme();
@@ -325,6 +436,10 @@
         }
 
         // --- Funciones Favoritos ---
+
+        /**
+         * Carga los URLs de canales favoritos desde localStorage.
+         */
         function loadFavorites() {
             const storedFavorites = localStorage.getItem(FAVORITES_KEY);
             if (storedFavorites) {
@@ -343,20 +458,29 @@
             }
         }
 
+        /**
+         * Guarda el conjunto actual de URLs favoritas en localStorage.
+         */
         function saveFavorites() {
             localStorage.setItem(FAVORITES_KEY, JSON.stringify(Array.from(favoriteChannelUrls)));
         }
 
+        /**
+         * Comprueba si una URL de canal está en el conjunto de favoritos.
+         * @param {string} channelUrl - La URL del canal a comprobar.
+         * @returns {boolean} - True si es favorito, false si no.
+         */
         function isFavorite(channelUrl) {
             return favoriteChannelUrls.has(channelUrl);
         }
 
+        /**
+         * Añade o quita el canal actual de la lista de favoritos.
+         */
         function toggleFavorite() {
             if (currentChannelIndex < 0 || currentChannelIndex >= channels.length) return;
-            
             const currentChannel = channels[currentChannelIndex];
             const url = currentChannel.url;
-            
             if (isFavorite(url)) {
                 favoriteChannelUrls.delete(url);
                 showPlayerMessage(`"${currentChannel.name}" eliminado de Favoritos`);
@@ -364,15 +488,16 @@
                 favoriteChannelUrls.add(url);
                 showPlayerMessage(`"${currentChannel.name}" añadido a Favoritos`);
             }
-            
             saveFavorites();
             updateFavoriteButtonState();
-            
             if (currentView === 'favorites') {
                 renderChannelList();
             }
         }
 
+        /**
+         * Actualiza el estado visual (icono, clase, aria-label) del botón de favoritos.
+         */
         function updateFavoriteButtonState() {
             if (currentChannelIndex < 0 || currentChannelIndex >= channels.length) {
                 favoriteBtn.classList.remove('is-favorite');
@@ -382,11 +507,9 @@
                 favoriteBtn.disabled = true;
                 return;
             }
-            
             favoriteBtn.disabled = false;
             const currentChannel = channels[currentChannelIndex];
             const isFav = isFavorite(currentChannel.url);
-            
             favoriteBtn.classList.toggle('is-favorite', isFav);
             favoriteBtn.querySelector('i').classList.toggle('fas', isFav);
             favoriteBtn.querySelector('i').classList.toggle('far', !isFav);
@@ -396,21 +519,26 @@
             favoriteBtn.setAttribute('aria-label', isFav ? 'Quitar de Favoritos' : 'Añadir a Favoritos');
         }
 
+        /**
+         * Borra todos los canales favoritos guardados (previa confirmación).
+         */
         function clearFavorites() {
             if (confirm('¿Estás seguro de que quieres borrar TODOS tus favoritos? Esta acción no se puede deshacer.')) {
                 favoriteChannelUrls.clear();
                 saveFavorites();
                 updateFavoriteButtonState();
-                
                 if (currentView === 'favorites') {
                     renderChannelList();
                 }
-                
                 showPlayerMessage("Favoritos borrados", false, settingsView);
             }
         }
 
         // --- Funciones Historial ---
+
+        /**
+         * Carga el historial de URLs vistas desde localStorage.
+         */
         function loadHistory() {
             const storedHistory = localStorage.getItem(HISTORY_KEY);
             if (storedHistory) {
@@ -428,46 +556,59 @@
             }
         }
 
+        /**
+         * Guarda el array actual del historial en localStorage.
+         */
         function saveHistory() {
             localStorage.setItem(HISTORY_KEY, JSON.stringify(recentlyWatchedUrls));
         }
 
+        /**
+         * Añade una URL de canal al principio del historial.
+         * Elimina duplicados y limita el tamaño del historial.
+         * @param {string} channelUrl - La URL del canal a añadir.
+         */
         function addToHistory(channelUrl) {
             if (!channelUrl) return;
-            
             recentlyWatchedUrls = recentlyWatchedUrls.filter(url => url !== channelUrl);
             recentlyWatchedUrls.unshift(channelUrl);
-            
             if (recentlyWatchedUrls.length > MAX_HISTORY_SIZE) {
                 recentlyWatchedUrls.pop();
             }
-            
             saveHistory();
-            
             if (currentView === 'history') {
                 renderChannelList();
             }
         }
 
+        /**
+         * Borra todo el historial de reproducción (previa confirmación).
+         */
         function clearHistory() {
             if (confirm('¿Estás seguro de que quieres borrar TODO tu historial de reproducción? Esta acción no se puede deshacer.')) {
                 recentlyWatchedUrls = [];
                 saveHistory();
-                
                 if (currentView === 'history') {
                     renderChannelList();
                 }
-                
                 showPlayerMessage("Historial borrado", false, settingsView);
             }
         }
 
         // --- Funciones de Navegación y Vistas ---
+
+        /**
+         * Muestra el área de contenido principal (reproductor y lista) y oculta la configuración.
+         */
         function showMainContent() {
             mainContentArea.classList.remove('hidden');
             settingsView.classList.add('hidden');
         }
 
+        /**
+         * Muestra la vista de configuración y oculta el contenido principal.
+         * Guarda la vista anterior para poder volver.
+         */
         function showSettingsView() {
             previousView = currentView !== 'settings' ? currentView : previousView;
             currentView = 'settings';
@@ -477,19 +618,28 @@
             m3uUrlDisplay.textContent = m3uUrl;
         }
 
+        /**
+         * Cambia a una vista específica (home, favoritos, historial, categoría).
+         * @param {string} view - El nombre de la vista ('all', 'favorites', 'history', 'category').
+         * @param {string|null} [categoryGroup=null] - El grupo de categoría (solo si view es 'category').
+         */
         function navigateToView(view, categoryGroup = null) {
             showMainContent();
             currentView = view;
             currentCategoryGroup = categoryGroup;
             renderChannelList();
             updateSidebarActiveLink(view, categoryGroup);
-            
             if (sidebar.classList.contains('open')) {
                 toggleSidebar();
             }
         }
 
         // --- Inicialización HLS.js ---
+
+        /**
+         * Inicializa la instancia de HLS.js si es soportado por el navegador.
+         * Configura los listeners de eventos para errores y carga del manifiesto.
+         */
         function initializeHls() {
             if (Hls.isSupported()) {
                 hls = new Hls({
@@ -502,7 +652,6 @@
                     fragLoadingTimeOut: 30000,
                     startLoadOnInit: false
                 });
-
                 hls.on(Hls.Events.ERROR, handleHlsError);
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
                     videoPlayer.play().catch(e => {
@@ -510,22 +659,27 @@
                         showPlayerMessage("Presiona Play para iniciar", false);
                     });
                 });
-                
                 hls.attachMedia(videoPlayer);
             } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                console.log("HLS.js no soportado, usando soporte HLS nativo del navegador.");
                 videoPlayer.addEventListener('error', handlePlaybackError);
             } else {
-                showPlayerMessage("Tu navegador no soporta este tipo de video", true);
+                showPlayerMessage("Tu navegador no soporta este tipo de video (HLS)", true);
             }
         }
 
         // --- Parseo del M3U ---
+
+        /**
+         * Parsea el contenido de un archivo M3U y extrae la información de los canales.
+         * @param {string} text - El contenido del archivo M3U como texto.
+         * @returns {Array<object>} - Un array de objetos, cada uno representando un canal.
+         */
         function parseM3U(text) {
             const lines = text.split('\n');
             const parsedChannels = [];
             let currentChannel = null;
             let channelIdCounter = 0;
-            
             for (const line of lines) {
                 const trimmedLine = line.trim();
                 if (trimmedLine.startsWith('#EXTINF:')) {
@@ -536,24 +690,18 @@
                         logo: null,
                         group: 'General'
                     };
-
-                    // Extraer atributos y nombre del canal
                     const parts = trimmedLine.split(/:(.+)/)[1].split(',');
                     const attributes = parts[0];
-                    currentChannel.name = parts[1] || 'Canal Desconocido';
-
-                    // Extraer atributos individuales
+                    currentChannel.name = parts[1]?.trim() || 'Canal Desconocido';
                     const logoMatch = attributes.match(/tvg-logo="([^"]*)"/i);
                     if (logoMatch && logoMatch[1]) {
                         currentChannel.logo = logoMatch[1].trim();
                     }
-
                     const groupMatch = attributes.match(/group-title="([^"]*)"/i);
                     if (groupMatch && groupMatch[1]) {
                         currentChannel.group = groupMatch[1].trim() || 'General';
                     }
-                } 
-                else if (currentChannel && trimmedLine && !trimmedLine.startsWith('#')) {
+                } else if (currentChannel && trimmedLine && !trimmedLine.startsWith('#')) {
                     if (trimmedLine.startsWith('http://') || trimmedLine.startsWith('https://')) {
                         currentChannel.url = trimmedLine;
                         parsedChannels.push(currentChannel);
@@ -561,81 +709,73 @@
                     }
                 }
             }
-            
             return parsedChannels;
         }
 
         // --- Carga y Parseo del M3U con caché ---
+
+        /**
+         * Carga el archivo M3U desde la URL, usando caché si está disponible y no ha expirado.
+         * Parsea el contenido y actualiza la interfaz.
+         * @param {string} url - La URL del archivo M3U.
+         */
         async function fetchAndLoadM3U(url) {
             mainLoader.style.display = 'block';
             appContainer.classList.add('hidden');
             loadErrorMessageContainer.classList.add('hidden');
-            
             try {
-                // Intentar cargar desde caché primero
                 const cachedData = localStorage.getItem(CACHE_KEY);
                 let m3uText = null;
-                
                 if (cachedData) {
                     const { timestamp, data } = JSON.parse(cachedData);
                     const age = Date.now() - timestamp;
-                    
                     if (age < CACHE_EXPIRATION) {
                         m3uText = data;
                         console.log("Usando lista M3U desde caché");
+                    } else {
+                        console.log("Caché M3U expirada.");
+                        localStorage.removeItem(CACHE_KEY);
                     }
                 }
-                
-                // Si no hay caché válido, cargar desde la red
                 if (!m3uText) {
+                    console.log("Cargando lista M3U desde la red...");
                     const response = await fetch(`${url}?t=${Date.now()}`);
-                    
                     if (!response.ok) {
-                        throw new Error(`Error ${response.status}: ${response.statusText}`);
+                        throw new Error(`Error al cargar M3U: ${response.status} ${response.statusText}`);
                     }
-                    
                     m3uText = await response.text();
-                    
-                    // Guardar en caché
                     localStorage.setItem(CACHE_KEY, JSON.stringify({
                         timestamp: Date.now(),
                         data: m3uText
                     }));
+                    console.log("Lista M3U guardada en caché.");
                 }
-                
                 if (!m3uText || !m3uText.includes('#EXTINF')) {
-                    throw new Error("El archivo M3U no tiene un formato válido");
+                    throw new Error("El archivo M3U descargado no parece tener un formato válido.");
                 }
-                
                 channels = parseM3U(m3uText);
-                
                 if (channels.length === 0) {
-                    throw new Error("No se encontraron canales en la lista");
+                    throw new Error("No se encontraron canales válidos en la lista M3U.");
                 }
-                
                 generateCategoryLinks();
                 navigateToView('all');
-                renderChannelList();
-                
                 appContainer.classList.remove('hidden');
-                retryCount = 0; // Resetear contador de reintentos
+                retryCount = 0;
             } catch (error) {
-                console.error("Error al cargar M3U:", error);
-                
-                // Reintentar si es un error de red y no hemos alcanzado el máximo
-                if (error.message.includes('Failed to fetch') && retryCount < MAX_RETRIES) {
+                console.error("Error fatal al cargar o procesar M3U:", error);
+                if ((error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) && retryCount < MAX_RETRIES) {
                     retryCount++;
-                    console.log(`Reintentando (${retryCount}/${MAX_RETRIES})...`);
+                    console.log(`Error de red. Reintentando cargar M3U (${retryCount}/${MAX_RETRIES})...`);
                     setTimeout(() => fetchAndLoadM3U(url), 3000 * retryCount);
                     return;
                 }
-                
                 loadErrorMessageContainer.innerHTML = `
                     <div class="text-red-500 dark:text-red-400">
-                        <h1 class="text-xl font-bold mb-2">Error al Cargar</h1>
-                        <p>${error.message}</p>
-                        <button onclick="location.reload()" class="mt-3 px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded">
-                            Reintentar
+                        <h1 class="text-xl font-bold mb-2">Error al Cargar la Lista</h1>
+                        <p class="text-sm">${error.message}</p>
+                        <p class="text-xs mt-2">Verifica tu conexión o la URL del M3U.</p>
+                        <button onclick="location.reload()" class="mt-3 px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">
+                            Reintentar Carga
                         </button>
                     </div>`;
                 loadErrorMessageContainer.classList.remove('hidden');
@@ -644,56 +784,65 @@
             }
         }
 
+
         // --- Generar Links de Categorías Dinámicas ---
+
+        /**
+         * Genera los enlaces para cada grupo/categoría encontrada en los canales
+         * y los añade al sidebar izquierdo.
+         */
         function generateCategoryLinks() {
             dynamicCategoriesContainer.innerHTML = '';
-            
-            const groups = [...new Set(channels.map(c => c.group || 'General'))].sort((a, b) => a.localeCompare(b));
-            
-            if (groups.length === 0 || (groups.length === 1 && groups[0] === 'General')) {
+            const groups = [...new Set(channels.map(c => c.group?.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+            if (groups.length === 0 || (groups.length === 1 && groups[0].toLowerCase() === 'general')) {
                 categoriesPlaceholder.textContent = "No hay categorías definidas.";
                 categoriesPlaceholder.style.display = 'block';
                 return;
             }
-            
             categoriesPlaceholder.style.display = 'none';
-            
             groups.forEach(group => {
-                if (!group) return;
-                
                 const link = document.createElement('a');
                 link.href = '#';
                 link.classList.add('sidebar-link', 'category-link', 'flex', 'items-center', 'space-x-4', 'px-3', 'py-2', 'rounded-lg', 'hover:bg-gray-100', 'dark:hover:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
                 link.dataset.group = group;
-                
                 const iconClass = getIconForCategory(group);
                 link.innerHTML = `<i class="${iconClass} fa-fw text-gray-500 dark:text-gray-400 w-5 text-center"></i> <span>${group}</span>`;
-                
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
                     navigateToView('category', group);
                 });
-                
                 dynamicCategoriesContainer.appendChild(link);
             });
         }
 
+        /**
+         * Devuelve una clase de icono de Font Awesome basada en el nombre del grupo.
+         * @param {string} groupName - El nombre del grupo/categoría.
+         * @returns {string} - La clase CSS del icono (ej: 'fas fa-music').
+         */
         function getIconForCategory(groupName) {
+            if (!groupName) return 'fas fa-tv';
             const lowerGroup = groupName.toLowerCase();
             if (lowerGroup.includes('music') || lowerGroup.includes('música')) return 'fas fa-music';
             if (lowerGroup.includes('game') || lowerGroup.includes('juego')) return 'fas fa-gamepad';
             if (lowerGroup.includes('news') || lowerGroup.includes('noticia')) return 'fas fa-newspaper';
             if (lowerGroup.includes('sport') || lowerGroup.includes('deporte')) return 'fas fa-futbol';
             if (lowerGroup.includes('movie') || lowerGroup.includes('cine') || lowerGroup.includes('película')) return 'fas fa-film';
+            if (lowerGroup.includes('infantil') || lowerGroup.includes('kids')) return 'fas fa-child';
+            if (lowerGroup.includes('docu') || lowerGroup.includes('cultura')) return 'fas fa-book-open';
             return 'fas fa-tv';
         }
 
+
         // --- Renderizar Canales ---
+
+        /**
+         * Muestra la lista de canales en el sidebar derecho según la vista actual (todos, favoritos, historial, categoría).
+         */
         function renderChannelList() {
             channelListContainer.innerHTML = '';
             let channelsToDisplay = [];
             let title = "Canales Disponibles";
-            
             switch (currentView) {
                 case 'favorites':
                     channelsToDisplay = channels.filter(channel => isFavorite(channel.url));
@@ -715,26 +864,20 @@
                     title = "Todos los Canales";
                     break;
             }
-            
             channelListTitle.textContent = title;
-            
             if (channelsToDisplay.length === 0) {
                 let placeholderText = "No hay canales para mostrar.";
                 if (currentView === 'favorites') placeholderText = "No tienes canales favoritos marcados.";
                 else if (currentView === 'history') placeholderText = "Tu historial de reproducción está vacío.";
                 else if (currentView === 'category') placeholderText = `No hay canales en la categoría "${currentCategoryGroup}".`;
-                
                 channelListPlaceholder.textContent = placeholderText;
                 channelListPlaceholder.style.display = 'block';
                 return;
             }
-            
             channelListPlaceholder.style.display = 'none';
-            
-            channelsToDisplay.forEach((channel, index) => {
+            channelsToDisplay.forEach((channel) => {
                 const originalIndex = channels.findIndex(c => c.id === channel.id);
                 const videoElement = document.createElement('div');
-                
                 videoElement.classList.add('flex', 'space-x-3', 'cursor-pointer', 'channel-item', 'p-2', 'rounded-lg', 'hover:bg-gray-200', 'dark:hover:bg-gray-700', 'items-center');
                 videoElement.setAttribute('role', 'button');
                 videoElement.setAttribute('tabindex', '0');
@@ -742,40 +885,32 @@
                 videoElement.dataset.index = originalIndex;
                 videoElement.dataset.url = channel.url;
                 videoElement.dataset.id = channel.id;
-                
                 const thumbContainer = document.createElement('div');
                 thumbContainer.classList.add('w-24', 'h-14', 'flex-shrink-0', 'relative', 'bg-gray-200', 'dark:bg-gray-700', 'rounded', 'overflow-hidden', 'flex', 'items-center', 'justify-center');
-                
                 if (channel.logo && channel.logo.startsWith('http')) {
                     const logoImg = document.createElement('img');
                     logoImg.alt = "";
                     logoImg.classList.add('recommended-thumbnail');
                     logoImg.loading = 'lazy';
                     logoImg.src = channel.logo;
-                    
                     logoImg.onerror = () => {
                         thumbContainer.innerHTML = `<i class="fas ${getIconForCategory(channel.group)} text-3xl text-gray-500 dark:text-gray-400"></i>`;
                     };
-                    
                     thumbContainer.appendChild(logoImg);
                 } else {
                     thumbContainer.innerHTML = `<i class="fas ${getIconForCategory(channel.group)} text-3xl text-gray-500 dark:text-gray-400"></i>`;
                 }
-                
                 const infoDiv = document.createElement('div');
                 infoDiv.classList.add('flex-1', 'overflow-hidden');
                 infoDiv.innerHTML = `
                     <h3 class="text-sm font-semibold line-clamp-2 text-gray-800 dark:text-gray-200">${channel.name}</h3>
                     <p class="text-xs text-gray-500 dark:text-gray-400 truncate">${channel.group || 'General'}</p>
                 `;
-                
                 videoElement.appendChild(thumbContainer);
                 videoElement.appendChild(infoDiv);
-                
                 const loadHandler = () => {
                     loadVideo(originalIndex);
                 };
-                
                 videoElement.addEventListener('click', loadHandler);
                 videoElement.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -783,54 +918,47 @@
                         loadHandler();
                     }
                 });
-                
                 channelListContainer.appendChild(videoElement);
             });
-            
             highlightChannelInList(currentChannelIndex);
         }
 
+
         // --- Cargar y Reproducir un Vídeo/Canal ---
+
+        /**
+         * Carga y comienza la reproducción de un canal específico por su índice.
+         * @param {number} index - El índice del canal en el array `channels` original.
+         */
         function loadVideo(index) {
             if (index < 0 || index >= channels.length) {
-                showPlayerMessage("Canal no válido", true);
+                showPlayerMessage("Índice de canal no válido", true);
                 return;
             }
-            
-            // Limpiar estado anterior
             if (hls) {
                 hls.stopLoad();
                 hls.detachMedia();
             }
-            
             videoPlayer.removeAttribute('src');
             videoPlayer.load();
-            
             currentChannelIndex = index;
             const channel = channels[index];
             const videoUrl = channel.url;
-            
             console.log(`Cargando canal [${index}]: ${channel.name} (${videoUrl})`);
-            
             playerLoader.classList.remove('hidden');
             videoPlayer.style.opacity = '0.5';
-            
             videoTitle.textContent = channel.name;
             videoDescription.textContent = `Reproduciendo: ${channel.name}${channel.group ? ' (' + channel.group + ')' : ''}`;
             channelNameElement.textContent = channel.name;
             subscriberCountElement.textContent = channel.group || '';
-            
-            // Configurar logo del canal
             channelLogoImg.classList.add('hidden');
             channelLogoIcon.classList.remove('hidden');
             channelLogoIcon.className = `fas ${getIconForCategory(channel.group)} text-xl`;
             channelLogoContainer.classList.remove('bg-gray-500', 'bg-blue-500');
-            
             if (channel.logo && channel.logo.startsWith('http')) {
                 channelLogoImg.src = channel.logo;
                 channelLogoImg.classList.remove('hidden');
                 channelLogoIcon.classList.add('hidden');
-                
                 channelLogoImg.onerror = () => {
                     channelLogoImg.classList.add('hidden');
                     channelLogoIcon.classList.remove('hidden');
@@ -839,12 +967,10 @@
             } else {
                 channelLogoContainer.classList.add('bg-gray-500');
             }
-            
             highlightChannelInList(index);
-            currentSpeedIndex = playbackRates.indexOf(1);
             setPlaybackSpeed(1);
             updateFavoriteButtonState();
-            
+            renderComments(sampleComments);
             try {
                 if (videoUrl.toLowerCase().endsWith('.m3u8')) {
                     if (hls) {
@@ -856,16 +982,18 @@
                         videoPlayer.load();
                         videoPlayer.play().catch(e => {
                             console.warn("Fallo al auto-reproducir HLS nativo:", e.message);
+                            showPlayerMessage("Presiona Play para iniciar", false);
                         });
                     } else {
-                        throw new Error('HLS no soportado por el navegador.');
+                        throw new Error('HLS no es soportado por este navegador.');
                     }
                 } else {
                     if (hls) hls.detachMedia();
                     videoPlayer.src = videoUrl;
                     videoPlayer.load();
                     videoPlayer.play().catch(e => {
-                        console.warn("Fallo al auto-reproducir directo:", e.message);
+                        console.warn("Fallo al auto-reproducir fuente directa:", e.message);
+                        showPlayerMessage("Presiona Play para iniciar", false);
                     });
                 }
             } catch (error) {
@@ -874,78 +1002,89 @@
             }
         }
 
+
         // --- Resaltar Canal en la Lista ---
+
+        /**
+         * Marca visualmente el canal seleccionado en la lista derecha y asegura que sea visible.
+         * @param {number} selectedIndex - El índice del canal seleccionado (del array `channels` original).
+         */
         function highlightChannelInList(selectedIndex) {
             const items = channelListContainer.querySelectorAll('.channel-item');
-            
             items.forEach((item) => {
                 const itemIndex = parseInt(item.dataset.index, 10);
                 const isSelected = itemIndex === selectedIndex;
-                
                 item.classList.toggle('selected', isSelected);
-                
                 if (isSelected) {
-                    const containerRect = channelListContainer.getBoundingClientRect();
-                    const elementRect = item.getBoundingClientRect();
-                    
-                    if (elementRect.top < containerRect.top || elementRect.bottom > containerRect.bottom) {
-                        item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    }
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 }
             });
         }
 
         // --- Manejador de Errores HLS.js ---
+
+        /**
+         * Callback para manejar errores emitidos por la instancia de HLS.js.
+         * Intenta recuperar errores fatales si es posible.
+         * @param {string} event - Nombre del evento de error.
+         * @param {object} data - Datos del error proporcionados por HLS.js.
+         */
         function handleHlsError(event, data) {
             console.error('Error de HLS.js:', data.type, data.details, data);
-            
             if (data.fatal) {
                 switch(data.type) {
                     case Hls.ErrorTypes.NETWORK_ERROR:
                         showPlayerMessage("Error de red, intentando reconectar...", true);
-                        
                         if (hls && channels[currentChannelIndex]?.url === data.url) {
                             setTimeout(() => {
-                                hls.startLoad();
+                                if (hls) {
+                                   console.log("Reintentando carga HLS después de error de red...");
+                                   hls.startLoad();
+                                }
                             }, 3000);
                         }
                         break;
-                        
                     case Hls.ErrorTypes.MEDIA_ERROR:
                         showPlayerMessage("Error de stream, intentando recuperar...", true);
-                        
                         if (hls && data.details !== 'bufferStalledError') {
                             try {
+                                console.log("Intentando recuperar de Media Error HLS...");
                                 hls.recoverMediaError();
                             } catch (e) {
-                                console.error("Fallo al recuperar media error HLS:", e);
-                                hls.destroy();
+                                console.error("Fallo al recuperar media error HLS, reiniciando HLS:", e);
+                                if (hls) hls.destroy();
                                 initializeHls();
-                                loadVideo(currentChannelIndex);
+                                if (currentChannelIndex !== -1) loadVideo(currentChannelIndex);
                             }
+                        } else if (hls && data.details === 'bufferStalledError') {
+                            console.warn("Buffer Stalled Error detectado.");
                         }
                         break;
-                        
                     default:
                         handlePlaybackError(new Error(`Error HLS (${data.type}): ${data.details || 'Detalle desconocido'}`));
-                        
                         if (hls) {
                             hls.destroy();
                             initializeHls();
                         }
                         break;
                 }
+            } else {
+                console.warn("Error no fatal de HLS.js:", data.type, data.details);
             }
         }
 
         // --- Manejador de Errores de Reproducción General ---
+
+        /**
+         * Maneja errores genéricos del elemento <video> o errores fatales de HLS no recuperados.
+         * @param {Error|MediaError|null} error - El objeto de error.
+         */
         function handlePlaybackError(error) {
             console.error("Error de reproducción:", error);
             playerLoader.classList.add('hidden');
             videoPlayer.style.opacity = '1';
-            
-            showPlayerMessage(`Error: ${error?.message || 'No se pudo reproducir el canal.'}`, true);
-            
+            const errorMessage = error?.message || 'No se pudo reproducir el canal.';
+            showPlayerMessage(`Error: ${errorMessage}`, true);
             if (currentChannelIndex >= 0 && currentChannelIndex < channels.length) {
                 videoTitle.textContent = `Error al cargar: ${channels[currentChannelIndex].name}`;
             } else {
@@ -954,99 +1093,114 @@
         }
 
         // --- Mostrar Mensaje sobre el Reproductor ---
+        let playerMessageTimeoutId = null;
+
+        /**
+         * Muestra un mensaje temporal sobre el reproductor o en la vista de configuración.
+         * @param {string} message - El texto del mensaje.
+         * @param {boolean} [isError=false] - Si es un mensaje de error (fondo rojo).
+         * @param {HTMLElement} [container=playerMessage] - El elemento donde mostrar el mensaje.
+         */
         function showPlayerMessage(message, isError = false, container = playerMessage) {
             if (!container) return;
-            
             container.textContent = message;
             container.classList.toggle('bg-red-600/80', isError);
             container.classList.toggle('text-white', true);
             container.classList.toggle('bg-green-600/80', !isError && container === settingsView);
             container.classList.toggle('bg-black/70', !isError && container !== settingsView);
-            container.classList.remove('hidden', 'opacity-0');
+            container.classList.remove('hidden');
+            void container.offsetWidth;
             container.style.opacity = '1';
-            
-            if (container.timeoutId) clearTimeout(container.timeoutId);
-            
-            container.timeoutId = setTimeout(() => {
+            if (playerMessageTimeoutId) clearTimeout(playerMessageTimeoutId);
+            playerMessageTimeoutId = setTimeout(() => {
                 container.style.opacity = '0';
-                setTimeout(() => container.classList.add('hidden'), 500);
+                setTimeout(() => {
+                    container.classList.add('hidden');
+                    playerMessageTimeoutId = null;
+                }, 500);
             }, 3000);
         }
 
+
         // --- Renderizar Comentarios Simulados ---
+
+        /**
+         * Muestra una lista de comentarios simulados bajo el video.
+         * @param {Array<object>} commentsToRender - Array de objetos de comentario.
+         */
         function renderComments(commentsToRender) {
-            if (!commentListContainerJS || !commentCountElement) return;
-            
+            if (!commentListContainerJS || !commentCountElement) {
+                console.warn("Elementos de comentarios no encontrados en el DOM.");
+                return;
+            }
             commentListContainerJS.innerHTML = '';
-            
             if (!commentsToRender || commentsToRender.length === 0) {
                 commentCountElement.textContent = '0';
                 return;
             }
-            
             commentCountElement.textContent = commentsToRender.length.toLocaleString();
-            
             commentsToRender.forEach(comment => {
                 const commentDiv = document.createElement('div');
                 commentDiv.classList.add('flex', 'items-start', 'space-x-3');
-                
                 const avatarDiv = document.createElement('div');
                 avatarDiv.classList.add('w-10', 'h-10', 'rounded-full', 'flex-shrink-0', 'flex', 'items-center', 'justify-center', 'text-white', 'font-semibold');
                 avatarDiv.style.backgroundColor = comment.avatarColor || '#A0AEC0';
                 avatarDiv.textContent = comment.author.charAt(0).toUpperCase();
-                
                 const contentDiv = document.createElement('div');
                 contentDiv.classList.add('flex-1');
-                
                 const infoDiv = document.createElement('div');
                 infoDiv.classList.add('text-sm');
                 infoDiv.innerHTML = `
                     <span class="font-semibold mr-2 text-gray-900 dark:text-gray-100">${comment.author}</span>
                     <span class="text-gray-500 dark:text-gray-400">${comment.timestamp}</span>
                 `;
-                
                 const textP = document.createElement('p');
                 textP.classList.add('text-sm', 'mt-1', 'text-gray-900', 'dark:text-gray-100');
                 textP.textContent = comment.text;
-                
                 const actionsDiv = document.createElement('div');
                 actionsDiv.classList.add('flex', 'items-center', 'space-x-3', 'text-xs', 'text-gray-500', 'dark:text-gray-400', 'mt-2');
                 actionsDiv.innerHTML = `
-                    <button class="hover:text-black dark:hover:text-white focus:outline-none">
+                    <button class="hover:text-black dark:hover:text-white focus:outline-none opacity-50 cursor-not-allowed">
                         <i class="far fa-thumbs-up"></i> ${comment.likes || 0}
                     </button>
-                    <button class="hover:text-black dark:hover:text-white focus:outline-none">
+                    <button class="hover:text-black dark:hover:text-white focus:outline-none opacity-50 cursor-not-allowed">
                         <i class="far fa-thumbs-down"></i>
                     </button>
-                    <button class="font-semibold hover:text-black dark:hover:text-white focus:outline-none uppercase">
+                    <button class="font-semibold hover:text-black dark:hover:text-white focus:outline-none uppercase opacity-50 cursor-not-allowed">
                         Responder
                     </button>
                 `;
-                
                 contentDiv.appendChild(infoDiv);
                 contentDiv.appendChild(textP);
                 contentDiv.appendChild(actionsDiv);
-                
                 commentDiv.appendChild(avatarDiv);
                 commentDiv.appendChild(contentDiv);
-                
                 commentListContainerJS.appendChild(commentDiv);
             });
         }
 
+
         // --- Controles del Reproductor ---
+
+        /**
+         * Formatea un tiempo en segundos a un string MM:SS.
+         * @param {number} time - Tiempo en segundos.
+         * @returns {string} - Tiempo formateado o '00:00' si es inválido/infinito.
+         */
         function formatTime(time) {
-            if (isNaN(time) || !isFinite(time)) return '00:00';
-            
+            if (isNaN(time) || !isFinite(time)) {
+                return '--:--';
+            }
             const minutes = Math.floor(time / 60);
             const seconds = Math.floor(time % 60);
-            
             return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
 
+        /**
+         * Alterna entre reproducir y pausar el video.
+         */
         function togglePlayPause() {
             if (currentChannelIndex < 0) return;
-            
             if (videoPlayer.paused || videoPlayer.ended) {
                 videoPlayer.play().catch(handlePlaybackError);
             } else {
@@ -1054,6 +1208,9 @@
             }
         }
 
+        /**
+         * Actualiza el icono del botón Play/Pause según el estado del video.
+         */
         function updatePlayPauseIcon() {
             if (videoPlayer.paused || videoPlayer.ended) {
                 playPauseIcon.classList.remove('fa-pause');
@@ -1066,50 +1223,69 @@
             }
         }
 
+        /**
+         * Actualiza la barra de progreso y el display de tiempo.
+         */
         function updateProgressBar() {
             const duration = videoPlayer.duration;
             let percentage = 0;
-            
             if (duration && isFinite(duration)) {
                 percentage = (videoPlayer.currentTime / duration) * 100;
+                progressBar.value = percentage || 0;
+                const sliderTrackColor = isDarkMode ? '#4b5563' : '#e0e0e0';
+                progressBar.style.background = `linear-gradient(to right, #ff0000 ${percentage}%, ${sliderTrackColor} ${percentage}%)`;
+                progressBar.disabled = false;
             } else {
                 progressBar.value = 100;
                 progressBar.style.background = '#ff0000';
-                return;
+                progressBar.disabled = true;
             }
-            
-            progressBar.value = percentage || 0;
-            const sliderTrackColor = isDarkMode ? '#4b5563' : '#e0e0e0';
-            progressBar.style.background = `linear-gradient(to right, #ff0000 ${percentage}%, ${sliderTrackColor} ${percentage}%)`;
         }
 
+        /**
+         * Actualiza el texto que muestra el tiempo actual y la duración total.
+         */
         function updateTimeDisplay() {
-            const currentTime = formatTime(videoPlayer.currentTime);
-            const duration = isFinite(videoPlayer.duration) ? formatTime(videoPlayer.duration) : 'EN VIVO';
-            timeDisplay.textContent = `${currentTime} / ${duration}`;
+            const currentTimeFormatted = formatTime(videoPlayer.currentTime);
+            const durationFormatted = isFinite(videoPlayer.duration) ? formatTime(videoPlayer.duration) : 'EN VIVO';
+            timeDisplay.textContent = `${currentTimeFormatted} / ${durationFormatted}`;
         }
 
+        /**
+         * Adelanta o retrocede el video un número específico de segundos.
+         * Solo funciona si la duración es finita.
+         * @param {number} change - Segundos a cambiar (positivo para adelantar, negativo para retroceder).
+         */
         function seekVideo(change) {
             if (!isFinite(videoPlayer.duration)) return;
-            
             const newTime = videoPlayer.currentTime + change;
             videoPlayer.currentTime = Math.max(0, Math.min(newTime, videoPlayer.duration));
             updateProgressBar();
         }
 
+        /**
+         * Establece el tiempo de reproducción basado en el valor actual de la barra de progreso.
+         * Solo funciona si la duración es finita.
+         */
         function seekVideoFromBar() {
             if (!isFinite(videoPlayer.duration)) return;
-            
             const time = (progressBar.value / 100) * videoPlayer.duration;
             videoPlayer.currentTime = time;
         }
 
+        /**
+         * Alterna el estado de silencio (mute) del video.
+         */
         function toggleMute() {
             videoPlayer.muted = !videoPlayer.muted;
             updateVolumeUI();
             volumeBtn.setAttribute('aria-label', videoPlayer.muted ? 'Activar Sonido' : 'Silenciar');
         }
 
+        /**
+         * Ajusta el volumen del video en pequeños incrementos/decrementos.
+         * @param {number} change - Cantidad a cambiar el volumen (ej. 0.1 o -0.1).
+         */
         function adjustVolume(change) {
             let newVolume = videoPlayer.volume + change;
             newVolume = Math.max(0, Math.min(1, newVolume));
@@ -1119,16 +1295,20 @@
             showPlayerMessage(`Volumen: ${Math.round(videoPlayer.volume * 100)}%`);
         }
 
+        /**
+         * Establece el volumen del video basado en el valor actual del slider de volumen.
+         */
         function setVolumeFromSlider() {
             const newVolume = parseFloat(volumeSlider.value);
             videoPlayer.volume = newVolume;
             videoPlayer.muted = newVolume === 0;
-            updateVolumeUI();
         }
 
+        /**
+         * Actualiza el icono de volumen y el slider según el volumen y estado mute actuales.
+         */
         function updateVolumeUI() {
             const volumePercentage = videoPlayer.muted ? 0 : videoPlayer.volume * 100;
-            
             if (videoPlayer.muted || videoPlayer.volume === 0) {
                 volumeIcon.classList.remove('fa-volume-up', 'fa-volume-down');
                 volumeIcon.classList.add('fa-volume-mute');
@@ -1142,11 +1322,13 @@
                 volumeIcon.classList.add('fa-volume-up');
                 volumeSlider.value = videoPlayer.volume;
             }
-            
             const volumeSliderTrackColor = isDarkMode ? '#4b5563' : '#e0e0e0';
             volumeSlider.style.background = `linear-gradient(to right, #ff0000 ${volumePercentage}%, ${volumeSliderTrackColor} ${volumePercentage}%)`;
         }
 
+        /**
+         * Cambia a la siguiente velocidad de reproducción en el ciclo definido.
+         */
         function cyclePlaybackSpeed() {
             currentSpeedIndex = (currentSpeedIndex + 1) % playbackRates.length;
             const newRate = playbackRates[currentSpeedIndex];
@@ -1154,44 +1336,57 @@
             showPlayerMessage(`Velocidad: ${newRate}x`);
         }
 
+        /**
+         * Establece la velocidad de reproducción del video y actualiza el botón.
+         * @param {number} rate - La nueva velocidad de reproducción (ej. 1, 1.5, 2).
+         */
         function setPlaybackSpeed(rate) {
             videoPlayer.playbackRate = rate;
             speedBtn.textContent = `${rate}x`;
             currentSpeedIndex = playbackRates.indexOf(rate);
-            
             if (currentSpeedIndex === -1) {
                 currentSpeedIndex = playbackRates.indexOf(1);
             }
         }
 
+        /**
+         * Entra o sale del modo de pantalla completa para el contenedor del video.
+         */
         function toggleFullScreen() {
             const elementToFullscreen = videoPlayerContainer;
-            
-            if (!document.fullscreenElement) {
+            if (!document.fullscreenElement &&
+                !document.webkitFullscreenElement &&
+                !document.mozFullScreenElement &&
+                !document.msFullscreenElement)
+            {
                 if (elementToFullscreen.requestFullscreen) {
-                    elementToFullscreen.requestFullscreen().catch(err => console.error("Error FS:", err));
-                } else if (elementToFullscreen.webkitRequestFullscreen) {
+                    elementToFullscreen.requestFullscreen().catch(err => console.error("Error al entrar en Fullscreen:", err));
+                } else if (elementToFullscreen.webkitRequestFullscreen) { /* Safari */
                     elementToFullscreen.webkitRequestFullscreen();
-                } else if (elementToFullscreen.mozRequestFullScreen) {
+                } else if (elementToFullscreen.mozRequestFullScreen) { /* Firefox */
                     elementToFullscreen.mozRequestFullScreen();
-                } else if (elementToFullscreen.msRequestFullscreen) {
+                } else if (elementToFullscreen.msRequestFullscreen) { /* IE11 */
                     elementToFullscreen.msRequestFullscreen();
                 }
             } else {
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
+                } else if (document.webkitExitFullscreen) { /* Safari */
                     document.webkitExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
+                } else if (document.mozCancelFullScreen) { /* Firefox */
                     document.mozCancelFullScreen();
-                } else if (document.msExitFullscreen) {
+                } else if (document.msExitFullscreen) { /* IE11 */
                     document.msExitFullscreen();
                 }
             }
         }
 
+        /**
+         * Actualiza el icono del botón de pantalla completa según el estado actual.
+         */
         function updateFullscreenIcon() {
-            if (document.fullscreenElement) {
+            const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+            if (isFullscreen) {
                 fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
                 fullscreenBtn.setAttribute('aria-label', 'Salir de Pantalla Completa');
                 videoPlayerContainer.classList.add('is-fullscreen');
@@ -1202,33 +1397,40 @@
             }
         }
 
+        /**
+         * Muestra u oculta la barra lateral izquierda (en móviles).
+         */
         function toggleSidebar() {
             const isOpen = sidebar.classList.toggle('open');
             sidebarOverlay.classList.toggle('hidden');
-            menuToggle.setAttribute('aria-expanded', isOpen);
+            menuToggle.setAttribute('aria-expanded', isOpen.toString());
         }
 
         // --- Actualizar Estilo Activo Sidebar Izquierdo ---
+
+        /**
+         * Marca el enlace correspondiente en el sidebar izquierdo como activo.
+         * @param {string} activeView - La vista activa ('home', 'favorites', 'history', 'settings', 'category').
+         * @param {string|null} [activeGroup=null] - El grupo de categoría activo (si activeView es 'category').
+         */
         function updateSidebarActiveLink(activeView, activeGroup = null) {
             [homeLink, favoritesLink, historyLink, settingsLink].forEach(link => link?.classList.remove('active'));
-            
             if (activeCategoryLinkElement) {
                 activeCategoryLinkElement.classList.remove('active');
                 activeCategoryLinkElement = null;
             }
-            
             switch (activeView) {
-                case 'home': 
-                    homeLink?.classList.add('active'); 
+                case 'all':
+                    homeLink?.classList.add('active');
                     break;
-                case 'favorites': 
-                    favoritesLink?.classList.add('active'); 
+                case 'favorites':
+                    favoritesLink?.classList.add('active');
                     break;
-                case 'history': 
-                    historyLink?.classList.add('active'); 
+                case 'history':
+                    historyLink?.classList.add('active');
                     break;
-                case 'settings': 
-                    settingsLink?.classList.add('active'); 
+                case 'settings':
+                    settingsLink?.classList.add('active');
                     break;
                 case 'category':
                     const categoryLinks = dynamicCategoriesContainer.querySelectorAll('.category-link');
@@ -1242,25 +1444,27 @@
             }
         }
 
+
         // --- Navegación por Teclado en Lista de Canales ---
+
+        /**
+         * Permite navegar por la lista de canales derecha usando las flechas arriba/abajo.
+         * @param {number} direction - Dirección del movimiento (-1 para arriba, 1 para abajo).
+         */
         function navigateChannelList(direction) {
             const items = Array.from(channelListContainer.querySelectorAll('.channel-item'));
             if (items.length === 0) return;
-            
             const currentFocusElement = document.activeElement;
             let currentVisualIndex = -1;
-            
-            if (currentFocusElement && currentFocusElement.classList.contains('channel-item') && 
+            if (currentFocusElement && currentFocusElement.classList.contains('channel-item') &&
                 channelListContainer.contains(currentFocusElement)) {
                 currentVisualIndex = items.indexOf(currentFocusElement);
             } else {
                 const logicalIndexInVisual = items.findIndex(item => parseInt(item.dataset.index, 10) === currentChannelIndex);
                 currentVisualIndex = (logicalIndexInVisual !== -1) ? logicalIndexInVisual : -1;
             }
-            
             let nextVisualIndex = currentVisualIndex + direction;
             nextVisualIndex = Math.max(0, Math.min(nextVisualIndex, items.length - 1));
-            
             if (nextVisualIndex >= 0 && nextVisualIndex < items.length) {
                 const nextElement = items[nextVisualIndex];
                 if (nextElement) {
@@ -1269,43 +1473,68 @@
             }
         }
 
+        // --- NUEVO: Función para manejar el scroll en la lista de canales ---
+        /**
+         * Controla la visibilidad de los detalles del video al hacer scroll
+         * en la lista de canales en vista móvil.
+         */
+        function handleChannelScroll() {
+            const currentScrollTop = channelListContainer.scrollTop;
+            const isMobile = window.innerWidth <= 768; // Punto de corte de Tailwind 'md'
+
+            if (!videoDetailsWrapper) return; // Salir si el wrapper no existe
+
+            if (isMobile) {
+                // Determinar dirección del scroll (con umbral)
+                if (currentScrollTop > lastScrollTop + scrollThreshold) {
+                    // Scrolling Down
+                    videoDetailsWrapper.classList.remove('hidden-on-scroll');
+                    mainContentArea.classList.remove('details-hidden-layout'); // Quitar clase del layout si se usa
+                } else if (currentScrollTop < lastScrollTop - scrollThreshold && currentScrollTop > scrollThreshold) {
+                    // Scrolling Up (y no estamos justo en el top)
+                    videoDetailsWrapper.classList.add('hidden-on-scroll');
+                    mainContentArea.classList.add('details-hidden-layout'); // Añadir clase al layout si se usa
+                } else if (currentScrollTop <= scrollThreshold) {
+                     // Si estamos muy cerca o en el top, mostrar detalles
+                     videoDetailsWrapper.classList.remove('hidden-on-scroll');
+                     mainContentArea.classList.remove('details-hidden-layout');
+                }
+            } else {
+                // Si no es móvil, asegurarse que los detalles siempre sean visibles
+                videoDetailsWrapper.classList.remove('hidden-on-scroll');
+                mainContentArea.classList.remove('details-hidden-layout');
+            }
+
+            // Actualizar última posición de scroll (solo si el cambio es mayor que el umbral para evitar ruido)
+            if(Math.abs(currentScrollTop - lastScrollTop) > scrollThreshold || currentScrollTop === 0) {
+               lastScrollTop = currentScrollTop <= 0 ? 0 : currentScrollTop; // Evitar valores negativos
+            }
+        }
+
+
         // --- Event Listeners ---
+        // Asignación de funciones a eventos de los elementos de la UI
+
+        // Controles del reproductor
         playPauseBtn.addEventListener('click', togglePlayPause);
         speedBtn.addEventListener('click', cyclePlaybackSpeed);
         videoPlayerContainer.addEventListener('dblclick', toggleFullScreen);
         favoriteBtn.addEventListener('click', toggleFavorite);
         themeToggleBtn.addEventListener('click', toggleTheme);
+        volumeBtn.addEventListener('click', toggleMute);
+        volumeSlider.addEventListener('input', setVolumeFromSlider);
+        fullscreenBtn.addEventListener('click', toggleFullScreen);
+        progressBar.addEventListener('input', seekVideoFromBar);
 
-        // Listeners Sidebar Izquierdo
-        homeLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            navigateToView('all');
-        });
+        // Listeners Sidebar Izquierdo (Navegación)
+        homeLink.addEventListener('click', (e) => { e.preventDefault(); navigateToView('all'); });
+        favoritesLink.addEventListener('click', (e) => { e.preventDefault(); navigateToView('favorites'); });
+        historyLink.addEventListener('click', (e) => { e.preventDefault(); navigateToView('history'); });
+        settingsLink.addEventListener('click', (e) => { e.preventDefault(); showSettingsView(); });
 
-        favoritesLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            navigateToView('favorites');
-        });
-
-        historyLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            navigateToView('history');
-        });
-
-        settingsLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            showSettingsView();
-        });
-
-        closeSettingsBtn.addEventListener('click', () => {
-            navigateToView(previousView || 'all', currentCategoryGroup);
-        });
-
-        backToPlayerBtn.addEventListener('click', () => {
-            navigateToView(previousView || 'all', currentCategoryGroup);
-        });
-
-        // Listeners Configuración
+        // Listeners Vista Configuración
+        closeSettingsBtn.addEventListener('click', () => { navigateToView(previousView || 'all', currentCategoryGroup); });
+        backToPlayerBtn.addEventListener('click', () => { navigateToView(previousView || 'all', currentCategoryGroup); });
         clearFavoritesBtn.addEventListener('click', clearFavorites);
         clearHistoryBtn.addEventListener('click', clearHistory);
         reloadM3uBtn.addEventListener('click', () => {
@@ -1314,7 +1543,7 @@
             showPlayerMessage("Recargando lista de canales...", false, settingsView);
         });
 
-        // Listeners Reproductor
+        // Listeners del elemento <video>
         videoPlayer.addEventListener('play', updatePlayPauseIcon);
         videoPlayer.addEventListener('pause', updatePlayPauseIcon);
         videoPlayer.addEventListener('ended', updatePlayPauseIcon);
@@ -1334,7 +1563,6 @@
         videoPlayer.addEventListener('playing', () => {
             playerLoader.classList.add('hidden');
             videoPlayer.style.opacity = '1';
-            
             if (currentChannelIndex >= 0 && currentChannelIndex < channels.length) {
                 addToHistory(channels[currentChannelIndex].url);
             }
@@ -1344,32 +1572,39 @@
             videoPlayer.style.opacity = '0.5';
         });
         videoPlayer.addEventListener('error', (e) => {
-            if (!hls || !hls.url || (videoPlayer.src && !videoPlayer.src.endsWith('m3u8'))) {
-                handlePlaybackError(videoPlayer.error || new Error('Error desconocido del reproductor'));
+            if (!hls || !hls.url || (videoPlayer.src && !videoPlayer.src.toLowerCase().endsWith('.m3u8'))) {
+                 handlePlaybackError(videoPlayer.error || new Error('Error desconocido del reproductor'));
             }
         });
-
-        progressBar.addEventListener('input', seekVideoFromBar);
-        volumeBtn.addEventListener('click', toggleMute);
-        volumeSlider.addEventListener('input', setVolumeFromSlider);
         videoPlayer.addEventListener('volumechange', updateVolumeUI);
-        fullscreenBtn.addEventListener('click', toggleFullScreen);
+
+        // Listeners de Pantalla Completa
         document.addEventListener('fullscreenchange', updateFullscreenIcon);
         document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
         document.addEventListener('mozfullscreenchange', updateFullscreenIcon);
         document.addEventListener('MSFullscreenChange', updateFullscreenIcon);
+
+        // Listeners Sidebar Móvil
         menuToggle.addEventListener('click', toggleSidebar);
         sidebarOverlay.addEventListener('click', toggleSidebar);
 
-        // Listener Teclado Global
+        // --- NUEVO: Listener para el scroll en la lista de canales ---
+        if (channelListContainer) {
+            channelListContainer.addEventListener('scroll', handleChannelScroll);
+        }
+        // --- NUEVO: Listener para resize para resetear estado si se pasa a desktop ---
+        window.addEventListener('resize', handleChannelScroll);
+
+
+        // Listener Teclado Global (Atajos)
         document.addEventListener('keydown', (e) => {
             const targetTagName = e.target.tagName.toLowerCase();
             const isInputFocused = ['input', 'textarea', 'select'].includes(targetTagName);
             const activeElement = document.activeElement;
-            const isChannelListFocused = channelListContainer && 
+            const isChannelListFocused = channelListContainer &&
                 (channelListContainer.contains(activeElement) || activeElement === channelListContainer);
             const isSettingsVisible = !settingsView.classList.contains('hidden');
-            
+
             if (isSettingsVisible) {
                 if (e.key === 'Escape') {
                     e.preventDefault();
@@ -1377,18 +1612,14 @@
                 }
                 return;
             }
-            
             if (isInputFocused) return;
-            
             if ((e.key === 'Escape' || e.key === 'b' || e.key === 'B') && sidebar.classList.contains('open')) {
-                e.preventDefault();
-                toggleSidebar();
-                
-                if (menuToggle && document.body.contains(menuToggle)) menuToggle.focus();
-                else if (videoPlayer && document.body.contains(videoPlayer)) videoPlayer.focus();
-                return;
+                 e.preventDefault();
+                 toggleSidebar();
+                 if (menuToggle && document.body.contains(menuToggle)) menuToggle.focus();
+                 else if (videoPlayer && document.body.contains(videoPlayer)) videoPlayer.focus();
+                 return;
             }
-            
             if (isChannelListFocused) {
                 if (e.key === 'ArrowUp') {
                     e.preventDefault();
@@ -1409,90 +1640,94 @@
                     return;
                 }
             }
-            
             if (!isChannelListFocused) {
-                switch(e.key) {
-                    case ' ':
-                        e.preventDefault();
-                        togglePlayPause();
-                        break;
+                 switch(e.key) {
+                    case ' ': case 'k': case 'K':
+                         e.preventDefault();
+                         togglePlayPause();
+                         break;
                     case 'f': case 'F':
-                        e.preventDefault();
-                        toggleFullScreen();
-                        break;
+                         e.preventDefault();
+                         toggleFullScreen();
+                         break;
                     case 'm': case 'M':
-                        e.preventDefault();
-                        toggleMute();
-                        break;
-                    case 'ArrowLeft':
-                        e.preventDefault();
-                        if (isFinite(videoPlayer.duration)) {
-                            seekVideo(-5);
-                            showPlayerMessage(`-5s`);
-                        }
-                        break;
-                    case 'ArrowRight':
-                        e.preventDefault();
-                        if (isFinite(videoPlayer.duration)) {
-                            seekVideo(5);
-                            showPlayerMessage(`+5s`);
-                        }
-                        break;
+                         e.preventDefault();
+                         toggleMute();
+                         break;
+                    case 'ArrowLeft': case 'j': case 'J':
+                         e.preventDefault();
+                         if (isFinite(videoPlayer.duration)) {
+                             const seekAmount = (e.key === 'j' || e.key === 'J') ? -10 : -5;
+                             seekVideo(seekAmount);
+                             showPlayerMessage(`${seekAmount}s`);
+                         }
+                         break;
+                    case 'ArrowRight': case 'l': case 'L':
+                         e.preventDefault();
+                         if (isFinite(videoPlayer.duration)) {
+                             const seekAmount = (e.key === 'l' || e.key === 'L') ? 10 : 5;
+                             seekVideo(seekAmount);
+                             showPlayerMessage(`+${seekAmount}s`);
+                         }
+                         break;
                     case 'ArrowUp':
-                        e.preventDefault();
-                        adjustVolume(0.1);
-                        break;
+                         e.preventDefault();
+                         adjustVolume(0.05);
+                         break;
                     case 'ArrowDown':
-                        e.preventDefault();
-                        adjustVolume(-0.1);
-                        break;
+                         e.preventDefault();
+                         adjustVolume(-0.05);
+                         break;
                     case '>':
-                        if (e.shiftKey) {
-                            e.preventDefault();
-                            const nextSpeedIndex = Math.min(playbackRates.length - 1, currentSpeedIndex + 1);
-                            if (nextSpeedIndex !== currentSpeedIndex) {
-                                setPlaybackSpeed(playbackRates[nextSpeedIndex]);
-                                showPlayerMessage(`Velocidad: ${videoPlayer.playbackRate}x`);
-                            }
-                        }
-                        break;
+                         if (e.shiftKey) {
+                             e.preventDefault();
+                             const nextSpeedIndex = Math.min(playbackRates.length - 1, currentSpeedIndex + 1);
+                             if (nextSpeedIndex !== currentSpeedIndex) {
+                                 setPlaybackSpeed(playbackRates[nextSpeedIndex]);
+                                 showPlayerMessage(`Velocidad: ${videoPlayer.playbackRate}x`);
+                             }
+                         }
+                         break;
                     case '<':
-                        if (e.shiftKey) {
-                            e.preventDefault();
-                            const nextSpeedIndex = Math.max(0, currentSpeedIndex - 1);
-                            if (nextSpeedIndex !== currentSpeedIndex) {
-                                setPlaybackSpeed(playbackRates[nextSpeedIndex]);
-                                showPlayerMessage(`Velocidad: ${videoPlayer.playbackRate}x`);
-                            }
-                        }
-                        break;
-                    case '0': case '1': case '2': case '3': case '4': 
+                         if (e.shiftKey) {
+                             e.preventDefault();
+                             const nextSpeedIndex = Math.max(0, currentSpeedIndex - 1);
+                             if (nextSpeedIndex !== currentSpeedIndex) {
+                                 setPlaybackSpeed(playbackRates[nextSpeedIndex]);
+                                 showPlayerMessage(`Velocidad: ${videoPlayer.playbackRate}x`);
+                             }
+                         }
+                         break;
+                    case '0': case '1': case '2': case '3': case '4':
                     case '5': case '6': case '7': case '8': case '9':
-                        if (isFinite(videoPlayer.duration) && videoPlayer.duration > 0) {
+                        if (isFinite(videoPlayer.duration)) {
                             e.preventDefault();
                             const percentage = parseInt(e.key) * 10;
                             const time = (percentage / 100) * videoPlayer.duration;
                             videoPlayer.currentTime = time;
+                            updateProgressBar();
                             showPlayerMessage(`Saltar a ${percentage}%`);
                         }
                         break;
-                }
+                 }
             }
         });
 
-        // --- Inicialización ---
+
+        // --- Inicialización al Cargar la Página ---
         document.addEventListener('DOMContentLoaded', () => {
             loadTheme();
             loadFavorites();
             loadHistory();
             initializeHls();
-            renderComments(sampleComments);
             fetchAndLoadM3U(m3uUrl);
             updateVolumeUI();
-            updateProgressBar();
             updateFavoriteButtonState();
-            updateFullscreenIcon();
+            renderComments(sampleComments);
+            // --- NUEVO: Llamada inicial para el estado del scroll ---
+            handleChannelScroll();
         });
+
     </script>
 </body>
 </html>
