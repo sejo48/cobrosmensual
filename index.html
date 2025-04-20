@@ -9,13 +9,20 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         /* Estilos personalizados adicionales */
-        html {
-             scroll-behavior: smooth; /* Habilita scroll suave globalmente */
-        }
+        /* html {
+             scroll-behavior: smooth; /* Movido a main-content-area si es necesario */
+        /* } */
         body {
             font-family: 'Roboto', sans-serif; /* Considerar cargar Roboto desde Google Fonts */
             overflow-y: hidden; /* Evita el scroll vertical en el body */
             transition: background-color 0.3s ease, color 0.3s ease; /* Transición suave para cambio de tema */
+        }
+
+        /* --- NUEVO: Padding superior para scroll para compensar header fijo --- */
+        #main-content-area {
+            /* Ajusta este valor si la altura real de tu cabecera es diferente (ej. 64px, 68px) */
+            scroll-padding-top: 70px;
+            scroll-behavior: smooth; /* Scroll suave para este contenedor */
         }
 
         /* Estilos para la barra de progreso (input range) */
@@ -302,7 +309,6 @@
                 </div>
             </div> </div> </div> <script>
         // --- Elementos del DOM ---
-        // Se obtienen referencias a los elementos HTML necesarios para la interactividad
         const mainLoader = document.getElementById('main-loader');
         const appContainer = document.getElementById('app-container');
         const mainContentArea = document.getElementById('main-content-area');
@@ -347,7 +353,7 @@
         const categoriesPlaceholder = document.getElementById('categories-placeholder');
         const favoriteBtn = document.getElementById('favorite-btn');
         const themeToggleBtn = document.getElementById('theme-toggle-btn');
-        const htmlElement = document.documentElement; // Referencia al elemento <html> para el tema
+        const htmlElement = document.documentElement;
         const loadErrorMessageContainer = document.getElementById('load-error-message');
         const closeSettingsBtn = document.getElementById('close-settings-btn');
         const backToPlayerBtn = document.getElementById('back-to-player-btn');
@@ -357,426 +363,82 @@
         const reloadM3uBtn = document.getElementById('reload-m3u-btn');
         const videoDetailsWrapper = document.getElementById('video-details-wrapper');
 
-
         // --- URL del M3U y Configuración de Caché ---
         const m3uUrl = 'https://raw.githubusercontent.com/sejo48/chanejorgedez/refs/heads/main/listaoficial.m3u';
         const CACHE_KEY = 'm3u_cache';
         const CACHE_EXPIRATION = 6 * 60 * 60 * 1000; // 6 horas
 
         // --- Estado de la Aplicación ---
-        let hls = null;
-        let channels = [];
-        let currentChannelIndex = -1;
-        const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2];
-        let currentSpeedIndex = 2;
-        let favoriteChannelUrls = new Set();
-        const FAVORITES_KEY = 'youtubeClone_favorites';
-        let recentlyWatchedUrls = [];
-        const HISTORY_KEY = 'youtubeClone_history';
-        const MAX_HISTORY_SIZE = 20;
-        let currentView = 'all';
-        let currentCategoryGroup = null;
-        let previousView = 'all';
-        let isDarkMode = false;
-        const THEME_KEY = 'youtubeClone_theme';
-        let activeCategoryLinkElement = null;
-        let retryCount = 0;
-        const MAX_RETRIES = 3;
-        let lastScrollTop = 0;
-        const scrollThreshold = 10;
-
+        let hls = null; let channels = []; let currentChannelIndex = -1;
+        const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2]; let currentSpeedIndex = 2;
+        let favoriteChannelUrls = new Set(); const FAVORITES_KEY = 'youtubeClone_favorites';
+        let recentlyWatchedUrls = []; const HISTORY_KEY = 'youtubeClone_history'; const MAX_HISTORY_SIZE = 20;
+        let currentView = 'all'; let currentCategoryGroup = null; let previousView = 'all';
+        let isDarkMode = false; const THEME_KEY = 'youtubeClone_theme';
+        let activeCategoryLinkElement = null; let retryCount = 0; const MAX_RETRIES = 3;
+        let lastScrollTop = 0; const scrollThreshold = 10;
 
         // --- Datos de Comentarios Simulados ---
-        const sampleComments = [
-            { author: "Usuario Alfa", timestamp: "Hace 15 minutos", text: "¡Excelente transmisión! Se ve muy nítido.", likes: 12, avatarColor: "#3B82F6" },
-            { author: "Beta Tester", timestamp: "Hace 1 hora", text: "¿Alguien sabe si pasarán el partido más tarde?", likes: 3, avatarColor: "#10B981" },
-            { author: "Comentarista Casual", timestamp: "Hace 3 horas", text: "Me encanta este canal, siempre buena programación.", likes: 8, avatarColor: "#F59E0B" },
-            { author: "Noctámbulo", timestamp: "Hace 5 horas", text: "Perfecto para verlo de madrugada.", likes: 2, avatarColor: "#6366F1" },
-            { author: "Observador", timestamp: "Hace 1 día", text: "La calidad de imagen es bastante buena comparada con otras opciones.", likes: 5, avatarColor: "#EC4899" }
-        ];
+        const sampleComments = [ { author: "Usuario Alfa", timestamp: "Hace 15 minutos", text: "¡Excelente transmisión! Se ve muy nítido.", likes: 12, avatarColor: "#3B82F6" }, { author: "Beta Tester", timestamp: "Hace 1 hora", text: "¿Alguien sabe si pasarán el partido más tarde?", likes: 3, avatarColor: "#10B981" }, { author: "Comentarista Casual", timestamp: "Hace 3 horas", text: "Me encanta este canal, siempre buena programación.", likes: 8, avatarColor: "#F59E0B" }, { author: "Noctámbulo", timestamp: "Hace 5 horas", text: "Perfecto para verlo de madrugada.", likes: 2, avatarColor: "#6366F1" }, { author: "Observador", timestamp: "Hace 1 día", text: "La calidad de imagen es bastante buena comparada con otras opciones.", likes: 5, avatarColor: "#EC4899" } ];
 
         // --- Funciones Tema Oscuro/Claro ---
-        function loadTheme() {
-            const savedTheme = localStorage.getItem(THEME_KEY);
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            isDarkMode = savedTheme === 'dark' || (!savedTheme && prefersDark);
-            applyTheme();
-        }
-        function saveTheme() {
-            localStorage.setItem(THEME_KEY, isDarkMode ? 'dark' : 'light');
-        }
-        function applyTheme() {
-            htmlElement.classList.toggle('dark', isDarkMode);
-            if (themeToggleBtn) {
-                themeToggleBtn.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-                themeToggleBtn.setAttribute('aria-label', isDarkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
-            }
-        }
-        function toggleTheme() {
-            isDarkMode = !isDarkMode;
-            applyTheme();
-            saveTheme();
-        }
+        function loadTheme() { const savedTheme = localStorage.getItem(THEME_KEY); const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; isDarkMode = savedTheme === 'dark' || (!savedTheme && prefersDark); applyTheme(); }
+        function saveTheme() { localStorage.setItem(THEME_KEY, isDarkMode ? 'dark' : 'light'); }
+        function applyTheme() { htmlElement.classList.toggle('dark', isDarkMode); if (themeToggleBtn) { themeToggleBtn.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>'; themeToggleBtn.setAttribute('aria-label', isDarkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'); } }
+        function toggleTheme() { isDarkMode = !isDarkMode; applyTheme(); saveTheme(); }
 
         // --- Funciones Favoritos ---
-        function loadFavorites() {
-            const storedFavorites = localStorage.getItem(FAVORITES_KEY);
-            if (storedFavorites) {
-                try {
-                    const parsedFavorites = JSON.parse(storedFavorites);
-                    if (Array.isArray(parsedFavorites)) {
-                        favoriteChannelUrls = new Set(parsedFavorites);
-                    } else {
-                        console.warn("Los favoritos guardados no son un array, iniciando vacío.");
-                        favoriteChannelUrls = new Set();
-                    }
-                } catch (e) {
-                    console.error("Error al parsear favoritos de localStorage:", e);
-                    favoriteChannelUrls = new Set();
-                }
-            }
-        }
-        function saveFavorites() {
-            localStorage.setItem(FAVORITES_KEY, JSON.stringify(Array.from(favoriteChannelUrls)));
-        }
-        function isFavorite(channelUrl) {
-            return favoriteChannelUrls.has(channelUrl);
-        }
-        function toggleFavorite() {
-            if (currentChannelIndex < 0 || currentChannelIndex >= channels.length) return;
-            const currentChannel = channels[currentChannelIndex];
-            const url = currentChannel.url;
-            if (isFavorite(url)) {
-                favoriteChannelUrls.delete(url);
-                showPlayerMessage(`"${currentChannel.name}" eliminado de Favoritos`);
-            } else {
-                favoriteChannelUrls.add(url);
-                showPlayerMessage(`"${currentChannel.name}" añadido a Favoritos`);
-            }
-            saveFavorites();
-            updateFavoriteButtonState();
-            if (currentView === 'favorites') {
-                renderChannelList();
-            }
-        }
-        function updateFavoriteButtonState() {
-            if (currentChannelIndex < 0 || currentChannelIndex >= channels.length) {
-                favoriteBtn.classList.remove('is-favorite');
-                favoriteBtn.querySelector('i').classList.remove('fas', 'text-yellow-400');
-                favoriteBtn.querySelector('i').classList.add('far', 'text-gray-600', 'dark:text-gray-400');
-                favoriteBtn.setAttribute('aria-label', 'Añadir a Favoritos');
-                favoriteBtn.disabled = true;
-                return;
-            }
-            favoriteBtn.disabled = false;
-            const currentChannel = channels[currentChannelIndex];
-            const isFav = isFavorite(currentChannel.url);
-            favoriteBtn.classList.toggle('is-favorite', isFav);
-            favoriteBtn.querySelector('i').classList.toggle('fas', isFav);
-            favoriteBtn.querySelector('i').classList.toggle('far', !isFav);
-            favoriteBtn.querySelector('i').classList.toggle('text-yellow-400', isFav);
-            favoriteBtn.querySelector('i').classList.toggle('text-gray-600', !isFav);
-            favoriteBtn.querySelector('i').classList.toggle('dark:text-gray-400', !isFav);
-            favoriteBtn.setAttribute('aria-label', isFav ? 'Quitar de Favoritos' : 'Añadir a Favoritos');
-        }
-        function clearFavorites() {
-            if (confirm('¿Estás seguro de que quieres borrar TODOS tus favoritos? Esta acción no se puede deshacer.')) {
-                favoriteChannelUrls.clear();
-                saveFavorites();
-                updateFavoriteButtonState();
-                if (currentView === 'favorites') {
-                    renderChannelList();
-                }
-                showPlayerMessage("Favoritos borrados", false, settingsView);
-            }
-        }
+        function loadFavorites() { const storedFavorites = localStorage.getItem(FAVORITES_KEY); if (storedFavorites) { try { const parsedFavorites = JSON.parse(storedFavorites); if (Array.isArray(parsedFavorites)) { favoriteChannelUrls = new Set(parsedFavorites); } else { console.warn("Los favoritos guardados no son un array, iniciando vacío."); favoriteChannelUrls = new Set(); } } catch (e) { console.error("Error al parsear favoritos de localStorage:", e); favoriteChannelUrls = new Set(); } } }
+        function saveFavorites() { localStorage.setItem(FAVORITES_KEY, JSON.stringify(Array.from(favoriteChannelUrls))); }
+        function isFavorite(channelUrl) { return favoriteChannelUrls.has(channelUrl); }
+        function toggleFavorite() { if (currentChannelIndex < 0 || currentChannelIndex >= channels.length) return; const currentChannel = channels[currentChannelIndex]; const url = currentChannel.url; if (isFavorite(url)) { favoriteChannelUrls.delete(url); showPlayerMessage(`"${currentChannel.name}" eliminado de Favoritos`); } else { favoriteChannelUrls.add(url); showPlayerMessage(`"${currentChannel.name}" añadido a Favoritos`); } saveFavorites(); updateFavoriteButtonState(); if (currentView === 'favorites') { renderChannelList(); } }
+        function updateFavoriteButtonState() { if (currentChannelIndex < 0 || currentChannelIndex >= channels.length) { favoriteBtn.classList.remove('is-favorite'); favoriteBtn.querySelector('i').classList.remove('fas', 'text-yellow-400'); favoriteBtn.querySelector('i').classList.add('far', 'text-gray-600', 'dark:text-gray-400'); favoriteBtn.setAttribute('aria-label', 'Añadir a Favoritos'); favoriteBtn.disabled = true; return; } favoriteBtn.disabled = false; const currentChannel = channels[currentChannelIndex]; const isFav = isFavorite(currentChannel.url); favoriteBtn.classList.toggle('is-favorite', isFav); favoriteBtn.querySelector('i').classList.toggle('fas', isFav); favoriteBtn.querySelector('i').classList.toggle('far', !isFav); favoriteBtn.querySelector('i').classList.toggle('text-yellow-400', isFav); favoriteBtn.querySelector('i').classList.toggle('text-gray-600', !isFav); favoriteBtn.querySelector('i').classList.toggle('dark:text-gray-400', !isFav); favoriteBtn.setAttribute('aria-label', isFav ? 'Quitar de Favoritos' : 'Añadir a Favoritos'); }
+        function clearFavorites() { if (confirm('¿Estás seguro de que quieres borrar TODOS tus favoritos? Esta acción no se puede deshacer.')) { favoriteChannelUrls.clear(); saveFavorites(); updateFavoriteButtonState(); if (currentView === 'favorites') { renderChannelList(); } showPlayerMessage("Favoritos borrados", false, settingsView); } }
 
         // --- Funciones Historial ---
-        function loadHistory() {
-            const storedHistory = localStorage.getItem(HISTORY_KEY);
-            if (storedHistory) {
-                try {
-                    const parsedHistory = JSON.parse(storedHistory);
-                    if (Array.isArray(parsedHistory)) {
-                        recentlyWatchedUrls = parsedHistory;
-                    } else {
-                        recentlyWatchedUrls = [];
-                    }
-                } catch (e) {
-                    console.error("Error al parsear historial de localStorage:", e);
-                    recentlyWatchedUrls = [];
-                }
-            }
-        }
-        function saveHistory() {
-            localStorage.setItem(HISTORY_KEY, JSON.stringify(recentlyWatchedUrls));
-        }
-        function addToHistory(channelUrl) {
-            if (!channelUrl) return;
-            recentlyWatchedUrls = recentlyWatchedUrls.filter(url => url !== channelUrl);
-            recentlyWatchedUrls.unshift(channelUrl);
-            if (recentlyWatchedUrls.length > MAX_HISTORY_SIZE) {
-                recentlyWatchedUrls.pop();
-            }
-            saveHistory();
-            if (currentView === 'history') {
-                renderChannelList();
-            }
-        }
-        function clearHistory() {
-            if (confirm('¿Estás seguro de que quieres borrar TODO tu historial de reproducción? Esta acción no se puede deshacer.')) {
-                recentlyWatchedUrls = [];
-                saveHistory();
-                if (currentView === 'history') {
-                    renderChannelList();
-                }
-                showPlayerMessage("Historial borrado", false, settingsView);
-            }
-        }
+        function loadHistory() { const storedHistory = localStorage.getItem(HISTORY_KEY); if (storedHistory) { try { const parsedHistory = JSON.parse(storedHistory); if (Array.isArray(parsedHistory)) { recentlyWatchedUrls = parsedHistory; } else { recentlyWatchedUrls = []; } } catch (e) { console.error("Error al parsear historial de localStorage:", e); recentlyWatchedUrls = []; } } }
+        function saveHistory() { localStorage.setItem(HISTORY_KEY, JSON.stringify(recentlyWatchedUrls)); }
+        function addToHistory(channelUrl) { if (!channelUrl) return; recentlyWatchedUrls = recentlyWatchedUrls.filter(url => url !== channelUrl); recentlyWatchedUrls.unshift(channelUrl); if (recentlyWatchedUrls.length > MAX_HISTORY_SIZE) { recentlyWatchedUrls.pop(); } saveHistory(); if (currentView === 'history') { renderChannelList(); } }
+        function clearHistory() { if (confirm('¿Estás seguro de que quieres borrar TODO tu historial de reproducción? Esta acción no se puede deshacer.')) { recentlyWatchedUrls = []; saveHistory(); if (currentView === 'history') { renderChannelList(); } showPlayerMessage("Historial borrado", false, settingsView); } }
 
         // --- Funciones de Navegación y Vistas ---
-        function showMainContent() {
-            mainContentArea.classList.remove('hidden');
-            settingsView.classList.add('hidden');
-        }
-        function showSettingsView() {
-            previousView = currentView !== 'settings' ? currentView : previousView;
-            currentView = 'settings';
-            mainContentArea.classList.add('hidden');
-            settingsView.classList.remove('hidden');
-            updateSidebarActiveLink('settings');
-            m3uUrlDisplay.textContent = m3uUrl;
-        }
-        function navigateToView(view, categoryGroup = null) {
-            showMainContent();
-            currentView = view;
-            currentCategoryGroup = categoryGroup;
-            renderChannelList();
-            updateSidebarActiveLink(view, categoryGroup);
-            if (sidebar.classList.contains('open')) {
-                toggleSidebar();
-            }
-        }
+        function showMainContent() { mainContentArea.classList.remove('hidden'); settingsView.classList.add('hidden'); }
+        function showSettingsView() { previousView = currentView !== 'settings' ? currentView : previousView; currentView = 'settings'; mainContentArea.classList.add('hidden'); settingsView.classList.remove('hidden'); updateSidebarActiveLink('settings'); m3uUrlDisplay.textContent = m3uUrl; }
+        function navigateToView(view, categoryGroup = null) { showMainContent(); currentView = view; currentCategoryGroup = categoryGroup; renderChannelList(); updateSidebarActiveLink(view, categoryGroup); if (sidebar.classList.contains('open')) { toggleSidebar(); } }
 
         // --- Inicialización HLS.js ---
-        function initializeHls() {
-            if (Hls.isSupported()) {
-                hls = new Hls({
-                    maxMaxBufferLength: 30, maxBufferSize: 60 * 1000 * 1000, maxBufferLength: 30,
-                    lowLatencyMode: false, manifestLoadingTimeOut: 20000, levelLoadingTimeOut: 20000,
-                    fragLoadingTimeOut: 30000, startLoadOnInit: false
-                });
-                hls.on(Hls.Events.ERROR, handleHlsError);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    videoPlayer.play().catch(e => { console.warn("Autoplay falló:", e.message); showPlayerMessage("Presiona Play para iniciar", false); });
-                });
-                hls.attachMedia(videoPlayer);
-            } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-                console.log("HLS.js no soportado, usando soporte HLS nativo del navegador.");
-                videoPlayer.addEventListener('error', handlePlaybackError);
-            } else {
-                showPlayerMessage("Tu navegador no soporta este tipo de video (HLS)", true);
-            }
-        }
+        function initializeHls() { if (Hls.isSupported()) { hls = new Hls({ maxMaxBufferLength: 30, maxBufferSize: 60 * 1000 * 1000, maxBufferLength: 30, lowLatencyMode: false, manifestLoadingTimeOut: 20000, levelLoadingTimeOut: 20000, fragLoadingTimeOut: 30000, startLoadOnInit: false }); hls.on(Hls.Events.ERROR, handleHlsError); hls.on(Hls.Events.MANIFEST_PARSED, () => { videoPlayer.play().catch(e => { console.warn("Autoplay falló:", e.message); showPlayerMessage("Presiona Play para iniciar", false); }); }); hls.attachMedia(videoPlayer); } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) { console.log("HLS.js no soportado, usando soporte HLS nativo del navegador."); videoPlayer.addEventListener('error', handlePlaybackError); } else { showPlayerMessage("Tu navegador no soporta este tipo de video (HLS)", true); } }
 
         // --- Parseo del M3U ---
-        function parseM3U(text) {
-            const lines = text.split('\n'); const parsedChannels = []; let currentChannel = null; let channelIdCounter = 0;
-            for (const line of lines) {
-                const trimmedLine = line.trim();
-                if (trimmedLine.startsWith('#EXTINF:')) {
-                    currentChannel = { id: `channel-${channelIdCounter++}`, name: 'Canal Desconocido', url: '', logo: null, group: 'General' };
-                    const parts = trimmedLine.split(/:(.+)/)[1].split(','); const attributes = parts[0];
-                    currentChannel.name = parts[1]?.trim() || 'Canal Desconocido';
-                    const logoMatch = attributes.match(/tvg-logo="([^"]*)"/i); if (logoMatch && logoMatch[1]) { currentChannel.logo = logoMatch[1].trim(); }
-                    const groupMatch = attributes.match(/group-title="([^"]*)"/i); if (groupMatch && groupMatch[1]) { currentChannel.group = groupMatch[1].trim() || 'General'; }
-                } else if (currentChannel && trimmedLine && !trimmedLine.startsWith('#')) {
-                    if (trimmedLine.startsWith('http://') || trimmedLine.startsWith('https://')) { currentChannel.url = trimmedLine; parsedChannels.push(currentChannel); currentChannel = null; }
-                }
-            } return parsedChannels;
-        }
+        function parseM3U(text) { const lines = text.split('\n'); const parsedChannels = []; let currentChannel = null; let channelIdCounter = 0; for (const line of lines) { const trimmedLine = line.trim(); if (trimmedLine.startsWith('#EXTINF:')) { currentChannel = { id: `channel-${channelIdCounter++}`, name: 'Canal Desconocido', url: '', logo: null, group: 'General' }; const parts = trimmedLine.split(/:(.+)/)[1].split(','); const attributes = parts[0]; currentChannel.name = parts[1]?.trim() || 'Canal Desconocido'; const logoMatch = attributes.match(/tvg-logo="([^"]*)"/i); if (logoMatch && logoMatch[1]) { currentChannel.logo = logoMatch[1].trim(); } const groupMatch = attributes.match(/group-title="([^"]*)"/i); if (groupMatch && groupMatch[1]) { currentChannel.group = groupMatch[1].trim() || 'General'; } } else if (currentChannel && trimmedLine && !trimmedLine.startsWith('#')) { if (trimmedLine.startsWith('http://') || trimmedLine.startsWith('https://')) { currentChannel.url = trimmedLine; parsedChannels.push(currentChannel); currentChannel = null; } } } return parsedChannels; }
 
         // --- Carga y Parseo del M3U con caché ---
-        async function fetchAndLoadM3U(url) {
-            mainLoader.style.display = 'block'; appContainer.classList.add('hidden'); loadErrorMessageContainer.classList.add('hidden');
-            try {
-                const cachedData = localStorage.getItem(CACHE_KEY); let m3uText = null;
-                if (cachedData) {
-                    const { timestamp, data } = JSON.parse(cachedData); const age = Date.now() - timestamp;
-                    if (age < CACHE_EXPIRATION) { m3uText = data; console.log("Usando lista M3U desde caché"); }
-                    else { console.log("Caché M3U expirada."); localStorage.removeItem(CACHE_KEY); }
-                }
-                if (!m3uText) {
-                    console.log("Cargando lista M3U desde la red..."); const response = await fetch(`${url}?t=${Date.now()}`);
-                    if (!response.ok) { throw new Error(`Error al cargar M3U: ${response.status} ${response.statusText}`); }
-                    m3uText = await response.text(); localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data: m3uText })); console.log("Lista M3U guardada en caché.");
-                }
-                if (!m3uText || !m3uText.includes('#EXTINF')) { throw new Error("El archivo M3U descargado no parece tener un formato válido."); }
-                channels = parseM3U(m3uText); if (channels.length === 0) { throw new Error("No se encontraron canales válidos en la lista M3U."); }
-                generateCategoryLinks(); navigateToView('all'); appContainer.classList.remove('hidden'); retryCount = 0;
-            } catch (error) {
-                console.error("Error fatal al cargar o procesar M3U:", error);
-                if ((error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) && retryCount < MAX_RETRIES) {
-                    retryCount++; console.log(`Error de red. Reintentando cargar M3U (${retryCount}/${MAX_RETRIES})...`); setTimeout(() => fetchAndLoadM3U(url), 3000 * retryCount); return;
-                }
-                loadErrorMessageContainer.innerHTML = `<div class="text-red-500 dark:text-red-400"><h1 class="text-xl font-bold mb-2">Error al Cargar la Lista</h1><p class="text-sm">${error.message}</p><p class="text-xs mt-2">Verifica tu conexión o la URL del M3U.</p><button onclick="location.reload()" class="mt-3 px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">Reintentar Carga</button></div>`;
-                loadErrorMessageContainer.classList.remove('hidden');
-            } finally { mainLoader.style.display = 'none'; }
-        }
+        async function fetchAndLoadM3U(url) { mainLoader.style.display = 'block'; appContainer.classList.add('hidden'); loadErrorMessageContainer.classList.add('hidden'); try { const cachedData = localStorage.getItem(CACHE_KEY); let m3uText = null; if (cachedData) { const { timestamp, data } = JSON.parse(cachedData); const age = Date.now() - timestamp; if (age < CACHE_EXPIRATION) { m3uText = data; console.log("Usando lista M3U desde caché"); } else { console.log("Caché M3U expirada."); localStorage.removeItem(CACHE_KEY); } } if (!m3uText) { console.log("Cargando lista M3U desde la red..."); const response = await fetch(`${url}?t=${Date.now()}`); if (!response.ok) { throw new Error(`Error al cargar M3U: ${response.status} ${response.statusText}`); } m3uText = await response.text(); localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data: m3uText })); console.log("Lista M3U guardada en caché."); } if (!m3uText || !m3uText.includes('#EXTINF')) { throw new Error("El archivo M3U descargado no parece tener un formato válido."); } channels = parseM3U(m3uText); if (channels.length === 0) { throw new Error("No se encontraron canales válidos en la lista M3U."); } generateCategoryLinks(); navigateToView('all'); appContainer.classList.remove('hidden'); retryCount = 0; } catch (error) { console.error("Error fatal al cargar o procesar M3U:", error); if ((error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) && retryCount < MAX_RETRIES) { retryCount++; console.log(`Error de red. Reintentando cargar M3U (${retryCount}/${MAX_RETRIES})...`); setTimeout(() => fetchAndLoadM3U(url), 3000 * retryCount); return; } loadErrorMessageContainer.innerHTML = `<div class="text-red-500 dark:text-red-400"><h1 class="text-xl font-bold mb-2">Error al Cargar la Lista</h1><p class="text-sm">${error.message}</p><p class="text-xs mt-2">Verifica tu conexión o la URL del M3U.</p><button onclick="location.reload()" class="mt-3 px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">Reintentar Carga</button></div>`; loadErrorMessageContainer.classList.remove('hidden'); } finally { mainLoader.style.display = 'none'; } }
 
         // --- Generar Links de Categorías Dinámicas ---
-        function generateCategoryLinks() {
-            dynamicCategoriesContainer.innerHTML = ''; const groups = [...new Set(channels.map(c => c.group?.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
-            if (groups.length === 0 || (groups.length === 1 && groups[0].toLowerCase() === 'general')) { categoriesPlaceholder.textContent = "No hay categorías definidas."; categoriesPlaceholder.style.display = 'block'; return; }
-            categoriesPlaceholder.style.display = 'none';
-            groups.forEach(group => {
-                const link = document.createElement('a'); link.href = '#'; link.classList.add('sidebar-link', 'category-link', 'flex', 'items-center', 'space-x-4', 'px-3', 'py-2', 'rounded-lg', 'hover:bg-gray-100', 'dark:hover:bg-gray-700', 'text-gray-700', 'dark:text-gray-300'); link.dataset.group = group;
-                const iconClass = getIconForCategory(group); link.innerHTML = `<i class="${iconClass} fa-fw text-gray-500 dark:text-gray-400 w-5 text-center"></i> <span>${group}</span>`;
-                link.addEventListener('click', (e) => { e.preventDefault(); navigateToView('category', group); }); dynamicCategoriesContainer.appendChild(link);
-            });
-        }
-        function getIconForCategory(groupName) {
-            if (!groupName) return 'fas fa-tv'; const lowerGroup = groupName.toLowerCase();
-            if (lowerGroup.includes('music') || lowerGroup.includes('música')) return 'fas fa-music'; if (lowerGroup.includes('game') || lowerGroup.includes('juego')) return 'fas fa-gamepad';
-            if (lowerGroup.includes('news') || lowerGroup.includes('noticia')) return 'fas fa-newspaper'; if (lowerGroup.includes('sport') || lowerGroup.includes('deporte')) return 'fas fa-futbol';
-            if (lowerGroup.includes('movie') || lowerGroup.includes('cine') || lowerGroup.includes('película')) return 'fas fa-film'; if (lowerGroup.includes('infantil') || lowerGroup.includes('kids')) return 'fas fa-child';
-            if (lowerGroup.includes('docu') || lowerGroup.includes('cultura')) return 'fas fa-book-open'; return 'fas fa-tv';
-        }
+        function generateCategoryLinks() { dynamicCategoriesContainer.innerHTML = ''; const groups = [...new Set(channels.map(c => c.group?.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b)); if (groups.length === 0 || (groups.length === 1 && groups[0].toLowerCase() === 'general')) { categoriesPlaceholder.textContent = "No hay categorías definidas."; categoriesPlaceholder.style.display = 'block'; return; } categoriesPlaceholder.style.display = 'none'; groups.forEach(group => { const link = document.createElement('a'); link.href = '#'; link.classList.add('sidebar-link', 'category-link', 'flex', 'items-center', 'space-x-4', 'px-3', 'py-2', 'rounded-lg', 'hover:bg-gray-100', 'dark:hover:bg-gray-700', 'text-gray-700', 'dark:text-gray-300'); link.dataset.group = group; const iconClass = getIconForCategory(group); link.innerHTML = `<i class="${iconClass} fa-fw text-gray-500 dark:text-gray-400 w-5 text-center"></i> <span>${group}</span>`; link.addEventListener('click', (e) => { e.preventDefault(); navigateToView('category', group); }); dynamicCategoriesContainer.appendChild(link); }); }
+        function getIconForCategory(groupName) { if (!groupName) return 'fas fa-tv'; const lowerGroup = groupName.toLowerCase(); if (lowerGroup.includes('music') || lowerGroup.includes('música')) return 'fas fa-music'; if (lowerGroup.includes('game') || lowerGroup.includes('juego')) return 'fas fa-gamepad'; if (lowerGroup.includes('news') || lowerGroup.includes('noticia')) return 'fas fa-newspaper'; if (lowerGroup.includes('sport') || lowerGroup.includes('deporte')) return 'fas fa-futbol'; if (lowerGroup.includes('movie') || lowerGroup.includes('cine') || lowerGroup.includes('película')) return 'fas fa-film'; if (lowerGroup.includes('infantil') || lowerGroup.includes('kids')) return 'fas fa-child'; if (lowerGroup.includes('docu') || lowerGroup.includes('cultura')) return 'fas fa-book-open'; return 'fas fa-tv'; }
 
         // --- Renderizar Canales ---
-        function renderChannelList() {
-            channelListContainer.innerHTML = ''; let channelsToDisplay = []; let title = "Canales Disponibles";
-            switch (currentView) {
-                case 'favorites': channelsToDisplay = channels.filter(channel => isFavorite(channel.url)); title = "Canales Favoritos"; break;
-                case 'history': channelsToDisplay = recentlyWatchedUrls.map(url => channels.find(channel => channel.url === url)).filter(channel => channel !== undefined); title = "Historial de Reproducción"; break;
-                case 'category': channelsToDisplay = channels.filter(channel => channel.group === currentCategoryGroup); title = `Categoría: ${currentCategoryGroup}`; break;
-                case 'all': default: channelsToDisplay = channels; title = "Todos los Canales"; break;
-            }
-            channelListTitle.textContent = title;
-            if (channelsToDisplay.length === 0) {
-                let placeholderText = "No hay canales para mostrar."; if (currentView === 'favorites') placeholderText = "No tienes canales favoritos marcados."; else if (currentView === 'history') placeholderText = "Tu historial de reproducción está vacío."; else if (currentView === 'category') placeholderText = `No hay canales en la categoría "${currentCategoryGroup}".`;
-                channelListPlaceholder.textContent = placeholderText; channelListPlaceholder.style.display = 'block'; return;
-            }
-            channelListPlaceholder.style.display = 'none';
-            channelsToDisplay.forEach((channel) => {
-                const originalIndex = channels.findIndex(c => c.id === channel.id); const videoElement = document.createElement('div');
-                videoElement.classList.add('flex', 'space-x-3', 'cursor-pointer', 'channel-item', 'p-2', 'rounded-lg', 'hover:bg-gray-200', 'dark:hover:bg-gray-700', 'items-center');
-                videoElement.setAttribute('role', 'button'); videoElement.setAttribute('tabindex', '0'); videoElement.setAttribute('aria-label', `Reproducir ${channel.name}`);
-                videoElement.dataset.index = originalIndex; videoElement.dataset.url = channel.url; videoElement.dataset.id = channel.id;
-                const thumbContainer = document.createElement('div'); thumbContainer.classList.add('w-24', 'h-14', 'flex-shrink-0', 'relative', 'bg-gray-200', 'dark:bg-gray-700', 'rounded', 'overflow-hidden', 'flex', 'items-center', 'justify-center');
-                if (channel.logo && channel.logo.startsWith('http')) {
-                    const logoImg = document.createElement('img'); logoImg.alt = ""; logoImg.classList.add('recommended-thumbnail'); logoImg.loading = 'lazy'; logoImg.src = channel.logo;
-                    logoImg.onerror = () => { thumbContainer.innerHTML = `<i class="fas ${getIconForCategory(channel.group)} text-3xl text-gray-500 dark:text-gray-400"></i>`; }; thumbContainer.appendChild(logoImg);
-                } else { thumbContainer.innerHTML = `<i class="fas ${getIconForCategory(channel.group)} text-3xl text-gray-500 dark:text-gray-400"></i>`; }
-                const infoDiv = document.createElement('div'); infoDiv.classList.add('flex-1', 'overflow-hidden'); infoDiv.innerHTML = `<h3 class="text-sm font-semibold line-clamp-2 text-gray-800 dark:text-gray-200">${channel.name}</h3><p class="text-xs text-gray-500 dark:text-gray-400 truncate">${channel.group || 'General'}</p>`;
-                videoElement.appendChild(thumbContainer); videoElement.appendChild(infoDiv);
-                const loadHandler = () => { loadVideo(originalIndex); }; videoElement.addEventListener('click', loadHandler);
-                videoElement.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); loadHandler(); } });
-                channelListContainer.appendChild(videoElement);
-            });
-            highlightChannelInList(currentChannelIndex);
-        }
+        function renderChannelList() { channelListContainer.innerHTML = ''; let channelsToDisplay = []; let title = "Canales Disponibles"; switch (currentView) { case 'favorites': channelsToDisplay = channels.filter(channel => isFavorite(channel.url)); title = "Canales Favoritos"; break; case 'history': channelsToDisplay = recentlyWatchedUrls.map(url => channels.find(channel => channel.url === url)).filter(channel => channel !== undefined); title = "Historial de Reproducción"; break; case 'category': channelsToDisplay = channels.filter(channel => channel.group === currentCategoryGroup); title = `Categoría: ${currentCategoryGroup}`; break; case 'all': default: channelsToDisplay = channels; title = "Todos los Canales"; break; } channelListTitle.textContent = title; if (channelsToDisplay.length === 0) { let placeholderText = "No hay canales para mostrar."; if (currentView === 'favorites') placeholderText = "No tienes canales favoritos marcados."; else if (currentView === 'history') placeholderText = "Tu historial de reproducción está vacío."; else if (currentView === 'category') placeholderText = `No hay canales en la categoría "${currentCategoryGroup}".`; channelListPlaceholder.textContent = placeholderText; channelListPlaceholder.style.display = 'block'; return; } channelListPlaceholder.style.display = 'none'; channelsToDisplay.forEach((channel) => { const originalIndex = channels.findIndex(c => c.id === channel.id); const videoElement = document.createElement('div'); videoElement.classList.add('flex', 'space-x-3', 'cursor-pointer', 'channel-item', 'p-2', 'rounded-lg', 'hover:bg-gray-200', 'dark:hover:bg-gray-700', 'items-center'); videoElement.setAttribute('role', 'button'); videoElement.setAttribute('tabindex', '0'); videoElement.setAttribute('aria-label', `Reproducir ${channel.name}`); videoElement.dataset.index = originalIndex; videoElement.dataset.url = channel.url; videoElement.dataset.id = channel.id; const thumbContainer = document.createElement('div'); thumbContainer.classList.add('w-24', 'h-14', 'flex-shrink-0', 'relative', 'bg-gray-200', 'dark:bg-gray-700', 'rounded', 'overflow-hidden', 'flex', 'items-center', 'justify-center'); if (channel.logo && channel.logo.startsWith('http')) { const logoImg = document.createElement('img'); logoImg.alt = ""; logoImg.classList.add('recommended-thumbnail'); logoImg.loading = 'lazy'; logoImg.src = channel.logo; logoImg.onerror = () => { thumbContainer.innerHTML = `<i class="fas ${getIconForCategory(channel.group)} text-3xl text-gray-500 dark:text-gray-400"></i>`; }; thumbContainer.appendChild(logoImg); } else { thumbContainer.innerHTML = `<i class="fas ${getIconForCategory(channel.group)} text-3xl text-gray-500 dark:text-gray-400"></i>`; } const infoDiv = document.createElement('div'); infoDiv.classList.add('flex-1', 'overflow-hidden'); infoDiv.innerHTML = `<h3 class="text-sm font-semibold line-clamp-2 text-gray-800 dark:text-gray-200">${channel.name}</h3><p class="text-xs text-gray-500 dark:text-gray-400 truncate">${channel.group || 'General'}</p>`; videoElement.appendChild(thumbContainer); videoElement.appendChild(infoDiv); const loadHandler = () => { loadVideo(originalIndex); }; videoElement.addEventListener('click', loadHandler); videoElement.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); loadHandler(); } }); channelListContainer.appendChild(videoElement); }); highlightChannelInList(currentChannelIndex); }
 
         // --- Cargar y Reproducir un Vídeo/Canal ---
-        function loadVideo(index) {
-            if (index < 0 || index >= channels.length) { showPlayerMessage("Índice de canal no válido", true); return; }
-            if (hls) { hls.stopLoad(); hls.detachMedia(); }
-            videoPlayer.removeAttribute('src'); videoPlayer.load();
-            currentChannelIndex = index; const channel = channels[index]; const videoUrl = channel.url;
-            console.log(`Cargando canal [${index}]: ${channel.name} (${videoUrl})`);
-            playerLoader.classList.remove('hidden'); videoPlayer.style.opacity = '0.5';
-            videoTitle.textContent = channel.name; videoDescription.textContent = `Reproduciendo: ${channel.name}${channel.group ? ' (' + channel.group + ')' : ''}`;
-            channelNameElement.textContent = channel.name; subscriberCountElement.textContent = channel.group || '';
-            channelLogoImg.classList.add('hidden'); channelLogoIcon.classList.remove('hidden'); channelLogoIcon.className = `fas ${getIconForCategory(channel.group)} text-xl`; channelLogoContainer.classList.remove('bg-gray-500', 'bg-blue-500');
-            if (channel.logo && channel.logo.startsWith('http')) {
-                channelLogoImg.src = channel.logo; channelLogoImg.classList.remove('hidden'); channelLogoIcon.classList.add('hidden');
-                channelLogoImg.onerror = () => { channelLogoImg.classList.add('hidden'); channelLogoIcon.classList.remove('hidden'); channelLogoContainer.classList.add('bg-gray-500'); };
-            } else { channelLogoContainer.classList.add('bg-gray-500'); }
-            highlightChannelInList(index); setPlaybackSpeed(1); updateFavoriteButtonState(); renderComments(sampleComments);
-            try {
-                if (videoUrl.toLowerCase().endsWith('.m3u8')) {
-                    if (hls) { hls.loadSource(videoUrl); hls.attachMedia(videoPlayer); hls.startLoad(); }
-                    else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) { videoPlayer.src = videoUrl; videoPlayer.load(); videoPlayer.play().catch(e => { console.warn("Fallo al auto-reproducir HLS nativo:", e.message); showPlayerMessage("Presiona Play para iniciar", false); }); }
-                    else { throw new Error('HLS no es soportado por este navegador.'); }
-                } else {
-                    if (hls) hls.detachMedia(); videoPlayer.src = videoUrl; videoPlayer.load(); videoPlayer.play().catch(e => { console.warn("Fallo al auto-reproducir fuente directa:", e.message); showPlayerMessage("Presiona Play para iniciar", false); });
-                }
-            } catch (error) { console.error("Error al configurar la fuente del vídeo:", error); handlePlaybackError(error); }
-
-            // --- NUEVO: Scroll hacia el reproductor en móvil al seleccionar canal ---
-            const isMobileView = window.innerWidth <= 768; // Usar el mismo breakpoint que el CSS
-            if (isMobileView && videoPlayerContainer) {
-                 // Usar scrollIntoView para mover el contenedor del reproductor a la vista
-                 videoPlayerContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }
+        function loadVideo(index) { if (index < 0 || index >= channels.length) { showPlayerMessage("Índice de canal no válido", true); return; } if (hls) { hls.stopLoad(); hls.detachMedia(); } videoPlayer.removeAttribute('src'); videoPlayer.load(); currentChannelIndex = index; const channel = channels[index]; const videoUrl = channel.url; console.log(`Cargando canal [${index}]: ${channel.name} (${videoUrl})`); playerLoader.classList.remove('hidden'); videoPlayer.style.opacity = '0.5'; videoTitle.textContent = channel.name; videoDescription.textContent = `Reproduciendo: ${channel.name}${channel.group ? ' (' + channel.group + ')' : ''}`; channelNameElement.textContent = channel.name; subscriberCountElement.textContent = channel.group || ''; channelLogoImg.classList.add('hidden'); channelLogoIcon.classList.remove('hidden'); channelLogoIcon.className = `fas ${getIconForCategory(channel.group)} text-xl`; channelLogoContainer.classList.remove('bg-gray-500', 'bg-blue-500'); if (channel.logo && channel.logo.startsWith('http')) { channelLogoImg.src = channel.logo; channelLogoImg.classList.remove('hidden'); channelLogoIcon.classList.add('hidden'); channelLogoImg.onerror = () => { channelLogoImg.classList.add('hidden'); channelLogoIcon.classList.remove('hidden'); channelLogoContainer.classList.add('bg-gray-500'); }; } else { channelLogoContainer.classList.add('bg-gray-500'); } highlightChannelInList(index); setPlaybackSpeed(1); updateFavoriteButtonState(); renderComments(sampleComments); try { if (videoUrl.toLowerCase().endsWith('.m3u8')) { if (hls) { hls.loadSource(videoUrl); hls.attachMedia(videoPlayer); hls.startLoad(); } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) { videoPlayer.src = videoUrl; videoPlayer.load(); videoPlayer.play().catch(e => { console.warn("Fallo al auto-reproducir HLS nativo:", e.message); showPlayerMessage("Presiona Play para iniciar", false); }); } else { throw new Error('HLS no es soportado por este navegador.'); } } else { if (hls) hls.detachMedia(); videoPlayer.src = videoUrl; videoPlayer.load(); videoPlayer.play().catch(e => { console.warn("Fallo al auto-reproducir fuente directa:", e.message); showPlayerMessage("Presiona Play para iniciar", false); }); } } catch (error) { console.error("Error al configurar la fuente del vídeo:", error); handlePlaybackError(error); } const isMobileView = window.innerWidth <= 768; if (isMobileView && videoPlayerContainer) { videoPlayerContainer.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }
 
         // --- Resaltar Canal en la Lista ---
-        function highlightChannelInList(selectedIndex) {
-            const items = channelListContainer.querySelectorAll('.channel-item');
-            items.forEach((item) => {
-                const itemIndex = parseInt(item.dataset.index, 10); const isSelected = itemIndex === selectedIndex;
-                item.classList.toggle('selected', isSelected);
-                if (isSelected) { item.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
-            });
-        }
+        function highlightChannelInList(selectedIndex) { const items = channelListContainer.querySelectorAll('.channel-item'); items.forEach((item) => { const itemIndex = parseInt(item.dataset.index, 10); const isSelected = itemIndex === selectedIndex; item.classList.toggle('selected', isSelected); if (isSelected) { item.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } }); }
 
         // --- Manejador de Errores HLS.js ---
-        function handleHlsError(event, data) {
-            console.error('Error de HLS.js:', data.type, data.details, data);
-            if (data.fatal) {
-                switch(data.type) {
-                    case Hls.ErrorTypes.NETWORK_ERROR:
-                        showPlayerMessage("Error de red, intentando reconectar...", true);
-                        if (hls && channels[currentChannelIndex]?.url === data.url) { setTimeout(() => { if (hls) { console.log("Reintentando carga HLS después de error de red..."); hls.startLoad(); } }, 3000); }
-                        break;
-                    case Hls.ErrorTypes.MEDIA_ERROR:
-                        showPlayerMessage("Error de stream, intentando recuperar...", true);
-                        if (hls && data.details !== 'bufferStalledError') { try { console.log("Intentando recuperar de Media Error HLS..."); hls.recoverMediaError(); } catch (e) { console.error("Fallo al recuperar media error HLS, reiniciando HLS:", e); if (hls) hls.destroy(); initializeHls(); if (currentChannelIndex !== -1) loadVideo(currentChannelIndex); } }
-                        else if (hls && data.details === 'bufferStalledError') { console.warn("Buffer Stalled Error detectado."); }
-                        break;
-                    default:
-                        handlePlaybackError(new Error(`Error HLS (${data.type}): ${data.details || 'Detalle desconocido'}`));
-                        if (hls) { hls.destroy(); initializeHls(); } break;
-                }
-            } else { console.warn("Error no fatal de HLS.js:", data.type, data.details); }
-        }
+        function handleHlsError(event, data) { console.error('Error de HLS.js:', data.type, data.details, data); if (data.fatal) { switch(data.type) { case Hls.ErrorTypes.NETWORK_ERROR: showPlayerMessage("Error de red, intentando reconectar...", true); if (hls && channels[currentChannelIndex]?.url === data.url) { setTimeout(() => { if (hls) { console.log("Reintentando carga HLS después de error de red..."); hls.startLoad(); } }, 3000); } break; case Hls.ErrorTypes.MEDIA_ERROR: showPlayerMessage("Error de stream, intentando recuperar...", true); if (hls && data.details !== 'bufferStalledError') { try { console.log("Intentando recuperar de Media Error HLS..."); hls.recoverMediaError(); } catch (e) { console.error("Fallo al recuperar media error HLS, reiniciando HLS:", e); if (hls) hls.destroy(); initializeHls(); if (currentChannelIndex !== -1) loadVideo(currentChannelIndex); } } else if (hls && data.details === 'bufferStalledError') { console.warn("Buffer Stalled Error detectado."); } break; default: handlePlaybackError(new Error(`Error HLS (${data.type}): ${data.details || 'Detalle desconocido'}`)); if (hls) { hls.destroy(); initializeHls(); } break; } } else { console.warn("Error no fatal de HLS.js:", data.type, data.details); } }
 
         // --- Manejador de Errores de Reproducción General ---
-        function handlePlaybackError(error) {
-            console.error("Error de reproducción:", error); playerLoader.classList.add('hidden'); videoPlayer.style.opacity = '1';
-            const errorMessage = error?.message || 'No se pudo reproducir el canal.'; showPlayerMessage(`Error: ${errorMessage}`, true);
-            if (currentChannelIndex >= 0 && currentChannelIndex < channels.length) { videoTitle.textContent = `Error al cargar: ${channels[currentChannelIndex].name}`; }
-            else { videoTitle.textContent = "Error al cargar canal"; }
-        }
+        function handlePlaybackError(error) { console.error("Error de reproducción:", error); playerLoader.classList.add('hidden'); videoPlayer.style.opacity = '1'; const errorMessage = error?.message || 'No se pudo reproducir el canal.'; showPlayerMessage(`Error: ${errorMessage}`, true); if (currentChannelIndex >= 0 && currentChannelIndex < channels.length) { videoTitle.textContent = `Error al cargar: ${channels[currentChannelIndex].name}`; } else { videoTitle.textContent = "Error al cargar canal"; } }
 
         // --- Mostrar Mensaje sobre el Reproductor ---
-        let playerMessageTimeoutId = null;
-        function showPlayerMessage(message, isError = false, container = playerMessage) {
-            if (!container) return; container.textContent = message;
-            container.classList.toggle('bg-red-600/80', isError); container.classList.toggle('text-white', true);
-            container.classList.toggle('bg-green-600/80', !isError && container === settingsView); container.classList.toggle('bg-black/70', !isError && container !== settingsView);
-            container.classList.remove('hidden'); void container.offsetWidth; container.style.opacity = '1';
-            if (playerMessageTimeoutId) clearTimeout(playerMessageTimeoutId);
-            playerMessageTimeoutId = setTimeout(() => {
-                container.style.opacity = '0'; setTimeout(() => { container.classList.add('hidden'); playerMessageTimeoutId = null; }, 500);
-            }, 3000);
-        }
+        let playerMessageTimeoutId = null; function showPlayerMessage(message, isError = false, container = playerMessage) { if (!container) return; container.textContent = message; container.classList.toggle('bg-red-600/80', isError); container.classList.toggle('text-white', true); container.classList.toggle('bg-green-600/80', !isError && container === settingsView); container.classList.toggle('bg-black/70', !isError && container !== settingsView); container.classList.remove('hidden'); void container.offsetWidth; container.style.opacity = '1'; if (playerMessageTimeoutId) clearTimeout(playerMessageTimeoutId); playerMessageTimeoutId = setTimeout(() => { container.style.opacity = '0'; setTimeout(() => { container.classList.add('hidden'); playerMessageTimeoutId = null; }, 500); }, 3000); }
 
         // --- Renderizar Comentarios Simulados ---
-        function renderComments(commentsToRender) {
-            if (!commentListContainerJS || !commentCountElement) { console.warn("Elementos de comentarios no encontrados en el DOM."); return; }
-            commentListContainerJS.innerHTML = ''; if (!commentsToRender || commentsToRender.length === 0) { commentCountElement.textContent = '0'; return; }
-            commentCountElement.textContent = commentsToRender.length.toLocaleString();
-            commentsToRender.forEach(comment => {
-                const commentDiv = document.createElement('div'); commentDiv.classList.add('flex', 'items-start', 'space-x-3');
-                const avatarDiv = document.createElement('div'); avatarDiv.classList.add('w-10', 'h-10', 'rounded-full', 'flex-shrink-0', 'flex', 'items-center', 'justify-center', 'text-white', 'font-semibold'); avatarDiv.style.backgroundColor = comment.avatarColor || '#A0AEC0'; avatarDiv.textContent = comment.author.charAt(0).toUpperCase();
-                const contentDiv = document.createElement('div'); contentDiv.classList.add('flex-1'); const infoDiv = document.createElement('div'); infoDiv.classList.add('text-sm'); infoDiv.innerHTML = `<span class="font-semibold mr-2 text-gray-900 dark:text-gray-100">${comment.author}</span><span class="text-gray-500 dark:text-gray-400">${comment.timestamp}</span>`;
-                const textP = document.createElement('p'); textP.classList.add('text-sm', 'mt-1', 'text-gray-900', 'dark:text-gray-100'); textP.textContent = comment.text;
-                const actionsDiv = document.createElement('div'); actionsDiv.classList.add('flex', 'items-center', 'space-x-3', 'text-xs', 'text-gray-500', 'dark:text-gray-400', 'mt-2'); actionsDiv.innerHTML = `<button class="hover:text-black dark:hover:text-white focus:outline-none opacity-50 cursor-not-allowed"><i class="far fa-thumbs-up"></i> ${comment.likes || 0}</button><button class="hover:text-black dark:hover:text-white focus:outline-none opacity-50 cursor-not-allowed"><i class="far fa-thumbs-down"></i></button><button class="font-semibold hover:text-black dark:hover:text-white focus:outline-none uppercase opacity-50 cursor-not-allowed">Responder</button>`;
-                contentDiv.appendChild(infoDiv); contentDiv.appendChild(textP); contentDiv.appendChild(actionsDiv); commentDiv.appendChild(avatarDiv); commentDiv.appendChild(contentDiv); commentListContainerJS.appendChild(commentDiv);
-            });
-        }
+        function renderComments(commentsToRender) { if (!commentListContainerJS || !commentCountElement) { console.warn("Elementos de comentarios no encontrados en el DOM."); return; } commentListContainerJS.innerHTML = ''; if (!commentsToRender || commentsToRender.length === 0) { commentCountElement.textContent = '0'; return; } commentCountElement.textContent = commentsToRender.length.toLocaleString(); commentsToRender.forEach(comment => { const commentDiv = document.createElement('div'); commentDiv.classList.add('flex', 'items-start', 'space-x-3'); const avatarDiv = document.createElement('div'); avatarDiv.classList.add('w-10', 'h-10', 'rounded-full', 'flex-shrink-0', 'flex', 'items-center', 'justify-center', 'text-white', 'font-semibold'); avatarDiv.style.backgroundColor = comment.avatarColor || '#A0AEC0'; avatarDiv.textContent = comment.author.charAt(0).toUpperCase(); const contentDiv = document.createElement('div'); contentDiv.classList.add('flex-1'); const infoDiv = document.createElement('div'); infoDiv.classList.add('text-sm'); infoDiv.innerHTML = `<span class="font-semibold mr-2 text-gray-900 dark:text-gray-100">${comment.author}</span><span class="text-gray-500 dark:text-gray-400">${comment.timestamp}</span>`; const textP = document.createElement('p'); textP.classList.add('text-sm', 'mt-1', 'text-gray-900', 'dark:text-gray-100'); textP.textContent = comment.text; const actionsDiv = document.createElement('div'); actionsDiv.classList.add('flex', 'items-center', 'space-x-3', 'text-xs', 'text-gray-500', 'dark:text-gray-400', 'mt-2'); actionsDiv.innerHTML = `<button class="hover:text-black dark:hover:text-white focus:outline-none opacity-50 cursor-not-allowed"><i class="far fa-thumbs-up"></i> ${comment.likes || 0}</button><button class="hover:text-black dark:hover:text-white focus:outline-none opacity-50 cursor-not-allowed"><i class="far fa-thumbs-down"></i></button><button class="font-semibold hover:text-black dark:hover:text-white focus:outline-none uppercase opacity-50 cursor-not-allowed">Responder</button>`; contentDiv.appendChild(infoDiv); contentDiv.appendChild(textP); contentDiv.appendChild(actionsDiv); commentDiv.appendChild(avatarDiv); commentDiv.appendChild(contentDiv); commentListContainerJS.appendChild(commentDiv); }); }
 
         // --- Controles del Reproductor ---
         function formatTime(time) { if (isNaN(time) || !isFinite(time)) { return '--:--'; } const minutes = Math.floor(time / 60); const seconds = Math.floor(time % 60); return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`; }
@@ -797,35 +459,13 @@
         function toggleSidebar() { const isOpen = sidebar.classList.toggle('open'); sidebarOverlay.classList.toggle('hidden'); menuToggle.setAttribute('aria-expanded', isOpen.toString()); }
 
         // --- Actualizar Estilo Activo Sidebar Izquierdo ---
-        function updateSidebarActiveLink(activeView, activeGroup = null) {
-            [homeLink, favoritesLink, historyLink, settingsLink].forEach(link => link?.classList.remove('active')); if (activeCategoryLinkElement) { activeCategoryLinkElement.classList.remove('active'); activeCategoryLinkElement = null; }
-            switch (activeView) {
-                case 'all': homeLink?.classList.add('active'); break; case 'favorites': favoritesLink?.classList.add('active'); break;
-                case 'history': historyLink?.classList.add('active'); break; case 'settings': settingsLink?.classList.add('active'); break;
-                case 'category': const categoryLinks = dynamicCategoriesContainer.querySelectorAll('.category-link'); categoryLinks.forEach(link => { if (link.dataset.group === activeGroup) { link.classList.add('active'); activeCategoryLinkElement = link; } }); break;
-            }
-        }
+        function updateSidebarActiveLink(activeView, activeGroup = null) { [homeLink, favoritesLink, historyLink, settingsLink].forEach(link => link?.classList.remove('active')); if (activeCategoryLinkElement) { activeCategoryLinkElement.classList.remove('active'); activeCategoryLinkElement = null; } switch (activeView) { case 'all': homeLink?.classList.add('active'); break; case 'favorites': favoritesLink?.classList.add('active'); break; case 'history': historyLink?.classList.add('active'); break; case 'settings': settingsLink?.classList.add('active'); break; case 'category': const categoryLinks = dynamicCategoriesContainer.querySelectorAll('.category-link'); categoryLinks.forEach(link => { if (link.dataset.group === activeGroup) { link.classList.add('active'); activeCategoryLinkElement = link; } }); break; } }
 
         // --- Navegación por Teclado en Lista de Canales ---
-        function navigateChannelList(direction) {
-            const items = Array.from(channelListContainer.querySelectorAll('.channel-item')); if (items.length === 0) return; const currentFocusElement = document.activeElement; let currentVisualIndex = -1;
-            if (currentFocusElement && currentFocusElement.classList.contains('channel-item') && channelListContainer.contains(currentFocusElement)) { currentVisualIndex = items.indexOf(currentFocusElement); }
-            else { const logicalIndexInVisual = items.findIndex(item => parseInt(item.dataset.index, 10) === currentChannelIndex); currentVisualIndex = (logicalIndexInVisual !== -1) ? logicalIndexInVisual : -1; }
-            let nextVisualIndex = currentVisualIndex + direction; nextVisualIndex = Math.max(0, Math.min(nextVisualIndex, items.length - 1));
-            if (nextVisualIndex >= 0 && nextVisualIndex < items.length) { const nextElement = items[nextVisualIndex]; if (nextElement) { nextElement.focus(); } }
-        }
+        function navigateChannelList(direction) { const items = Array.from(channelListContainer.querySelectorAll('.channel-item')); if (items.length === 0) return; const currentFocusElement = document.activeElement; let currentVisualIndex = -1; if (currentFocusElement && currentFocusElement.classList.contains('channel-item') && channelListContainer.contains(currentFocusElement)) { currentVisualIndex = items.indexOf(currentFocusElement); } else { const logicalIndexInVisual = items.findIndex(item => parseInt(item.dataset.index, 10) === currentChannelIndex); currentVisualIndex = (logicalIndexInVisual !== -1) ? logicalIndexInVisual : -1; } let nextVisualIndex = currentVisualIndex + direction; nextVisualIndex = Math.max(0, Math.min(nextVisualIndex, items.length - 1)); if (nextVisualIndex >= 0 && nextVisualIndex < items.length) { const nextElement = items[nextVisualIndex]; if (nextElement) { nextElement.focus(); } } }
 
         // --- Función para manejar el scroll en la lista de canales ---
-        function handleChannelScroll() {
-            const currentScrollTop = channelListContainer.scrollTop; const isMobile = window.innerWidth <= 768;
-            if (!videoDetailsWrapper) return;
-            if (isMobile) {
-                if (currentScrollTop > lastScrollTop + scrollThreshold) { videoDetailsWrapper.classList.remove('hidden-on-scroll'); mainContentArea.classList.remove('details-hidden-layout'); }
-                else if (currentScrollTop < lastScrollTop - scrollThreshold && currentScrollTop > scrollThreshold) { videoDetailsWrapper.classList.add('hidden-on-scroll'); mainContentArea.classList.add('details-hidden-layout'); }
-                else if (currentScrollTop <= scrollThreshold) { videoDetailsWrapper.classList.remove('hidden-on-scroll'); mainContentArea.classList.remove('details-hidden-layout'); }
-            } else { videoDetailsWrapper.classList.remove('hidden-on-scroll'); mainContentArea.classList.remove('details-hidden-layout'); }
-            if(Math.abs(currentScrollTop - lastScrollTop) > scrollThreshold || currentScrollTop === 0) { lastScrollTop = currentScrollTop <= 0 ? 0 : currentScrollTop; }
-        }
+        function handleChannelScroll() { const currentScrollTop = channelListContainer.scrollTop; const isMobile = window.innerWidth <= 768; if (!videoDetailsWrapper) return; if (isMobile) { if (currentScrollTop > lastScrollTop + scrollThreshold) { videoDetailsWrapper.classList.remove('hidden-on-scroll'); mainContentArea.classList.remove('details-hidden-layout'); } else if (currentScrollTop < lastScrollTop - scrollThreshold && currentScrollTop > scrollThreshold) { videoDetailsWrapper.classList.add('hidden-on-scroll'); mainContentArea.classList.add('details-hidden-layout'); } else if (currentScrollTop <= scrollThreshold) { videoDetailsWrapper.classList.remove('hidden-on-scroll'); mainContentArea.classList.remove('details-hidden-layout'); } } else { videoDetailsWrapper.classList.remove('hidden-on-scroll'); mainContentArea.classList.remove('details-hidden-layout'); } if(Math.abs(currentScrollTop - lastScrollTop) > scrollThreshold || currentScrollTop === 0) { lastScrollTop = currentScrollTop <= 0 ? 0 : currentScrollTop; } }
 
         // --- Event Listeners ---
         playPauseBtn.addEventListener('click', togglePlayPause); speedBtn.addEventListener('click', cyclePlaybackSpeed); videoPlayerContainer.addEventListener('dblclick', toggleFullScreen); favoriteBtn.addEventListener('click', toggleFavorite); themeToggleBtn.addEventListener('click', toggleTheme); volumeBtn.addEventListener('click', toggleMute); volumeSlider.addEventListener('input', setVolumeFromSlider); fullscreenBtn.addEventListener('click', toggleFullScreen); progressBar.addEventListener('input', seekVideoFromBar);
@@ -835,28 +475,10 @@
         document.addEventListener('fullscreenchange', updateFullscreenIcon); document.addEventListener('webkitfullscreenchange', updateFullscreenIcon); document.addEventListener('mozfullscreenchange', updateFullscreenIcon); document.addEventListener('MSFullscreenChange', updateFullscreenIcon);
         menuToggle.addEventListener('click', toggleSidebar); sidebarOverlay.addEventListener('click', toggleSidebar);
         if (channelListContainer) { channelListContainer.addEventListener('scroll', handleChannelScroll); } window.addEventListener('resize', handleChannelScroll);
-        document.addEventListener('keydown', (e) => {
-            const targetTagName = e.target.tagName.toLowerCase(); const isInputFocused = ['input', 'textarea', 'select'].includes(targetTagName); const activeElement = document.activeElement; const isChannelListFocused = channelListContainer && (channelListContainer.contains(activeElement) || activeElement === channelListContainer); const isSettingsVisible = !settingsView.classList.contains('hidden');
-            if (isSettingsVisible) { if (e.key === 'Escape') { e.preventDefault(); navigateToView(previousView || 'all', currentCategoryGroup); } return; } if (isInputFocused) return;
-            if ((e.key === 'Escape' || e.key === 'b' || e.key === 'B') && sidebar.classList.contains('open')) { e.preventDefault(); toggleSidebar(); if (menuToggle && document.body.contains(menuToggle)) menuToggle.focus(); else if (videoPlayer && document.body.contains(videoPlayer)) videoPlayer.focus(); return; }
-            if (isChannelListFocused) { if (e.key === 'ArrowUp') { e.preventDefault(); navigateChannelList(-1); return; } if (e.key === 'ArrowDown') { e.preventDefault(); navigateChannelList(1); return; } if ((e.key === 'Enter' || e.key === ' ') && activeElement && activeElement.classList.contains('channel-item')) { e.preventDefault(); const indexToLoad = parseInt(activeElement.dataset.index, 10); if (!isNaN(indexToLoad)) { loadVideo(indexToLoad); } return; } }
-            if (!isChannelListFocused) {
-                 switch(e.key) {
-                    case ' ': case 'k': case 'K': e.preventDefault(); togglePlayPause(); break; case 'f': case 'F': e.preventDefault(); toggleFullScreen(); break; case 'm': case 'M': e.preventDefault(); toggleMute(); break;
-                    case 'ArrowLeft': case 'j': case 'J': e.preventDefault(); if (isFinite(videoPlayer.duration)) { const seekAmount = (e.key === 'j' || e.key === 'J') ? -10 : -5; seekVideo(seekAmount); showPlayerMessage(`${seekAmount}s`); } break;
-                    case 'ArrowRight': case 'l': case 'L': e.preventDefault(); if (isFinite(videoPlayer.duration)) { const seekAmount = (e.key === 'l' || e.key === 'L') ? 10 : 5; seekVideo(seekAmount); showPlayerMessage(`+${seekAmount}s`); } break;
-                    case 'ArrowUp': e.preventDefault(); adjustVolume(0.05); break; case 'ArrowDown': e.preventDefault(); adjustVolume(-0.05); break;
-                    case '>': if (e.shiftKey) { e.preventDefault(); const nextSpeedIndex = Math.min(playbackRates.length - 1, currentSpeedIndex + 1); if (nextSpeedIndex !== currentSpeedIndex) { setPlaybackSpeed(playbackRates[nextSpeedIndex]); showPlayerMessage(`Velocidad: ${videoPlayer.playbackRate}x`); } } break;
-                    case '<': if (e.shiftKey) { e.preventDefault(); const nextSpeedIndex = Math.max(0, currentSpeedIndex - 1); if (nextSpeedIndex !== currentSpeedIndex) { setPlaybackSpeed(playbackRates[nextSpeedIndex]); showPlayerMessage(`Velocidad: ${videoPlayer.playbackRate}x`); } } break;
-                    case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': if (isFinite(videoPlayer.duration)) { e.preventDefault(); const percentage = parseInt(e.key) * 10; const time = (percentage / 100) * videoPlayer.duration; videoPlayer.currentTime = time; updateProgressBar(); showPlayerMessage(`Saltar a ${percentage}%`); } break;
-                 }
-            }
-        });
+        document.addEventListener('keydown', (e) => { const targetTagName = e.target.tagName.toLowerCase(); const isInputFocused = ['input', 'textarea', 'select'].includes(targetTagName); const activeElement = document.activeElement; const isChannelListFocused = channelListContainer && (channelListContainer.contains(activeElement) || activeElement === channelListContainer); const isSettingsVisible = !settingsView.classList.contains('hidden'); if (isSettingsVisible) { if (e.key === 'Escape') { e.preventDefault(); navigateToView(previousView || 'all', currentCategoryGroup); } return; } if (isInputFocused) return; if ((e.key === 'Escape' || e.key === 'b' || e.key === 'B') && sidebar.classList.contains('open')) { e.preventDefault(); toggleSidebar(); if (menuToggle && document.body.contains(menuToggle)) menuToggle.focus(); else if (videoPlayer && document.body.contains(videoPlayer)) videoPlayer.focus(); return; } if (isChannelListFocused) { if (e.key === 'ArrowUp') { e.preventDefault(); navigateChannelList(-1); return; } if (e.key === 'ArrowDown') { e.preventDefault(); navigateChannelList(1); return; } if ((e.key === 'Enter' || e.key === ' ') && activeElement && activeElement.classList.contains('channel-item')) { e.preventDefault(); const indexToLoad = parseInt(activeElement.dataset.index, 10); if (!isNaN(indexToLoad)) { loadVideo(indexToLoad); } return; } } if (!isChannelListFocused) { switch(e.key) { case ' ': case 'k': case 'K': e.preventDefault(); togglePlayPause(); break; case 'f': case 'F': e.preventDefault(); toggleFullScreen(); break; case 'm': case 'M': e.preventDefault(); toggleMute(); break; case 'ArrowLeft': case 'j': case 'J': e.preventDefault(); if (isFinite(videoPlayer.duration)) { const seekAmount = (e.key === 'j' || e.key === 'J') ? -10 : -5; seekVideo(seekAmount); showPlayerMessage(`${seekAmount}s`); } break; case 'ArrowRight': case 'l': case 'L': e.preventDefault(); if (isFinite(videoPlayer.duration)) { const seekAmount = (e.key === 'l' || e.key === 'L') ? 10 : 5; seekVideo(seekAmount); showPlayerMessage(`+${seekAmount}s`); } break; case 'ArrowUp': e.preventDefault(); adjustVolume(0.05); break; case 'ArrowDown': e.preventDefault(); adjustVolume(-0.05); break; case '>': if (e.shiftKey) { e.preventDefault(); const nextSpeedIndex = Math.min(playbackRates.length - 1, currentSpeedIndex + 1); if (nextSpeedIndex !== currentSpeedIndex) { setPlaybackSpeed(playbackRates[nextSpeedIndex]); showPlayerMessage(`Velocidad: ${videoPlayer.playbackRate}x`); } } break; case '<': if (e.shiftKey) { e.preventDefault(); const nextSpeedIndex = Math.max(0, currentSpeedIndex - 1); if (nextSpeedIndex !== currentSpeedIndex) { setPlaybackSpeed(playbackRates[nextSpeedIndex]); showPlayerMessage(`Velocidad: ${videoPlayer.playbackRate}x`); } } break; case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': if (isFinite(videoPlayer.duration)) { e.preventDefault(); const percentage = parseInt(e.key) * 10; const time = (percentage / 100) * videoPlayer.duration; videoPlayer.currentTime = time; updateProgressBar(); showPlayerMessage(`Saltar a ${percentage}%`); } break; } } });
 
         // --- Inicialización al Cargar la Página ---
-        document.addEventListener('DOMContentLoaded', () => {
-            loadTheme(); loadFavorites(); loadHistory(); initializeHls(); fetchAndLoadM3U(m3uUrl); updateVolumeUI(); updateFavoriteButtonState(); renderComments(sampleComments); handleChannelScroll();
-        });
+        document.addEventListener('DOMContentLoaded', () => { loadTheme(); loadFavorites(); loadHistory(); initializeHls(); fetchAndLoadM3U(m3uUrl); updateVolumeUI(); updateFavoriteButtonState(); renderComments(sampleComments); handleChannelScroll(); });
     </script>
 </body>
 </html>
